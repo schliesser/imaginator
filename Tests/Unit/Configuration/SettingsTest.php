@@ -17,6 +17,7 @@ final class SettingsTest extends TestCase
             'formats' => 'webp',
             'qualities' => ['webp' => 70],
             'processor' => 'local',
+            'lqip' => 'dominant-color',
             'secretsRotation' => ['old-secret'],
         ], 'enc-key');
 
@@ -25,6 +26,7 @@ final class SettingsTest extends TestCase
         self::assertSame(['webp'], $settings->formats);
         self::assertSame(['webp' => 70], $settings->qualities);
         self::assertSame('local', $settings->processor);
+        self::assertSame('dominant-color', $settings->lqip);
         self::assertSame(hash_hmac('sha256', 'imaginator-url-signing', 'enc-key'), $settings->secrets[0]);
         self::assertSame('old-secret', $settings->secrets[1]);
     }
@@ -37,6 +39,7 @@ final class SettingsTest extends TestCase
         self::assertSame(Settings::DEFAULT_MAX_DIMENSION, $settings->maxDimension);
         self::assertSame(Settings::DEFAULT_FORMATS, $settings->formats);
         self::assertSame('local', $settings->processor);
+        self::assertSame('thumbhash', $settings->lqip);
         self::assertCount(1, $settings->secrets); // derived key only, no rotation
     }
 

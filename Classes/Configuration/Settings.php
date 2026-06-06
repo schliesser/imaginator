@@ -15,6 +15,7 @@ final readonly class Settings
     public const DEFAULT_MAX_DIMENSION = 2000;
     public const DEFAULT_FORMATS = ['avif', 'webp'];
     public const DEFAULT_QUALITIES = ['avif' => 50, 'webp' => 72];
+    public const DEFAULT_LQIP = 'thumbhash';
 
     /**
      * @param int[]               $ladder
@@ -29,6 +30,7 @@ final readonly class Settings
         public array $formats,
         public array $qualities,
         public string $processor,
+        public string $lqip,
     ) {}
 
     /**
@@ -47,6 +49,7 @@ final readonly class Settings
             $formats !== [] ? $formats : self::DEFAULT_FORMATS,
             $qualities !== [] ? $qualities : self::DEFAULT_QUALITIES,
             (string)($raw['processor'] ?? 'local'),
+            (string)($raw['lqip'] ?? self::DEFAULT_LQIP),
         );
     }
 

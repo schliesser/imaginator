@@ -24,3 +24,8 @@ settings:
     label: 'WebP quality'
     type: int
     default: 72
+  imaginator.lqip:
+    label: 'Low-quality placeholder'
+    description: 'thumbhash | dominant-color | none'
+    type: string
+    default: 'thumbhash'
