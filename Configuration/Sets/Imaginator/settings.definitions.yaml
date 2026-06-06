@@ -1,0 +1,26 @@
+settings:
+  imaginator.processor:
+    label: 'Image processor'
+    description: 'local | thumbor | imgproxy | imgix | cloudflare | cloudinary'
+    type: string
+    default: 'local'
+  imaginator.maxDimension:
+    label: 'Maximum image dimension in pixels'
+    type: int
+    default: 2000
+  imaginator.ladder:
+    label: 'Width ladder rungs (comma-separated)'
+    type: string
+    default: '320,420,560,740,980,1300,1720,2000'
+  imaginator.formats:
+    label: 'Negotiated formats (comma-separated, most-preferred first)'
+    type: string
+    default: 'avif,webp'
+  imaginator.quality.avif:
+    label: 'AVIF quality'
+    type: int
+    default: 50
+  imaginator.quality.webp:
+    label: 'WebP quality'
+    type: int
+    default: 72
