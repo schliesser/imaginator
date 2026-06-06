@@ -38,9 +38,9 @@ echo "› neutralising the installer's welcome-page TypoScript (the demo Set ren
 printf '# Page rendering is provided by the schliesser/imaginator-demo Site Set.\n' \
     > config/sites/main/setup.typoscript
 
-echo "› placing the demo image into fileadmin"
+echo "› placing the demo images into fileadmin"
 mkdir -p .Build/public/fileadmin/demo
-cp Build/demo/sample.jpg .Build/public/fileadmin/demo/sample.jpg
+cp Build/demo/*.jpg .Build/public/fileadmin/demo/
 
 echo "› finalising extensions and caches"
 .Build/bin/typo3 extension:setup

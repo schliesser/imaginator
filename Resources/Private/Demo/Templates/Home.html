@@ -8,32 +8,77 @@
     <title>Imaginator demo</title>
     <style>
         body { font-family: system-ui, sans-serif; max-width: 70rem; margin: 2rem auto; padding: 0 1rem; }
-        img { max-width: 100%; height: auto; border: 1px solid #ddd; }
+        img { max-width: 100%; height: auto; display: block; border: 1px solid #ddd; }
         section { margin-bottom: 3rem; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: .3rem; }
         code { background: #f4f4f4; padding: .1em .3em; border-radius: 3px; }
+
+        /* Full-width image cropped to a fixed height. */
+        .banner img { width: 100%; height: 320px; object-fit: cover; }
+
+        /* N images per row. */
+        .row { display: grid; gap: 1rem; }
+        .row-2 { grid-template-columns: repeat(2, 1fr); }
+        .row-3 { grid-template-columns: repeat(3, 1fr); }
+        .row-4 { grid-template-columns: repeat(4, 1fr); }
     </style>
 </head>
 <body>
     <h1>Imaginator demo</h1>
-    <p>View source to inspect the generated <code>srcset</code> ladder and the signed
-       <code>/_imaginator/&hellip;</code> candidate URLs. Resize the window and watch the browser
-       pick a different rung (the network panel shows a single request per image).</p>
+    <p>View source to inspect the generated <code>srcset</code> ladder, the AVIF/WebP
+       <code>&lt;source&gt;</code> tiers, the signed <code>/_imaginator/&hellip;</code> URLs and the
+       nonce-able LQIP <code>&lt;style&gt;</code>. Resize the window and watch the browser pick a
+       different rung (one request per image, no JS).</p>
 
     <section>
-        <h2>Single ratio &mdash; 16:9 &lt;img&gt;</h2>
-        <i:image src="fileadmin/demo/sample.jpg" aspectRatio="16:9" alt="Single ratio demo"/>
+        <h2>Priority / LCP &mdash; above the fold, eager + fetchpriority=high</h2>
+        <i:image src="fileadmin/demo/sample.jpg" aspectRatio="16:9" alt="LCP hero" priority="1"/>
     </section>
 
     <section>
-        <h2>Priority / LCP &mdash; eager + fetchpriority=high</h2>
-        <i:image src="fileadmin/demo/sample.jpg" aspectRatio="16:9" alt="Priority demo" priority="1"/>
+        <h2>Full-width banner &mdash; fixed height (CSS <code>object-fit: cover</code>)</h2>
+        <div class="banner">
+            <i:image src="fileadmin/demo/sample2.jpg" aspectRatio="21:9" alt="Full-width banner"/>
+        </div>
     </section>
 
     <section>
-        <h2>Art direction &mdash; &lt;picture&gt; with per-breakpoint ratios</h2>
-        <i:image src="fileadmin/demo/sample.jpg"
+        <h2>Single ratio &mdash; 16:9 <code>&lt;img&gt;</code></h2>
+        <i:image src="fileadmin/demo/sample.jpg" aspectRatio="16:9" alt="Single ratio"/>
+    </section>
+
+    <section>
+        <h2>Art direction &mdash; <code>&lt;picture&gt;</code> with per-breakpoint ratios</h2>
+        <i:image src="fileadmin/demo/sample2.jpg"
                  aspectRatio="{'(min-width:992px)': '16:9', '(max-width:991px)': '1:1'}"
-                 alt="Art-directed demo"/>
+                 alt="Art-directed"/>
+    </section>
+
+    <section>
+        <h2>Two in a row</h2>
+        <div class="row row-2">
+            <i:image src="fileadmin/demo/sample.jpg" aspectRatio="4:3" alt="Row of two, 1"/>
+            <i:image src="fileadmin/demo/sample2.jpg" aspectRatio="4:3" alt="Row of two, 2"/>
+        </div>
+    </section>
+
+    <section>
+        <h2>Three in a row</h2>
+        <div class="row row-3">
+            <i:image src="fileadmin/demo/sample.jpg" aspectRatio="4:3" alt="Row of three, 1"/>
+            <i:image src="fileadmin/demo/sample2.jpg" aspectRatio="4:3" alt="Row of three, 2"/>
+            <i:image src="fileadmin/demo/sample.jpg" aspectRatio="4:3" alt="Row of three, 3"/>
+        </div>
+    </section>
+
+    <section>
+        <h2>Four in a row</h2>
+        <div class="row row-4">
+            <i:image src="fileadmin/demo/sample.jpg" aspectRatio="1:1" alt="Row of four, 1"/>
+            <i:image src="fileadmin/demo/sample2.jpg" aspectRatio="1:1" alt="Row of four, 2"/>
+            <i:image src="fileadmin/demo/sample.jpg" aspectRatio="1:1" alt="Row of four, 3"/>
+            <i:image src="fileadmin/demo/sample2.jpg" aspectRatio="1:1" alt="Row of four, 4"/>
+        </div>
     </section>
 </body>
 </html>
