@@ -65,4 +65,22 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringContainsString('.webp', $output);
         self::assertStringContainsString('alt="A hero"', $output);
     }
+
+    public function testEmitsFormatTiersAndLqipBackground(): void
+    {
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="16:9" alt="A hero"/></html>'
+        );
+
+        // Stacked AVIF + WebP <source> tiers from the default formats setting.
+        self::assertStringContainsString('<picture>', $output);
+        self::assertStringContainsString('type="image/avif"', $output);
+        self::assertStringContainsString('type="image/webp"', $output);
+        // Default LQIP is ThumbHash -> a data-URI cover background on the fallback <img>.
+        self::assertStringContainsString('background-image:url(data:image/', $output);
+    }
 }

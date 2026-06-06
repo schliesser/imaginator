@@ -9,6 +9,7 @@ use Schliesser\Imaginator\Dto\AspectRatio;
 use Schliesser\Imaginator\Dto\BreakpointRatio;
 use Schliesser\Imaginator\Dto\ImageRenderRequest;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
+use Schliesser\Imaginator\Lqip\LqipGeneratorFactory;
 use Schliesser\Imaginator\Rendering\PictureRenderer;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Extbase\Service\ImageService;
@@ -27,6 +28,7 @@ final class ImageViewHelper extends AbstractViewHelper
         private readonly PictureRenderer $renderer,
         private readonly ImageProcessorInterface $processor,
         private readonly SettingsFactory $settingsFactory,
+        private readonly LqipGeneratorFactory $lqipFactory,
     ) {}
 
     public function initializeArguments(): void
@@ -51,9 +53,8 @@ final class ImageViewHelper extends AbstractViewHelper
         );
         $original = $file instanceof FileReference ? $file->getOriginalFile() : $file;
         $settings = $this->settingsFactory->create();
-        // v1 foundation emits a single, broadly-supported tier. Stacked AVIF/WebP <source> tiers
-        // (driven by $settings->formats) are added in the formats-lqip follow-on plan.
-        $format = 'webp';
+        // Stacked AVIF/WebP <source> tiers from settings; the <img> falls back to the original format.
+        $fallbackFormat = $this->fallbackFormat($original->getExtension());
 
         $request = new ImageRenderRequest(
             storageUid: $original->getStorage()->getUid(),
@@ -61,14 +62,26 @@ final class ImageViewHelper extends AbstractViewHelper
             sourceWidth: (int)$file->getProperty('width'),
             cropVariant: (string)$this->arguments['cropVariant'],
             breakpoints: $this->breakpoints($this->arguments['aspectRatio']),
-            format: $format,
-            quality: $settings->qualities[$format] ?? 72,
+            format: $fallbackFormat,
+            quality: $settings->qualities[$fallbackFormat] ?? 80,
             alt: (string)$this->arguments['alt'],
             class: $this->arguments['class'] !== null ? (string)$this->arguments['class'] : null,
             priority: (bool)$this->arguments['priority'],
+            formats: $settings->formats,
+            lqip: $this->lqipFactory->get($settings->lqip)->generate($original),
         );
 
         return $this->renderer->render($request, $this->processor);
+    }
+
+    private function fallbackFormat(string $extension): string
+    {
+        $extension = strtolower($extension);
+
+        return match ($extension) {
+            '', 'jpg' => 'jpeg',
+            default => $extension,
+        };
     }
 
     /**
