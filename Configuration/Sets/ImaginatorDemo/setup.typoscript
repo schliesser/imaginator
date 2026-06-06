@@ -1,0 +1,9 @@
+# Demo page rendering for manual testing of the <i:image> ViewHelper.
+# Active only on sites that opt into the "schliesser/imaginator-demo" set.
+
+page = PAGE
+page.10 = FLUIDTEMPLATE
+page.10 {
+    templateName = Home
+    templateRootPaths.0 = EXT:imaginator/Resources/Private/Demo/Templates/
+}

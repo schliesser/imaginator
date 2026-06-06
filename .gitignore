@@ -3,3 +3,5 @@
 /.ddev/
 /.idea/
 /var/
+/config/
+.phpunit.result.cache

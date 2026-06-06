@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Imaginator demo</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 70rem; margin: 2rem auto; padding: 0 1rem; }
+        img { max-width: 100%; height: auto; border: 1px solid #ddd; }
+        section { margin-bottom: 3rem; }
+        code { background: #f4f4f4; padding: .1em .3em; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Imaginator demo</h1>
+    <p>View source to inspect the generated <code>srcset</code> ladder and the signed
+       <code>/_imaginator/&hellip;</code> candidate URLs. Resize the window and watch the browser
+       pick a different rung (the network panel shows a single request per image).</p>
+
+    <section>
+        <h2>Single ratio &mdash; 16:9 &lt;img&gt;</h2>
+        <i:image src="fileadmin/demo/sample.jpg" aspectRatio="16:9" alt="Single ratio demo"/>
+    </section>
+
+    <section>
+        <h2>Priority / LCP &mdash; eager + fetchpriority=high</h2>
+        <i:image src="fileadmin/demo/sample.jpg" aspectRatio="16:9" alt="Priority demo" priority="1"/>
+    </section>
+
+    <section>
+        <h2>Art direction &mdash; &lt;picture&gt; with per-breakpoint ratios</h2>
+        <i:image src="fileadmin/demo/sample.jpg"
+                 aspectRatio="{'(min-width:992px)': '16:9', '(max-width:991px)': '1:1'}"
+                 alt="Art-directed demo"/>
+    </section>
+</body>
+</html>
