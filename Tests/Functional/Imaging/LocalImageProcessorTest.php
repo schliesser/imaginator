@@ -75,4 +75,13 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         self::assertNotFalse($size);
         self::assertSame(1280, $size[0]);
     }
+
+    public function testMaterializePublicUrlIsRootRelative(): void
+    {
+        // The middleware emits publicUrl as a Location header; a path without a leading slash
+        // would be resolved against the /_imaginator/... request path and 404.
+        $processed = $this->processor()->materialize($this->variant());
+
+        self::assertStringStartsWith('/', $processed->publicUrl);
+    }
 }

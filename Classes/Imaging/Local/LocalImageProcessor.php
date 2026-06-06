@@ -45,9 +45,23 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
         ]);
 
         return new ProcessedImage(
-            $this->imageService->getImageUri($processed),
+            $this->toRootRelativeUrl($this->imageService->getImageUri($processed)),
             $processed->getForLocalProcessing(false),
             $processed->getMimeType(),
         );
+    }
+
+    /**
+     * ImageService returns local URLs relative to the site root without a leading slash
+     * (e.g. "fileadmin/_processed_/…"). As a redirect Location that would resolve against the
+     * /_imaginator/ request path, so normalise anything that is not already absolute.
+     */
+    private function toRootRelativeUrl(string $url): string
+    {
+        if ($url === '' || $url[0] === '/' || preg_match('#^[a-z][a-z0-9+.-]*://#i', $url) === 1) {
+            return $url;
+        }
+
+        return '/' . $url;
     }
 }
