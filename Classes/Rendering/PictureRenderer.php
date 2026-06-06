@@ -125,6 +125,10 @@ final readonly class PictureRenderer
             $attrs['loading'] = 'lazy';
         }
         $attrs['decoding'] = 'async';
+        $style = $this->lqipStyle($request->lqip);
+        if ($style !== null) {
+            $attrs['style'] = $style;
+        }
 
         return '<img' . $this->attrs($attrs) . '>';
     }
@@ -162,6 +166,23 @@ final readonly class PictureRenderer
         }
 
         return $request->breakpoints[array_key_last($request->breakpoints)];
+    }
+
+    /**
+     * Turn a precomputed LQIP value into the `<img>` background: a `data:` URI becomes a cover
+     * background-image; anything else (a `#rrggbb` colour) becomes a solid background. The sharp
+     * ladder image paints on top, so the placeholder only shows for the first frames of decode.
+     */
+    private function lqipStyle(?string $lqip): ?string
+    {
+        if ($lqip === null || $lqip === '') {
+            return null;
+        }
+        if (str_starts_with($lqip, 'data:')) {
+            return 'background-image:url(' . $lqip . ');background-size:cover';
+        }
+
+        return 'background:' . $lqip;
     }
 
     /** @param array<string, string> $attrs */

@@ -28,5 +28,6 @@ final readonly class ImageRenderRequest
         public ?string $class = null,
         public bool $priority = false,
         public array $formats = [],
+        public ?string $lqip = null,
     ) {}
 }
