@@ -117,6 +117,21 @@ The Imaginator Site Set defines these settings under the `imaginator.*` namespac
 > ThumbHash placeholder are emitted out of the box). Reading per-site overrides of these settings
 > from the Site Set is wired in a follow-up; until then, changing the values has no effect.
 
+### Content Security Policy
+
+The placeholder is **not** rendered as an inline `style=""` attribute (those cannot carry a CSP
+nonce). The `<img>` only gets a CSS class; the actual rule is registered through TYPO3's
+`AssetCollector` and emitted as a `<style>` element, which TYPO3 nonces automatically when frontend
+CSP is enabled. Identical placeholders are deduplicated to a single rule.
+
+CSP directives you may need:
+
+- **`thumbhash`** (default): the blurred preview is a `data:` background-image, so allow
+  `img-src data:` (TYPO3's default frontend CSP already does).
+- **`dominant-color`**: a plain background colour — needs nothing beyond the nonced `<style>`
+  (no `img-src data:`); the leanest and strictest-CSP-friendly option.
+- **`none`**: no placeholder, no extra directive.
+
 ## Local development & manual testing
 
 A reproducible DDEV demo instance is included:
