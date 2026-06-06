@@ -12,6 +12,9 @@ final readonly class ImageRenderRequest
 {
     /**
      * @param BreakpointRatio[] $breakpoints ordered; entries with media => <source>, the one with null media => <img>
+     * @param string[]          $formats     negotiated formats (most-preferred first) emitted as stacked
+     *                                        `<source type>` tiers; empty => bare <img>/<picture>. The
+     *                                        `format` field is the fallback/original format for the `<img>`.
      */
     public function __construct(
         public int $storageUid,
@@ -24,5 +27,6 @@ final readonly class ImageRenderRequest
         public string $alt,
         public ?string $class = null,
         public bool $priority = false,
+        public array $formats = [],
     ) {}
 }

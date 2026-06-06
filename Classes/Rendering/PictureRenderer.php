@@ -23,11 +23,60 @@ final readonly class PictureRenderer
 
     public function render(ImageRenderRequest $request, ImageProcessorInterface $processor): string
     {
+        if ($request->formats !== []) {
+            return $this->renderPictureWithFormats($request, $processor);
+        }
         if (count($request->breakpoints) > 1) {
             return $this->renderPicture($request, $processor);
         }
 
         return $this->renderImg($request, $this->defaultBreakpoint($request), $processor);
+    }
+
+    /**
+     * Emit a `<picture>` with one `<source type="image/{format}">` per negotiated format (in order),
+     * ending with an `<img>` fallback in the original format. Browser picks the first it supports.
+     */
+    private function renderPictureWithFormats(ImageRenderRequest $request, ImageProcessorInterface $processor): string
+    {
+        $sources = '';
+        foreach ($request->breakpoints as $breakpoint) {
+            if ($breakpoint->media === null) {
+                continue;
+            }
+            $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth);
+            foreach ($request->formats as $format) {
+                $sources .= $this->formatSource($request, $rungs, $format, $breakpoint->media, $processor);
+            }
+        }
+        if ($sources === '') {
+            // Single ratio: one source per format, no media.
+            $rungs = $this->ladderFactory->build($this->defaultBreakpoint($request)->ratio, $request->sourceWidth);
+            foreach ($request->formats as $format) {
+                $sources .= $this->formatSource($request, $rungs, $format, null, $processor);
+            }
+        }
+        $img = $this->renderImg($request, $this->defaultBreakpoint($request), $processor);
+
+        return '<picture>' . $sources . $img . '</picture>';
+    }
+
+    /** @param Rung[] $rungs */
+    private function formatSource(
+        ImageRenderRequest $request,
+        array $rungs,
+        string $format,
+        ?string $media,
+        ImageProcessorInterface $processor,
+    ): string {
+        $attrs = ['type' => 'image/' . $format];
+        if ($media !== null) {
+            $attrs['media'] = htmlspecialchars($media, ENT_QUOTES);
+        }
+        $attrs['srcset'] = $this->srcset($request, $rungs, $processor, $format);
+        $attrs['sizes'] = $request->priority ? '100vw' : 'auto';
+
+        return '<source' . $this->attrs($attrs) . '>';
     }
 
     private function renderPicture(ImageRenderRequest $request, ImageProcessorInterface $processor): string
@@ -81,17 +130,17 @@ final readonly class PictureRenderer
     }
 
     /** @param Rung[] $rungs */
-    private function srcset(ImageRenderRequest $request, array $rungs, ImageProcessorInterface $processor): string
+    private function srcset(ImageRenderRequest $request, array $rungs, ImageProcessorInterface $processor, ?string $format = null): string
     {
         $candidates = [];
         foreach ($rungs as $rung) {
-            $candidates[] = $processor->buildUrl($this->variant($request, $rung)) . ' ' . $rung->width . 'w';
+            $candidates[] = $processor->buildUrl($this->variant($request, $rung, $format)) . ' ' . $rung->width . 'w';
         }
 
         return implode(', ', $candidates);
     }
 
-    private function variant(ImageRenderRequest $request, Rung $rung): ImageVariant
+    private function variant(ImageRenderRequest $request, Rung $rung, ?string $format = null): ImageVariant
     {
         return new ImageVariant(
             $request->storageUid,
@@ -99,7 +148,7 @@ final readonly class PictureRenderer
             $request->cropVariant,
             $rung->width,
             $rung->height,
-            $request->format,
+            $format ?? $request->format,
             $request->quality,
         );
     }
