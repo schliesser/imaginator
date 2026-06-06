@@ -91,4 +91,23 @@ final class ImageViewHelperTest extends FunctionalTestCase
         $rules = implode("\n", array_column($styles, 'source'));
         self::assertMatchesRegularExpression('/\.imaginator-lqip-[0-9a-f]{12}\{background-image:url\(data:image\//', $rules);
     }
+
+    public function testLqipSettingIsAppliedFromExtensionConfiguration(): void
+    {
+        // Instance-wide Extension Configuration must actually change behaviour.
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator'] = ['lqip' => 'dominant-color'];
+        $fileUid = $this->importFixture();
+
+        $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="16:9" alt="A hero"/></html>'
+        );
+
+        $styles = GeneralUtility::makeInstance(AssetCollector::class)->getInlineStyleSheets();
+        $rules = implode("\n", array_column($styles, 'source'));
+        // dominant-color -> a solid hex background, not a ThumbHash data-URI.
+        self::assertMatchesRegularExpression('/\.imaginator-lqip-[0-9a-f]{12}\{background:#[0-9a-f]{6}\}/', $rules);
+        self::assertStringNotContainsString('background-image:url(data:', $rules);
+    }
 }

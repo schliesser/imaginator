@@ -27,16 +27,8 @@ composer require schliesser/imaginator
 ```
 
 Activate the extension (`vendor/bin/typo3 extension:setup`, or via the Extensions module).
-Installing the extension is enough to use the `<i:image>` ViewHelper.
-
-To expose the configuration settings in the *Sites* backend module, add the Imaginator
-Site Set to your site (or to your sitepackage set's dependencies):
-
-```yaml
-# config/sites/<identifier>/config.yaml
-dependencies:
-  - schliesser/imaginator
-```
+Installing the extension is enough to use the `<i:image>` ViewHelper — no Site Set or TypoScript
+is required. Configure it under *Settings → Extension Configuration* (see below).
 
 ## Usage
 
@@ -101,21 +93,31 @@ and will be exposed as a setting in a later release.
 
 ## Configuration
 
-The Imaginator Site Set defines these settings under the `imaginator.*` namespace:
+Configuration is **instance-wide Extension Configuration**. Edit it under *Settings → Extension
+Configuration → imaginator* in the backend, or set it in `config/system/settings.php`:
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator'] = [
+    'lqip' => 'dominant-color',
+    'ladder' => '320,640,960,1280,1920',
+];
+```
 
 | Setting | Default | Description |
 |---|---|---|
-| `imaginator.processor` | `local` | Processing backend (v1: `local` only) |
-| `imaginator.maxDimension` | `2000` | Largest image dimension in px; the ladder is capped to it |
-| `imaginator.ladder` | `320,420,560,740,980,1300,1720,2000` | Width-ladder rungs (comma-separated) |
-| `imaginator.formats` | `avif,webp` | Negotiated formats, most-preferred first |
-| `imaginator.quality.avif` | `50` | AVIF quality (AVIF's scale sits lower than JPEG/WebP for the same perceived quality) |
-| `imaginator.quality.webp` | `72` | WebP quality |
-| `imaginator.lqip` | `thumbhash` | Low-quality placeholder: `thumbhash`, `dominant-color` or `none` |
+| `processor` | `local` | Processing backend (v1: `local` only) |
+| `maxDimension` | `2000` | Largest image dimension in px; the ladder is capped to it |
+| `ladder` | `320,420,560,740,980,1300,1720,2000` | Width-ladder rungs (comma-separated) |
+| `formats` | `avif,webp` | Negotiated formats, most-preferred first |
+| `quality.avif` | `50` | AVIF quality (AVIF's scale sits lower than JPEG/WebP for the same perceived quality) |
+| `quality.webp` | `72` | WebP quality |
+| `lqip` | `thumbhash` | Low-quality placeholder: `thumbhash`, `dominant-color` or `none` |
+| `secretsRotation` | – | Additional valid signing secrets (comma-separated) for key rotation |
 
-> **Note.** The renderer currently applies the **defaults above** (so AVIF+WebP tiers and a
-> ThumbHash placeholder are emitted out of the box). Reading per-site overrides of these settings
-> from the Site Set is wired in a follow-up; until then, changing the values has no effect.
+The active signing secret is always derived from the global `encryptionKey`; `secretsRotation`
+lets old secrets keep verifying while you rotate. Settings are global by design, so the render path
+and the signed-endpoint verify path always agree (a per-site model would risk mismatched ladders →
+spurious 403s).
 
 ### Content Security Policy
 
