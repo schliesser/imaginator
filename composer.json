@@ -1,0 +1,43 @@
+{
+    "name": "schliesser/imaginator",
+    "type": "typo3-cms-extension",
+    "description": "Zero-config responsive images for TYPO3: signed srcset ladders, local or external processing.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.3",
+        "typo3/cms-core": "^13.4 || ^14.0",
+        "typo3/cms-backend": "^13.4 || ^14.0",
+        "typo3/cms-frontend": "^13.4 || ^14.0",
+        "typo3/cms-fluid": "^13.4 || ^14.0"
+    },
+    "require-dev": {
+        "typo3/testing-framework": "^8.2 || ^9.0",
+        "phpunit/phpunit": "^11.0",
+        "friendsofphp/php-cs-fixer": "^3.51",
+        "phpstan/phpstan": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Schliesser\\Imaginator\\": "Classes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Schliesser\\Imaginator\\Tests\\": "Tests/"
+        }
+    },
+    "config": {
+        "vendor-dir": ".Build/vendor",
+        "bin-dir": ".Build/bin",
+        "allow-plugins": {
+            "typo3/cms-composer-installers": true,
+            "typo3/class-alias-loader": true
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "imaginator",
+            "web-dir": ".Build/public"
+        }
+    }
+}

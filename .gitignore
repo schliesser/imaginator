@@ -1,0 +1,5 @@
+/.Build/
+/composer.lock
+/.ddev/
+/.idea/
+/var/
