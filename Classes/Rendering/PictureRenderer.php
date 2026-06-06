@@ -21,6 +21,42 @@ final readonly class PictureRenderer
 {
     public function __construct(private LadderFactory $ladderFactory) {}
 
+    /**
+     * `<link rel="preload">` tags for the `<head>` so a priority/LCP image is discoverable before
+     * the body is parsed. Returns an empty list for non-priority images.
+     *
+     * Only the most-preferred format is preloaded (gated by `type`, so non-supporting browsers skip
+     * it rather than double-download); `imagesrcset`/`imagesizes` mirror the rendered tier exactly so
+     * the browser reuses the preload instead of re-fetching.
+     *
+     * @return string[]
+     */
+    public function preloadLinks(ImageRenderRequest $request, ImageProcessorInterface $processor): array
+    {
+        if (!$request->priority) {
+            return [];
+        }
+        $format = $request->formats[0] ?? $request->format;
+        $links = [];
+        foreach ($request->breakpoints as $breakpoint) {
+            $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth);
+            $attrs = [
+                'rel' => 'preload',
+                'as' => 'image',
+                'imagesrcset' => $this->srcset($request, $rungs, $processor, $format),
+                'imagesizes' => '100vw',
+                'type' => 'image/' . $format,
+                'fetchpriority' => 'high',
+            ];
+            if ($breakpoint->media !== null) {
+                $attrs['media'] = htmlspecialchars($breakpoint->media, ENT_QUOTES);
+            }
+            $links[] = '<link' . $this->attrs($attrs) . '>';
+        }
+
+        return $links;
+    }
+
     public function render(ImageRenderRequest $request, ImageProcessorInterface $processor): string
     {
         if ($request->formats !== []) {

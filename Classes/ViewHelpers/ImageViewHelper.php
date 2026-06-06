@@ -12,6 +12,7 @@ use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Lqip\LqipGeneratorFactory;
 use Schliesser\Imaginator\Rendering\PictureRenderer;
 use TYPO3\CMS\Core\Page\AssetCollector;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Extbase\Service\ImageService;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
@@ -31,6 +32,7 @@ final class ImageViewHelper extends AbstractViewHelper
         private readonly SettingsFactory $settingsFactory,
         private readonly LqipGeneratorFactory $lqipFactory,
         private readonly AssetCollector $assetCollector,
+        private readonly PageRenderer $pageRenderer,
     ) {}
 
     public function initializeArguments(): void
@@ -72,6 +74,11 @@ final class ImageViewHelper extends AbstractViewHelper
             formats: $settings->formats,
             lqipClass: $this->registerLqip($this->lqipFactory->get($settings->lqip)->generate($original)),
         );
+
+        // Priority/LCP images get a <head> preload so the request is discoverable immediately.
+        foreach ($this->renderer->preloadLinks($request, $this->processor) as $link) {
+            $this->pageRenderer->addHeaderData($link);
+        }
 
         return $this->renderer->render($request, $this->processor);
     }

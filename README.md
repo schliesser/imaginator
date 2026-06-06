@@ -68,9 +68,24 @@ Declare the ViewHelper namespace once per template and call `<i:image>`:
 | `cropVariant` | string | `default` | FAL crop variant to use |
 | `alt` | string | `''` | Alternative text |
 | `class` | string | – | CSS class on the `<img>` |
-| `priority` | bool | `false` | Mark as LCP image (eager + `fetchpriority="high"`) |
+| `priority` | bool | `false` | Mark as the LCP image (see below) |
 
 `width`/`height` are always emitted from the largest rung, so there is zero layout shift.
+
+### Priority / LCP images
+
+Set `priority="1"` on the above-the-fold (LCP) image. Imaginator then:
+
+- drops `loading="lazy"` and adds `fetchpriority="high"` on the `<img>`;
+- renders an explicit `sizes="100vw"` instead of `sizes="auto"`;
+- adds a `<link rel="preload" as="image" imagesrcset="…" imagesizes="100vw" type="image/…"
+  fetchpriority="high">` to the `<head>`, so the request is discoverable in the initial document
+  before the body is parsed.
+
+Only the most-preferred format is preloaded (gated by `type`, so other browsers don't
+double-download), and its `imagesrcset`/`imagesizes` mirror the rendered tier exactly so the
+browser reuses the preload. This satisfies Lighthouse's "LCP request is discoverable",
+"not lazily loaded" and "fetchpriority should be applied" audits. Use it on **one** image per page.
 
 ## The image endpoint & signing
 
