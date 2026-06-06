@@ -1,0 +1,29 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Schliesser\Imaginator\:
+    resource: '../Classes/*'
+    exclude:
+      - '../Classes/Dto/'
+      - '../Classes/Ladder/Rung.php'
+      - '../Classes/Url/CanonicalParams.php'
+
+  # Services whose constructors take scalar configuration are built via the factory.
+  Schliesser\Imaginator\Url\SignedUrlBuilder:
+    factory: ['@Schliesser\Imaginator\Configuration\SettingsFactory', 'createSignedUrlBuilder']
+
+  Schliesser\Imaginator\Ladder\LadderFactory:
+    factory: ['@Schliesser\Imaginator\Configuration\SettingsFactory', 'createLadderFactory']
+
+  # Interface bindings (render layer stays processor-agnostic; v1 local backend is GraphicsMagick).
+  Schliesser\Imaginator\Imaging\ImageProcessorInterface:
+    alias: Schliesser\Imaginator\Imaging\Local\LocalImageProcessor
+
+  Schliesser\Imaginator\Imaging\Local\Backend\LocalBackendInterface:
+    alias: Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend
+
+  Schliesser\Imaginator\Middleware\ProcessImageRequest:
+    public: true
