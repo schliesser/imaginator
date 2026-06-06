@@ -6,11 +6,12 @@ width-ladder `srcset` and `sizes="auto"`, so the browser's preload scanner fetch
 correctly-sized image in a single request. Candidate URLs are HMAC-signed and served as real
 image bytes by a local processing endpoint. JavaScript is never required for sharpness.
 
-> **Status — v1 foundation.** Local (GraphicsMagick) processing and the `<i:image>` ViewHelper
-> work end-to-end and emit a single WebP tier. AVIF / multi-format `<picture>` tiers, LQIP
-> placeholders, the JS enhancement layer, external CDN providers (Thumbor/imgproxy/imgix/
-> Cloudflare/Cloudinary) and the per-site settings overrides described below are planned
-> follow-ups (see `docs/`). Full TYPO3 reST documentation will follow.
+> **Status.** Local (GraphicsMagick/ImageMagick) processing, the `<i:image>` ViewHelper, stacked
+> **AVIF + WebP `<picture>` tiers**, and **low-quality placeholders** (ThumbHash by default,
+> dominant-colour and none as options) work end-to-end. The JS enhancement layer, external CDN
+> providers (Thumbor/imgproxy/imgix/Cloudflare/Cloudinary), the aspect-ratio backend element, and
+> per-site overrides of the settings below are planned follow-ups (see `docs/`). Full TYPO3 reST
+> documentation will follow.
 
 ## Requirements
 
@@ -110,10 +111,11 @@ The Imaginator Site Set defines these settings under the `imaginator.*` namespac
 | `imaginator.formats` | `avif,webp` | Negotiated formats, most-preferred first |
 | `imaginator.quality.avif` | `50` | AVIF quality (AVIF's scale sits lower than JPEG/WebP for the same perceived quality) |
 | `imaginator.quality.webp` | `72` | WebP quality |
+| `imaginator.lqip` | `thumbhash` | Low-quality placeholder: `thumbhash`, `dominant-color` or `none` |
 
-> **v1 note.** In the foundation release the renderer applies the **defaults above**; per-site
-> overrides of these settings are wired in a follow-up. Today the rendered tier is WebP at
-> quality 72.
+> **Note.** The renderer currently applies the **defaults above** (so AVIF+WebP tiers and a
+> ThumbHash placeholder are emitted out of the box). Reading per-site overrides of these settings
+> from the Site Set is wired in a follow-up; until then, changing the values has no effect.
 
 ## Local development & manual testing
 
