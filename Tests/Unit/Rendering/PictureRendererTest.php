@@ -60,4 +60,31 @@ final class PictureRendererTest extends TestCase
 
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
+
+    public function testMultipleRatiosRenderPictureWithSourcePerBreakpoint(): void
+    {
+        $request = new ImageRenderRequest(
+            storageUid: 1,
+            fileUid: 9,
+            sourceWidth: 4000,
+            cropVariant: 'default',
+            breakpoints: [
+                new BreakpointRatio(new AspectRatio(16, 9), '(min-width:992px)'),
+                new BreakpointRatio(new AspectRatio(4, 3)),
+            ],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+        );
+
+        $expected = '<picture>'
+            . '<source media="(min-width:992px)"'
+            . ' srcset="/img/9/320x180.webp 320w, /img/9/640x360.webp 640w" sizes="auto">'
+            . '<img src="/img/9/640x480.webp"'
+            . ' srcset="/img/9/320x240.webp 320w, /img/9/640x480.webp 640w"'
+            . ' sizes="auto" width="640" height="480" alt="A hero" loading="lazy" decoding="async">'
+            . '</picture>';
+
+        self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
+    }
 }

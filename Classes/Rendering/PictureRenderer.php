@@ -23,9 +23,35 @@ final readonly class PictureRenderer
 
     public function render(ImageRenderRequest $request, ImageProcessorInterface $processor): string
     {
-        $default = $this->defaultBreakpoint($request);
+        if (count($request->breakpoints) > 1) {
+            return $this->renderPicture($request, $processor);
+        }
 
-        return $this->renderImg($request, $default, $processor);
+        return $this->renderImg($request, $this->defaultBreakpoint($request), $processor);
+    }
+
+    private function renderPicture(ImageRenderRequest $request, ImageProcessorInterface $processor): string
+    {
+        $sources = '';
+        foreach ($request->breakpoints as $breakpoint) {
+            if ($breakpoint->media !== null) {
+                $sources .= $this->sourceTag($request, $breakpoint, $processor);
+            }
+        }
+        $img = $this->renderImg($request, $this->defaultBreakpoint($request), $processor);
+
+        return '<picture>' . $sources . $img . '</picture>';
+    }
+
+    private function sourceTag(ImageRenderRequest $request, BreakpointRatio $breakpoint, ImageProcessorInterface $processor): string
+    {
+        $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth);
+
+        return '<source' . $this->attrs([
+            'media' => htmlspecialchars((string)$breakpoint->media, ENT_QUOTES),
+            'srcset' => $this->srcset($request, $rungs, $processor),
+            'sizes' => $request->priority ? '100vw' : 'auto',
+        ]) . '>';
     }
 
     private function renderImg(ImageRenderRequest $request, BreakpointRatio $breakpoint, ImageProcessorInterface $processor): string
