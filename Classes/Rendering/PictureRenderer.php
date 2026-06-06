@@ -116,8 +116,9 @@ final readonly class PictureRenderer
             'height' => (string)$largest->height,
             'alt' => htmlspecialchars($request->alt, ENT_QUOTES),
         ];
-        if ($request->class !== null && $request->class !== '') {
-            $attrs['class'] = htmlspecialchars($request->class, ENT_QUOTES);
+        $class = $this->classAttribute($request);
+        if ($class !== null) {
+            $attrs['class'] = $class;
         }
         if ($request->priority) {
             $attrs['fetchpriority'] = 'high';
@@ -125,10 +126,6 @@ final readonly class PictureRenderer
             $attrs['loading'] = 'lazy';
         }
         $attrs['decoding'] = 'async';
-        $style = $this->lqipStyle($request->lqip);
-        if ($style !== null) {
-            $attrs['style'] = $style;
-        }
 
         return '<img' . $this->attrs($attrs) . '>';
     }
@@ -169,20 +166,21 @@ final readonly class PictureRenderer
     }
 
     /**
-     * Turn a precomputed LQIP value into the `<img>` background: a `data:` URI becomes a cover
-     * background-image; anything else (a `#rrggbb` colour) becomes a solid background. The sharp
-     * ladder image paints on top, so the placeholder only shows for the first frames of decode.
+     * Merge the author class with the LQIP class. The LQIP *rule* (background colour or cover
+     * background-image) is registered as a nonce-able `<style>` by the caller, so the `<img>` only
+     * ever carries a class — never a CSP-hostile inline `style=""` attribute.
      */
-    private function lqipStyle(?string $lqip): ?string
+    private function classAttribute(ImageRenderRequest $request): ?string
     {
-        if ($lqip === null || $lqip === '') {
-            return null;
+        $classes = [];
+        if ($request->class !== null && $request->class !== '') {
+            $classes[] = htmlspecialchars($request->class, ENT_QUOTES);
         }
-        if (str_starts_with($lqip, 'data:')) {
-            return 'background-image:url(' . $lqip . ');background-size:cover';
+        if ($request->lqipClass !== null && $request->lqipClass !== '') {
+            $classes[] = $request->lqipClass;
         }
 
-        return 'background:' . $lqip;
+        return $classes === [] ? null : implode(' ', $classes);
     }
 
     /** @param array<string, string> $attrs */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\Tests\Functional\ViewHelpers;
 
+use TYPO3\CMS\Core\Page\AssetCollector;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\View\ViewFactoryData;
@@ -66,7 +67,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringContainsString('alt="A hero"', $output);
     }
 
-    public function testEmitsFormatTiersAndLqipBackground(): void
+    public function testEmitsFormatTiersAndCspFriendlyLqip(): void
     {
         $fileUid = $this->importFixture();
 
@@ -80,7 +81,14 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringContainsString('<picture>', $output);
         self::assertStringContainsString('type="image/avif"', $output);
         self::assertStringContainsString('type="image/webp"', $output);
-        // Default LQIP is ThumbHash -> a data-URI cover background on the fallback <img>.
-        self::assertStringContainsString('background-image:url(data:image/', $output);
+
+        // The <img> carries an LQIP class, never an inline style attribute (CSP-friendly).
+        self::assertMatchesRegularExpression('/<img [^>]*class="imaginator-lqip-[0-9a-f]{12}"/', $output);
+        self::assertStringNotContainsString('style=', $output);
+
+        // The actual rule is registered as a (nonce-able) inline stylesheet via the AssetCollector.
+        $styles = GeneralUtility::makeInstance(AssetCollector::class)->getInlineStyleSheets();
+        $rules = implode("\n", array_column($styles, 'source'));
+        self::assertMatchesRegularExpression('/\.imaginator-lqip-[0-9a-f]{12}\{background-image:url\(data:image\//', $rules);
     }
 }

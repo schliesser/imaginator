@@ -11,6 +11,7 @@ use Schliesser\Imaginator\Dto\ImageRenderRequest;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Lqip\LqipGeneratorFactory;
 use Schliesser\Imaginator\Rendering\PictureRenderer;
+use TYPO3\CMS\Core\Page\AssetCollector;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Extbase\Service\ImageService;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
@@ -29,6 +30,7 @@ final class ImageViewHelper extends AbstractViewHelper
         private readonly ImageProcessorInterface $processor,
         private readonly SettingsFactory $settingsFactory,
         private readonly LqipGeneratorFactory $lqipFactory,
+        private readonly AssetCollector $assetCollector,
     ) {}
 
     public function initializeArguments(): void
@@ -68,10 +70,31 @@ final class ImageViewHelper extends AbstractViewHelper
             class: $this->arguments['class'] !== null ? (string)$this->arguments['class'] : null,
             priority: (bool)$this->arguments['priority'],
             formats: $settings->formats,
-            lqip: $this->lqipFactory->get($settings->lqip)->generate($original),
+            lqipClass: $this->registerLqip($this->lqipFactory->get($settings->lqip)->generate($original)),
         );
 
         return $this->renderer->render($request, $this->processor);
+    }
+
+    /**
+     * Register the LQIP rule as a deduplicated, nonce-able inline stylesheet (rendered in a
+     * `<style>` by the PageRenderer/AssetRenderer) and return the class that selects it.
+     * Returns null when there is no placeholder.
+     */
+    private function registerLqip(?string $lqip): ?string
+    {
+        if ($lqip === null || $lqip === '') {
+            return null;
+        }
+        $class = 'imaginator-lqip-' . substr(sha1($lqip), 0, 12);
+        $declaration = str_starts_with($lqip, 'data:')
+            ? 'background-image:url(' . $lqip . ');background-size:cover'
+            : 'background:' . $lqip;
+
+        // Identifier == class, so identical placeholders are emitted only once.
+        $this->assetCollector->addInlineStyleSheet($class, '.' . $class . '{' . $declaration . '}');
+
+        return $class;
     }
 
     private function fallbackFormat(string $extension): string

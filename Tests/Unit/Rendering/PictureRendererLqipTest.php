@@ -14,9 +14,14 @@ use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Ladder\LadderFactory;
 use Schliesser\Imaginator\Rendering\PictureRenderer;
 
+/**
+ * The renderer never emits an inline style="" (CSP-hostile: style-src-attr cannot be nonced).
+ * It only places a CSS class; the LQIP rule itself is registered as a nonce-able <style> by the
+ * ViewHelper via the AssetCollector.
+ */
 final class PictureRendererLqipTest extends TestCase
 {
-    private function render(?string $lqip): string
+    private function render(?string $lqipClass, ?string $class = null): string
     {
         $request = new ImageRenderRequest(
             storageUid: 1,
@@ -27,7 +32,8 @@ final class PictureRendererLqipTest extends TestCase
             format: 'webp',
             quality: 72,
             alt: 'A hero',
-            lqip: $lqip,
+            class: $class,
+            lqipClass: $lqipClass,
         );
 
         return (new PictureRenderer(new LadderFactory([320, 640], 2000)))->render($request, $this->fakeProcessor());
@@ -53,22 +59,25 @@ final class PictureRendererLqipTest extends TestCase
         };
     }
 
-    public function testHexLqipBecomesBackgroundColor(): void
+    public function testLqipClassIsAddedToImg(): void
     {
-        self::assertStringContainsString('style="background:#8a7f6e"', $this->render('#8a7f6e'));
+        self::assertStringContainsString('class="imaginator-lqip-abc123"', $this->render('imaginator-lqip-abc123'));
     }
 
-    public function testDataUriLqipBecomesCoverBackgroundImage(): void
+    public function testLqipClassIsMergedWithUserClass(): void
     {
-        $html = $this->render('data:image/png;base64,AAAA');
-        self::assertStringContainsString(
-            'style="background-image:url(data:image/png;base64,AAAA);background-size:cover"',
-            $html
-        );
+        self::assertStringContainsString('class="lead imaginator-lqip-abc123"', $this->render('imaginator-lqip-abc123', 'lead'));
     }
 
-    public function testNullLqipAddsNoStyle(): void
+    public function testNeverEmitsInlineStyle(): void
     {
-        self::assertStringNotContainsString('style=', $this->render(null));
+        self::assertStringNotContainsString('style=', $this->render('imaginator-lqip-abc123'));
+    }
+
+    public function testNoLqipNoClassAttribute(): void
+    {
+        $html = $this->render(null);
+        self::assertStringNotContainsString('class=', $html);
+        self::assertStringNotContainsString('style=', $html);
     }
 }
