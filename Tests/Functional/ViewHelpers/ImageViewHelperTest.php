@@ -40,7 +40,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
 
     private function render(string $template): string
     {
-        $templateFile = $this->instancePath . '/imaginator-test-template.html';
+        $templateFile = $this->instancePath . '/imaginator-test-' . md5($template) . '.html';
         file_put_contents($templateFile, $template);
 
         $view = $this->get(ViewFactoryInterface::class)

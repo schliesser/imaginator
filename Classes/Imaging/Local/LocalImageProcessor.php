@@ -7,15 +7,13 @@ namespace Schliesser\Imaginator\Imaging\Local;
 use Schliesser\Imaginator\Dto\AspectRatio;
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Dto\ProcessedImage;
-use Schliesser\Imaginator\Dto\Rectangle;
 use Schliesser\Imaginator\Imaging\CropCalculator;
+use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Imaging\Local\Backend\LocalBackendInterface;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
-use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Extbase\Service\ImageService;
 
 /**
@@ -30,9 +28,9 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
     public function __construct(
         private SignedUrlBuilder $signedUrlBuilder,
         private LocalBackendInterface $backend,
-        private ResourceFactory $resourceFactory,
         private ImageService $imageService,
         private CropCalculator $cropCalculator,
+        private CropResolver $cropResolver,
     ) {}
 
     public function buildUrl(ImageVariant $variant): string
@@ -47,59 +45,37 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
 
     public function materialize(ImageVariant $variant): ProcessedImage
     {
-        $processed = $variant->isReference
-            ? $this->materializeReference($variant)
-            : $this->backend->process(
-                $this->resourceFactory->getFileObject($variant->uid),
-                [
-                    'width' => $variant->width . 'c',
-                    'height' => $variant->height . 'c',
-                    'fileExtension' => $variant->format,
-                ],
-            );
+        $resolution = $this->cropResolver->resolve($variant->isReference, $variant->uid, $variant->cropVariant);
 
+        if ($variant->isReference) {
+            $rect = $this->cropCalculator->fit(
+                $resolution->cropArea,
+                $resolution->focusArea,
+                new AspectRatio($variant->width, $variant->height),
+            );
+            $processed = $this->backend->process($resolution->original, [
+                'width' => $variant->width,
+                'height' => $variant->height,
+                'fileExtension' => $variant->format,
+                'crop' => new Area($rect->x, $rect->y, $rect->width, $rect->height),
+            ]);
+        } else {
+            $processed = $this->backend->process($resolution->original, [
+                'width' => $variant->width . 'c',
+                'height' => $variant->height . 'c',
+                'fileExtension' => $variant->format,
+            ]);
+        }
+
+        return $this->toProcessedImage($processed);
+    }
+
+    private function toProcessedImage(ProcessedFile $processed): ProcessedImage
+    {
         return new ProcessedImage(
             $this->toRootRelativeUrl($this->imageService->getImageUri($processed)),
             $processed->getForLocalProcessing(false),
             $processed->getMimeType(),
-        );
-    }
-
-    private function materializeReference(ImageVariant $variant): ProcessedFile
-    {
-        $reference = $this->resourceFactory->getFileReferenceObject($variant->uid);
-        $original = $reference->getOriginalFile();
-        $collection = CropVariantCollection::create((string)$reference->getProperty('crop'));
-
-        // An empty crop area covers the whole file; an empty focus area stays empty so the crop is
-        // centred on the crop area instead.
-        $cropArea = $collection->getCropArea($variant->cropVariant);
-        $cropRect = $cropArea->isEmpty()
-            ? new Rectangle(0, 0, (float)$original->getProperty('width'), (float)$original->getProperty('height'))
-            : $this->toRectangle($cropArea->makeAbsoluteBasedOnFile($original));
-
-        $focusArea = $collection->getFocusArea($variant->cropVariant);
-        $focusRect = $focusArea->isEmpty()
-            ? new Rectangle(0, 0, 0, 0)
-            : $this->toRectangle($focusArea->makeAbsoluteBasedOnFile($original));
-
-        $rect = $this->cropCalculator->fit($cropRect, $focusRect, new AspectRatio($variant->width, $variant->height));
-
-        return $this->backend->process($original, [
-            'width' => $variant->width,
-            'height' => $variant->height,
-            'fileExtension' => $variant->format,
-            'crop' => new Area($rect->x, $rect->y, $rect->width, $rect->height),
-        ]);
-    }
-
-    private function toRectangle(Area $absolute): Rectangle
-    {
-        return new Rectangle(
-            $absolute->getOffsetLeft(),
-            $absolute->getOffsetTop(),
-            $absolute->getWidth(),
-            $absolute->getHeight(),
         );
     }
 

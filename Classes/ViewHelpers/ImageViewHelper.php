@@ -8,13 +8,12 @@ use Schliesser\Imaginator\Configuration\SettingsFactory;
 use Schliesser\Imaginator\Dto\AspectRatio;
 use Schliesser\Imaginator\Dto\BreakpointRatio;
 use Schliesser\Imaginator\Dto\ImageRenderRequest;
+use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Lqip\LqipGeneratorFactory;
 use Schliesser\Imaginator\Rendering\PictureRenderer;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
 use TYPO3\CMS\Core\Page\AssetCollector;
 use TYPO3\CMS\Core\Page\PageRenderer;
-use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Extbase\Service\ImageService;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
@@ -35,6 +34,7 @@ final class ImageViewHelper extends AbstractViewHelper
         private readonly LqipGeneratorFactory $lqipFactory,
         private readonly AssetCollector $assetCollector,
         private readonly PageRenderer $pageRenderer,
+        private readonly CropResolver $cropResolver,
     ) {}
 
     public function initializeArguments(): void
@@ -66,7 +66,9 @@ final class ImageViewHelper extends AbstractViewHelper
 
         // Bound the ladder by the croppable region (the crop area for references), so the
         // LadderFactory width+height clamp yields the fitted-rect width per breakpoint ratio.
-        [$sourceWidth, $sourceHeight] = $this->croppableSize($file, $original, $isReference, $cropVariant);
+        $resolution = $this->cropResolver->resolve($isReference, $file->getUid(), $cropVariant);
+        $sourceWidth = $resolution->sourceWidth;
+        $sourceHeight = $resolution->sourceHeight;
 
         $request = new ImageRenderRequest(
             isReference: $isReference,
@@ -111,27 +113,6 @@ final class ImageViewHelper extends AbstractViewHelper
         $this->assetCollector->addInlineStyleSheet($class, '.' . $class . '{' . $declaration . '}');
 
         return $class;
-    }
-
-    /**
-     * Croppable source size: the editor crop area for a reference (so the ladder never exceeds the
-     * cropped region), otherwise the full image.
-     *
-     * @return array{0: int, 1: int}
-     */
-    private function croppableSize(FileInterface $file, FileInterface $original, bool $isReference, string $cropVariant): array
-    {
-        $fullSize = [(int)$original->getProperty('width'), (int)$original->getProperty('height')];
-        if (!$isReference) {
-            return $fullSize;
-        }
-        $cropArea = CropVariantCollection::create((string)$file->getProperty('crop'))->getCropArea($cropVariant);
-        if ($cropArea->isEmpty()) {
-            return $fullSize;
-        }
-        $absolute = $cropArea->makeAbsoluteBasedOnFile($original);
-
-        return [(int)$absolute->getWidth(), (int)$absolute->getHeight()];
     }
 
     private function fallbackFormat(string $extension): string

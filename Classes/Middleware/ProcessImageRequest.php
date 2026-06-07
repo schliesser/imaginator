@@ -11,11 +11,11 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Schliesser\Imaginator\Dto\AspectRatio;
 use Schliesser\Imaginator\Dto\ImageVariant;
+use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Ladder\LadderFactory;
 use Schliesser\Imaginator\Url\CanonicalParams;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
-use TYPO3\CMS\Core\Resource\ResourceFactory;
 
 /**
  * Serves the signed image endpoint. The candidate URL *is* the image: verify the HMAC
@@ -30,7 +30,7 @@ final readonly class ProcessImageRequest implements MiddlewareInterface
     public function __construct(
         private SignedUrlBuilder $signedUrlBuilder,
         private LadderFactory $ladderFactory,
-        private ResourceFactory $resourceFactory,
+        private CropResolver $cropResolver,
         private ImageProcessorInterface $processor,
         private ResponseFactoryInterface $responseFactory,
     ) {}
@@ -63,16 +63,17 @@ final readonly class ProcessImageRequest implements MiddlewareInterface
      */
     private function isRungWidth(CanonicalParams $params): bool
     {
-        $file = $params->isReference
-            ? $this->resourceFactory->getFileReferenceObject($params->uid)->getOriginalFile()
-            : $this->resourceFactory->getFileObject($params->uid);
-        $sourceWidth = (int)$file->getProperty('width');
-        $sourceHeight = (int)$file->getProperty('height');
-        // The variant's own w:h is its target ratio, so the verify path applies the same
-        // source-height clamp as the render path.
+        // Same croppable bounds as the render path (crop area for references) so a crop-clamped
+        // width still validates. The variant's own w:h is its target ratio.
+        $resolution = $this->cropResolver->resolve($params->isReference, $params->uid, $params->cropVariant);
         $ratio = new AspectRatio(max(1, $params->width), max(1, $params->height));
 
-        return $this->ladderFactory->nearestRung($params->width, $sourceWidth, $ratio, $sourceHeight) === $params->width;
+        return $this->ladderFactory->nearestRung(
+            $params->width,
+            $resolution->sourceWidth,
+            $ratio,
+            $resolution->sourceHeight,
+        ) === $params->width;
     }
 
     private function toVariant(CanonicalParams $params): ImageVariant

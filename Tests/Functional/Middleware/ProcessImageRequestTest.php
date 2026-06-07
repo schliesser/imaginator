@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Schliesser\Imaginator\Imaging\CropCalculator;
+use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Ladder\LadderFactory;
@@ -48,18 +49,18 @@ final class ProcessImageRequestTest extends FunctionalTestCase
     private function middleware(): ProcessImageRequest
     {
         $imageService = GeneralUtility::makeInstance(ImageService::class);
-        $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+        $cropResolver = new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class));
 
         return new ProcessImageRequest(
             $this->signedUrlBuilder,
             new LadderFactory([320, 640, 1280, 1920, 2560], 2000),
-            $resourceFactory,
+            $cropResolver,
             new LocalImageProcessor(
                 $this->signedUrlBuilder,
                 new GraphicsMagickBackend($imageService),
-                $resourceFactory,
                 $imageService,
                 new CropCalculator(),
+                $cropResolver,
             ),
             new ResponseFactory(),
         );

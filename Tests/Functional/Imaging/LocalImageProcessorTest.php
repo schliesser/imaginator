@@ -6,6 +6,7 @@ namespace Schliesser\Imaginator\Tests\Functional\Imaging;
 
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Imaging\CropCalculator;
+use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
@@ -35,9 +36,9 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         return new LocalImageProcessor(
             new SignedUrlBuilder(['test-secret']),
             new GraphicsMagickBackend(GeneralUtility::makeInstance(ImageService::class)),
-            GeneralUtility::makeInstance(ResourceFactory::class),
             GeneralUtility::makeInstance(ImageService::class),
             new CropCalculator(),
+            new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),
         );
     }
 
