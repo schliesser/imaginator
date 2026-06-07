@@ -64,6 +64,19 @@ describe('imaginator-aspect-ratios', () => {
     host.remove();
   });
 
+  it('marks the field dirty (has-change) so FormEngine warns on close', () => {
+    const host = mount('1:1,16:9');
+    const input = hidden(host);
+    expect(input.classList.contains('has-change')).toBe(false);
+
+    const select = rows(host)[1].querySelector('select') as HTMLSelectElement;
+    select.value = '16:9';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(input.classList.contains('has-change')).toBe(true);
+    host.remove();
+  });
+
   it('shows a live swatch reflecting the selected ratio', () => {
     const host = mount('1:1,16:9');
     const lgRow = rows(host)[1];

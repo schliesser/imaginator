@@ -5,9 +5,11 @@
   "description": "Build + test toolchain for the imaginator backend web components.",
   "scripts": {
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "build:js": "tsc -p Build/jsconfig/tsconfig.json"
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "@types/node": "^22.0.0",
     "jsdom": "^25.0.0",
     "typescript": "^5.6.0",

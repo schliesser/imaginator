@@ -102,6 +102,9 @@ class AspectRatiosElement extends HTMLElement {
     }
     serialize() {
         this.input.value = Object.keys(this.value).length === 0 ? '' : JSON.stringify(this.value);
+        // Mark the field dirty so FormEngine's unsaved-changes guard warns on close. FormEngine detects
+        // changes via the `has-change` class on `[name^="data["]` fields (see markFieldAsChanged).
+        this.input.classList.add('has-change');
         this.input.dispatchEvent(new Event('change', { bubbles: true }));
     }
     option(value, label) {

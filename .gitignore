@@ -1,6 +1,9 @@
 /.Build/
 /node_modules/
 /composer.lock
+/.playwright-mcp/
+/test-results/
+/playwright-report/
 /.ddev/
 /.idea/
 /var/
