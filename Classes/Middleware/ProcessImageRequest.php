@@ -63,7 +63,9 @@ final readonly class ProcessImageRequest implements MiddlewareInterface
      */
     private function isRungWidth(CanonicalParams $params): bool
     {
-        $file = $this->resourceFactory->getFileObject($params->fileUid);
+        $file = $params->isReference
+            ? $this->resourceFactory->getFileReferenceObject($params->uid)->getOriginalFile()
+            : $this->resourceFactory->getFileObject($params->uid);
         $sourceWidth = (int)$file->getProperty('width');
         $sourceHeight = (int)$file->getProperty('height');
         // The variant's own w:h is its target ratio, so the verify path applies the same
@@ -76,8 +78,8 @@ final readonly class ProcessImageRequest implements MiddlewareInterface
     private function toVariant(CanonicalParams $params): ImageVariant
     {
         return new ImageVariant(
-            $params->storageUid,
-            $params->fileUid,
+            $params->isReference,
+            $params->uid,
             $params->cropVariant,
             $params->width,
             $params->height,

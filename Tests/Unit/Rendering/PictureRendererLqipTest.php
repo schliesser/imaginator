@@ -24,8 +24,8 @@ final class PictureRendererLqipTest extends TestCase
     private function render(?string $lqipClass, ?string $class = null): string
     {
         $request = new ImageRenderRequest(
-            storageUid: 1,
-            fileUid: 9,
+            isReference: false,
+            uid: 9,
             sourceWidth: 4000,
             sourceHeight: 4000,
             cropVariant: 'default',

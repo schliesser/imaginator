@@ -9,8 +9,8 @@ use Schliesser\Imaginator\Url\CanonicalParams;
 final readonly class ImageVariant
 {
     public function __construct(
-        public int $storageUid,
-        public int $fileUid,
+        public bool $isReference,
+        public int $uid,
         public string $cropVariant,
         public int $width,
         public int $height,
@@ -21,8 +21,8 @@ final readonly class ImageVariant
     public function toCanonicalParams(): CanonicalParams
     {
         return new CanonicalParams(
-            $this->storageUid,
-            $this->fileUid,
+            $this->isReference,
+            $this->uid,
             $this->cropVariant,
             $this->width,
             $this->height,

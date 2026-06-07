@@ -180,8 +180,8 @@ final readonly class PictureRenderer
     private function variant(ImageRenderRequest $request, Rung $rung, ?string $format = null): ImageVariant
     {
         return new ImageVariant(
-            $request->storageUid,
-            $request->fileUid,
+            $request->isReference,
+            $request->uid,
             $request->cropVariant,
             $rung->width,
             $rung->height,

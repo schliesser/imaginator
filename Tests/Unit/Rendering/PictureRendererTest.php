@@ -26,7 +26,7 @@ final class PictureRendererTest extends TestCase
         return new class () implements ImageProcessorInterface {
             public function buildUrl(ImageVariant $variant): string
             {
-                return sprintf('/img/%d/%dx%d.%s', $variant->fileUid, $variant->width, $variant->height, $variant->format);
+                return sprintf('/img/%d/%dx%d.%s', $variant->uid, $variant->width, $variant->height, $variant->format);
             }
 
             public function isOffloaded(): bool
@@ -44,8 +44,8 @@ final class PictureRendererTest extends TestCase
     public function testSingleRatioRendersImgWithLadder(): void
     {
         $request = new ImageRenderRequest(
-            storageUid: 1,
-            fileUid: 9,
+            isReference: false,
+            uid: 9,
             sourceWidth: 4000,
             sourceHeight: 4000,
             cropVariant: 'default',
@@ -65,8 +65,8 @@ final class PictureRendererTest extends TestCase
     public function testMultipleRatiosRenderPictureWithSourcePerBreakpoint(): void
     {
         $request = new ImageRenderRequest(
-            storageUid: 1,
-            fileUid: 9,
+            isReference: false,
+            uid: 9,
             sourceWidth: 4000,
             sourceHeight: 4000,
             cropVariant: 'default',
@@ -93,8 +93,8 @@ final class PictureRendererTest extends TestCase
     public function testPriorityDropsLazyAndAddsFetchpriorityAndExplicitSizes(): void
     {
         $request = new ImageRenderRequest(
-            storageUid: 1,
-            fileUid: 9,
+            isReference: false,
+            uid: 9,
             sourceWidth: 4000,
             sourceHeight: 4000,
             cropVariant: 'default',

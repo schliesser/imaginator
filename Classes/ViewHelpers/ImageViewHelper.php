@@ -11,8 +11,10 @@ use Schliesser\Imaginator\Dto\ImageRenderRequest;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Lqip\LqipGeneratorFactory;
 use Schliesser\Imaginator\Rendering\PictureRenderer;
+use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
 use TYPO3\CMS\Core\Page\AssetCollector;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Extbase\Service\ImageService;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
@@ -55,17 +57,23 @@ final class ImageViewHelper extends AbstractViewHelper
             $this->arguments['image'] ?? null,
             (bool)($this->arguments['treatIdAsReference'] ?? false),
         );
-        $original = $file instanceof FileReference ? $file->getOriginalFile() : $file;
+        $isReference = $file instanceof FileReference;
+        $original = $isReference ? $file->getOriginalFile() : $file;
+        $cropVariant = (string)$this->arguments['cropVariant'];
         $settings = $this->settingsFactory->create();
         // Stacked AVIF/WebP <source> tiers from settings; the <img> falls back to the original format.
         $fallbackFormat = $this->fallbackFormat($original->getExtension());
 
+        // Bound the ladder by the croppable region (the crop area for references), so the
+        // LadderFactory width+height clamp yields the fitted-rect width per breakpoint ratio.
+        [$sourceWidth, $sourceHeight] = $this->croppableSize($file, $original, $isReference, $cropVariant);
+
         $request = new ImageRenderRequest(
-            storageUid: $original->getStorage()->getUid(),
-            fileUid: $original->getUid(),
-            sourceWidth: (int)$file->getProperty('width'),
-            sourceHeight: (int)$file->getProperty('height'),
-            cropVariant: (string)$this->arguments['cropVariant'],
+            isReference: $isReference,
+            uid: $file->getUid(),
+            sourceWidth: $sourceWidth,
+            sourceHeight: $sourceHeight,
+            cropVariant: $cropVariant,
             breakpoints: $this->breakpoints($this->arguments['aspectRatio']),
             format: $fallbackFormat,
             quality: $settings->qualities[$fallbackFormat] ?? 80,
@@ -103,6 +111,27 @@ final class ImageViewHelper extends AbstractViewHelper
         $this->assetCollector->addInlineStyleSheet($class, '.' . $class . '{' . $declaration . '}');
 
         return $class;
+    }
+
+    /**
+     * Croppable source size: the editor crop area for a reference (so the ladder never exceeds the
+     * cropped region), otherwise the full image.
+     *
+     * @return array{0: int, 1: int}
+     */
+    private function croppableSize(FileInterface $file, FileInterface $original, bool $isReference, string $cropVariant): array
+    {
+        $fullSize = [(int)$original->getProperty('width'), (int)$original->getProperty('height')];
+        if (!$isReference) {
+            return $fullSize;
+        }
+        $cropArea = CropVariantCollection::create((string)$file->getProperty('crop'))->getCropArea($cropVariant);
+        if ($cropArea->isEmpty()) {
+            return $fullSize;
+        }
+        $absolute = $cropArea->makeAbsoluteBasedOnFile($original);
+
+        return [(int)$absolute->getWidth(), (int)$absolute->getHeight()];
     }
 
     private function fallbackFormat(string $extension): string

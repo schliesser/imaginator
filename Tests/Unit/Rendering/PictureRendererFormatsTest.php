@@ -44,8 +44,8 @@ final class PictureRendererFormatsTest extends TestCase
     public function testStacksAvifThenWebpThenFallbackImg(): void
     {
         $request = new ImageRenderRequest(
-            storageUid: 1,
-            fileUid: 9,
+            isReference: false,
+            uid: 9,
             sourceWidth: 4000,
             sourceHeight: 4000,
             cropVariant: 'default',
@@ -77,8 +77,8 @@ final class PictureRendererFormatsTest extends TestCase
     public function testArtDirectionRepeatsEachBreakpointPerFormat(): void
     {
         $request = new ImageRenderRequest(
-            storageUid: 1,
-            fileUid: 9,
+            isReference: false,
+            uid: 9,
             sourceWidth: 4000,
             sourceHeight: 4000,
             cropVariant: 'default',

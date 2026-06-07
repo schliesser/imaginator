@@ -20,11 +20,11 @@ final class SignedUrlBuilder
     public function build(CanonicalParams $p): string
     {
         return sprintf(
-            '%s/%s/%d-%d/%s/%dx%d.%s',
+            '%s/%s/%s%d/%s/%dx%d.%s',
             self::PREFIX,
             $this->sign($p, $this->secrets[0]),
-            $p->storageUid,
-            $p->fileUid,
+            $p->isReference ? 'r' : 'f',
+            $p->uid,
             rawurlencode($p->cropVariant),
             $p->width,
             $p->height,
@@ -35,12 +35,12 @@ final class SignedUrlBuilder
     public function verify(string $path): ?CanonicalParams
     {
         $pattern = '#^' . preg_quote(self::PREFIX, '#')
-            . '/([0-9a-f]{' . self::SIG_LEN . '})/(\d+)-(\d+)/([^/]+)/(\d+)x(\d+)\.([a-z0-9]+)$#';
+            . '/([0-9a-f]{' . self::SIG_LEN . '})/([rf])(\d+)/([^/]+)/(\d+)x(\d+)\.([a-z0-9]+)$#';
         if (!preg_match($pattern, $path, $m)) {
             return null;
         }
         $params = new CanonicalParams(
-            (int)$m[2],
+            $m[2] === 'r',
             (int)$m[3],
             rawurldecode($m[4]),
             (int)$m[5],

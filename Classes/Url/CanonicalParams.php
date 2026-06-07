@@ -7,8 +7,8 @@ namespace Schliesser\Imaginator\Url;
 final readonly class CanonicalParams
 {
     public function __construct(
-        public int $storageUid,
-        public int $fileUid,
+        public bool $isReference,
+        public int $uid,
         public string $cropVariant,
         public int $width,
         public int $height,
@@ -18,8 +18,8 @@ final readonly class CanonicalParams
     public function canonicalString(): string
     {
         return implode('|', [
-            $this->storageUid,
-            $this->fileUid,
+            $this->isReference ? 'r' : 'f',
+            $this->uid,
             $this->cropVariant,
             $this->width,
             $this->height,

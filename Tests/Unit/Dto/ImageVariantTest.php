@@ -12,9 +12,9 @@ final class ImageVariantTest extends TestCase
 {
     public function testMapsToCanonicalParams(): void
     {
-        $v = new ImageVariant(1, 4567, 'hero', 1280, 720, 'webp', 72);
+        $v = new ImageVariant(true, 4567, 'hero', 1280, 720, 'webp', 72);
         self::assertEquals(
-            new CanonicalParams(1, 4567, 'hero', 1280, 720, 'webp'),
+            new CanonicalParams(true, 4567, 'hero', 1280, 720, 'webp'),
             $v->toCanonicalParams()
         );
     }

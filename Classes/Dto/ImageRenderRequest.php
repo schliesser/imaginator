@@ -17,8 +17,8 @@ final readonly class ImageRenderRequest
      *                                        `format` field is the fallback/original format for the `<img>`.
      */
     public function __construct(
-        public int $storageUid,
-        public int $fileUid,
+        public bool $isReference,
+        public int $uid,
         public int $sourceWidth,
         public int $sourceHeight,
         public string $cropVariant,

@@ -14,14 +14,23 @@ final class SignedUrlBuilderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->params = new CanonicalParams(1, 4567, 'hero', 1280, 720, 'webp');
+        $this->params = new CanonicalParams(false, 4567, 'hero', 1280, 720, 'webp');
     }
 
-    public function testBuildProducesExpectedShape(): void
+    public function testBuildProducesExpectedShapeForFile(): void
     {
         $url = (new SignedUrlBuilder(['s3cr3t']))->build($this->params);
         self::assertMatchesRegularExpression(
-            '#^/_imaginator/[0-9a-f]{16}/1-4567/hero/1280x720\.webp$#',
+            '#^/_imaginator/[0-9a-f]{16}/f4567/hero/1280x720\.webp$#',
+            $url
+        );
+    }
+
+    public function testBuildProducesExpectedShapeForReference(): void
+    {
+        $url = (new SignedUrlBuilder(['s3cr3t']))->build(new CanonicalParams(true, 4567, 'hero', 1280, 720, 'webp'));
+        self::assertMatchesRegularExpression(
+            '#^/_imaginator/[0-9a-f]{16}/r4567/hero/1280x720\.webp$#',
             $url
         );
     }

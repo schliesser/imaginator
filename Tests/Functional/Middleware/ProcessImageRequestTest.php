@@ -7,6 +7,7 @@ namespace Schliesser\Imaginator\Tests\Functional\Middleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Schliesser\Imaginator\Imaging\CropCalculator;
 use Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Ladder\LadderFactory;
@@ -58,6 +59,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
                 new GraphicsMagickBackend($imageService),
                 $resourceFactory,
                 $imageService,
+                new CropCalculator(),
             ),
             new ResponseFactory(),
         );
@@ -84,7 +86,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
         copy(__DIR__ . '/../Fixtures/Images/source-4000.jpg', $targetDir . 'source-4000.jpg');
         $file = $storage->getFile('source-4000.jpg');
 
-        return new CanonicalParams($storageUid, $file->getUid(), 'default', 1280, 720, 'webp');
+        return new CanonicalParams(false, $file->getUid(), 'default', 1280, 720, 'webp');
     }
 
     public function testNonImaginatorPathPassesThrough(): void
@@ -97,7 +99,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
 
     public function testForgedSignatureReturns403(): void
     {
-        $request = new ServerRequest('https://example.com/_imaginator/0000000000000000/1-1/default/1280x720.webp');
+        $request = new ServerRequest('https://example.com/_imaginator/0000000000000000/f1/default/1280x720.webp');
         $response = $this->middleware()->process($request, $this->passthroughHandler());
 
         self::assertSame(403, $response->getStatusCode());
@@ -120,8 +122,8 @@ final class ProcessImageRequestTest extends FunctionalTestCase
         // A valid signature for a width that is not a ladder rung must still be rejected (leaked-secret defense).
         $params = $this->importFixture();
         $offLadder = new CanonicalParams(
-            $params->storageUid,
-            $params->fileUid,
+            $params->isReference,
+            $params->uid,
             $params->cropVariant,
             1281, // between rungs 1280 and 1920
             721,
