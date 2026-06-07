@@ -1,0 +1,278 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - button "Collapse sidebar" [ref=e6] [cursor=pointer]:
+        - img [ref=e10]
+      - link "Imaginator 14.3.2" [ref=e13] [cursor=pointer]:
+        - /url: ./
+        - img [ref=e15]
+        - generic [ref=e16]:
+          - generic [ref=e17]: Imaginator
+          - generic [ref=e18]: 14.3.2
+    - list [ref=e21]:
+      - listitem [ref=e22]:
+        - button "Search" [ref=e23] [cursor=pointer]:
+          - generic "Search" [ref=e24]:
+            - img [ref=e27]
+          - generic [ref=e29]: Search
+      - listitem [ref=e30]:
+        - button "Clear cache" [ref=e31] [cursor=pointer]:
+          - generic "Clear cache" [ref=e32]:
+            - img [ref=e35]
+          - generic [ref=e37]: Clear cache
+      - listitem [ref=e38]:
+        - button "System Information 1" [ref=e39] [cursor=pointer]:
+          - generic "System Information" [ref=e40]:
+            - img [ref=e43]
+          - generic [ref=e45]: System Information
+          - generic [ref=e46]: "1"
+      - listitem [ref=e47]:
+        - button "Bookmarks" [ref=e48] [cursor=pointer]:
+          - generic "Bookmarks" [ref=e49]:
+            - img [ref=e52]
+          - generic [ref=e54]: Bookmarks
+      - listitem [ref=e55]:
+        - button "admin" [ref=e56] [cursor=pointer]:
+          - img [ref=e60]
+          - generic [ref=e61]: admin
+  - navigation "Module Menu" [ref=e65]:
+    - menubar "Module Menu" [ref=e66]:
+      - menuitem "Content" [expanded] [ref=e67] [cursor=pointer]:
+        - img [ref=e71]
+        - generic [ref=e73]: Content
+      - menu "Content" [ref=e75]:
+        - menuitem "Layout" [ref=e76] [cursor=pointer]:
+          - img [ref=e80]
+          - generic [ref=e82]: Layout
+        - menuitem "Records" [ref=e83] [cursor=pointer]:
+          - img [ref=e87]
+          - generic [ref=e89]: Records
+        - menuitem "Status" [ref=e90] [cursor=pointer]:
+          - img [ref=e94]
+          - generic [ref=e96]: Status
+      - menuitem "Media" [ref=e97] [cursor=pointer]:
+        - img [ref=e101]
+        - generic [ref=e103]: Media
+      - menuitem "Sites" [expanded] [ref=e104] [cursor=pointer]:
+        - img [ref=e108]
+        - generic [ref=e110]: Sites
+      - menu "Sites" [ref=e112]:
+        - menuitem "Setup" [ref=e113] [cursor=pointer]:
+          - img [ref=e117]
+          - generic [ref=e119]: Setup
+        - menuitem "Page TSconfig" [ref=e120] [cursor=pointer]:
+          - img [ref=e124]
+          - generic [ref=e126]: Page TSconfig
+        - menuitem "TypoScript" [ref=e127] [cursor=pointer]:
+          - img [ref=e131]
+          - generic [ref=e133]: TypoScript
+      - menuitem "Administration" [expanded] [ref=e134] [cursor=pointer]:
+        - img [ref=e138]
+        - generic [ref=e140]: Administration
+      - menu "Administration" [ref=e142]:
+        - menuitem "Users" [ref=e143] [cursor=pointer]:
+          - img [ref=e147]
+          - generic [ref=e149]: Users
+        - menuitem "Permissions" [ref=e150] [cursor=pointer]:
+          - img [ref=e154]
+          - generic [ref=e156]: Permissions
+        - menuitem "Log" [ref=e157] [cursor=pointer]:
+          - img [ref=e161]
+          - generic [ref=e163]: Log
+      - menuitem "System" [expanded] [ref=e164] [cursor=pointer]:
+        - img [ref=e168]
+        - generic [ref=e170]: System
+      - menu "System" [ref=e172]:
+        - menuitem "Maintenance" [ref=e173] [cursor=pointer]:
+          - img [ref=e177]
+          - generic [ref=e180]: Maintenance
+        - menuitem "Settings" [ref=e181] [cursor=pointer]:
+          - img [ref=e185]
+          - generic [ref=e188]: Settings
+        - menuitem "Upgrade" [ref=e189] [cursor=pointer]:
+          - img [ref=e193]
+          - generic [ref=e196]: Upgrade
+        - menuitem "Environment" [ref=e197] [cursor=pointer]:
+          - img [ref=e201]
+          - generic [ref=e207]: Environment
+        - menuitem "Extensions" [ref=e208] [cursor=pointer]:
+          - img [ref=e212]
+          - generic [ref=e214]: Extensions
+        - menuitem "Database" [ref=e215] [cursor=pointer]:
+          - img [ref=e219]
+          - generic [ref=e221]: Database
+        - menuitem "Configuration" [ref=e222] [cursor=pointer]:
+          - img [ref=e226]
+          - generic [ref=e228]: Configuration
+        - menuitem "Content Security Policy" [ref=e229] [cursor=pointer]:
+          - img [ref=e233]
+          - generic [ref=e235]: Content Security Policy
+  - iframe [ref=e246]:
+    - generic [ref=f4e2]:
+      - navigation "Breadcrumb" [ref=f4e7]:
+        - button "Layout" [ref=f4e8] [cursor=pointer]:
+          - img [ref=f4e12]
+          - generic [ref=f4e14]: Layout
+        - button "Home" [ref=f4e15] [cursor=pointer]:
+          - img [ref=f4e19]
+          - generic [ref=f4e21]: Home
+      - generic [ref=f4e22]:
+        - toolbar [ref=f4e24]:
+          - button "View webpage" [ref=f4e25] [cursor=pointer]:
+            - img [ref=f4e28]
+            - text: View webpage
+          - button "Edit page properties" [ref=f4e30] [cursor=pointer]:
+            - generic:
+              - img [ref=f4e33]
+              - text: Edit page properties
+        - toolbar [ref=f4e36]:
+          - button "View" [ref=f4e38] [cursor=pointer]:
+            - img [ref=f4e41]
+            - text: View
+          - button "Clear cache for this page" [ref=f4e43] [cursor=pointer]:
+            - img [ref=f4e46]
+          - button "Reload" [ref=f4e48] [cursor=pointer]:
+            - img [ref=f4e51]
+          - button "Share" [ref=f4e54] [cursor=pointer]:
+            - img [ref=f4e57]
+      - generic [ref=f4e60]:
+        - generic [ref=f4e61]:
+          - text: Home
+          - generic [ref=f4e63]:
+            - heading "Home" [level=1] [ref=f4e64]
+            - button "Edit the page title" [ref=f4e65] [cursor=pointer]:
+              - img [ref=f4e69]
+              - generic [ref=f4e71]: Edit the page title
+        - table [ref=f4e75]:
+          - rowgroup [ref=f4e78]:
+            - row "Normal" [ref=f4e79]:
+              - group "Normal" [ref=f4e80]:
+                - generic [ref=f4e81]:
+                  - link "Edit this column" [ref=f4e83] [cursor=pointer]:
+                    - /url: /typo3/record/edit?token=5e73b7cf5157af76a6d8b9b2032fedd07e0667d8d9a165e9679dbd54d382a919&edit%5Btt_content%5D%5B1,2,3,4%5D=edit&module=web_layout&returnUrl=/typo3/module/web/layout?token%3D5c0a786236971b65053f20a650957a5bcd86dc40c374b2bce3220a01a256465b%26id%3D1
+                    - img [ref=f4e86]
+                    - generic [ref=f4e88]: Edit this column
+                  - heading "Normal" [level=2] [ref=f4e89]
+                - button "Create new content" [ref=f4e92] [cursor=pointer]:
+                  - generic:
+                    - img [ref=f4e95]
+                    - text: Create new content
+                - generic [ref=f4e97]:
+                  - group "id=1 - Welcome to your default website - Regular Text Element" [ref=f4e98]:
+                    - generic [ref=f4e99]: id=1 - Welcome to your default website - Regular Text Element
+                    - generic [ref=f4e100]:
+                      - generic [ref=f4e101]:
+                        - generic [ref=f4e102]:
+                          - button "Open context menu" [ref=f4e103] [cursor=pointer]:
+                            - img [ref=f4e106]
+                          - generic "English" [ref=f4e108]
+                        - generic [ref=f4e111]: Regular Text Element
+                        - generic [ref=f4e114]:
+                          - button "Edit" [ref=f4e115] [cursor=pointer]:
+                            - img [ref=f4e118]
+                          - button "Hide" [ref=f4e120] [cursor=pointer]:
+                            - img [ref=f4e124]
+                          - link "Delete" [ref=f4e126] [cursor=pointer]:
+                            - /url: /typo3/record/commit?token=87a9c81a19909c673161a149220c2305a6f0e5d5e41979246ae37308957d4d29&cmd%5Btt_content%5D%5B1%5D%5Bdelete%5D=1&redirect=/typo3/module/web/layout?token%3D5c0a786236971b65053f20a650957a5bcd86dc40c374b2bce3220a01a256465b%26id%3D1
+                            - img [ref=f4e129]
+                          - button "Open context menu" [ref=f4e131] [cursor=pointer]:
+                            - img [ref=f4e134]
+                      - generic [ref=f4e137]:
+                        - button "Welcome to your default website" [ref=f4e140] [cursor=pointer]:
+                          - generic: Welcome to your default website
+                        - button "This website is made with TYPO3." [ref=f4e142] [cursor=pointer]:
+                          - paragraph [ref=f4e143]: This website is made with TYPO3.
+                    - button "Create new content" [ref=f4e145] [cursor=pointer]:
+                      - generic:
+                        - img [ref=f4e148]
+                        - text: Create new content
+                  - 'group "id=2 - Per-breakpoint: xs 1:1 -> md 4:3 -> lg 16:9 (hero.jpg) - Text & Media" [ref=f4e150]':
+                    - generic [ref=f4e151]: "id=2 - Per-breakpoint: xs 1:1 -> md 4:3 -> lg 16:9 (hero.jpg) - Text & Media"
+                    - generic [ref=f4e152]:
+                      - generic [ref=f4e153]:
+                        - generic [ref=f4e154]:
+                          - button "Open context menu" [ref=f4e155] [cursor=pointer]:
+                            - img [ref=f4e158]
+                          - generic "English" [ref=f4e160]
+                        - generic [ref=f4e163]: Text & Media
+                        - generic [ref=f4e166]:
+                          - button "Edit" [ref=f4e167] [cursor=pointer]:
+                            - img [ref=f4e170]
+                          - button "Hide" [ref=f4e172] [cursor=pointer]:
+                            - img [ref=f4e176]
+                          - link "Delete" [ref=f4e178] [cursor=pointer]:
+                            - /url: /typo3/record/commit?token=87a9c81a19909c673161a149220c2305a6f0e5d5e41979246ae37308957d4d29&cmd%5Btt_content%5D%5B2%5D%5Bdelete%5D=1&redirect=/typo3/module/web/layout?token%3D5c0a786236971b65053f20a650957a5bcd86dc40c374b2bce3220a01a256465b%26id%3D1
+                            - img [ref=f4e181]
+                          - button "Open context menu" [ref=f4e183] [cursor=pointer]:
+                            - img [ref=f4e186]
+                      - generic [ref=f4e189]:
+                        - 'button "Per-breakpoint: xs 1:1 -> md 4:3 -> lg 16:9 (hero.jpg)" [ref=f4e192] [cursor=pointer]':
+                          - generic: "Per-breakpoint: xs 1:1 -> md 4:3 -> lg 16:9 (hero.jpg)"
+                        - button "One CE ratio map drives every media reference. The reference crops the left 40% of a landscape source; each per-breakpoint ratio is fitted inside that crop area (focus-centered). Resize to watch the picture switch. hero.jpg" [ref=f4e194] [cursor=pointer]:
+                          - generic:
+                            - paragraph [ref=f4e195]: One CE ratio map drives every media reference. The reference crops the left 40% of a landscape source; each per-breakpoint ratio is fitted inside that crop area (focus-centered). Resize to watch the picture switch.
+                            - img "hero.jpg" [ref=f4e199]
+                    - button "Create new content" [ref=f4e201] [cursor=pointer]:
+                      - generic:
+                        - img [ref=f4e204]
+                        - text: Create new content
+                  - 'group "id=3 - Per-breakpoint: xs 4:3 -> lg 21:9 (banner.jpg) - Text & Media" [ref=f4e206]':
+                    - generic [ref=f4e207]: "id=3 - Per-breakpoint: xs 4:3 -> lg 21:9 (banner.jpg) - Text & Media"
+                    - generic [ref=f4e208]:
+                      - generic [ref=f4e209]:
+                        - generic [ref=f4e210]:
+                          - button "Open context menu" [ref=f4e211] [cursor=pointer]:
+                            - img [ref=f4e214]
+                          - generic "English" [ref=f4e216]
+                        - generic [ref=f4e219]: Text & Media
+                        - generic [ref=f4e222]:
+                          - button "Edit" [ref=f4e223] [cursor=pointer]:
+                            - img [ref=f4e226]
+                          - button "Hide" [ref=f4e228] [cursor=pointer]:
+                            - img [ref=f4e232]
+                          - link "Delete" [ref=f4e234] [cursor=pointer]:
+                            - /url: /typo3/record/commit?token=87a9c81a19909c673161a149220c2305a6f0e5d5e41979246ae37308957d4d29&cmd%5Btt_content%5D%5B3%5D%5Bdelete%5D=1&redirect=/typo3/module/web/layout?token%3D5c0a786236971b65053f20a650957a5bcd86dc40c374b2bce3220a01a256465b%26id%3D1
+                            - img [ref=f4e237]
+                          - button "Open context menu" [ref=f4e239] [cursor=pointer]:
+                            - img [ref=f4e242]
+                      - generic [ref=f4e245]:
+                        - 'button "Per-breakpoint: xs 4:3 -> lg 21:9 (banner.jpg)" [ref=f4e248] [cursor=pointer]':
+                          - generic: "Per-breakpoint: xs 4:3 -> lg 21:9 (banner.jpg)"
+                        - button "A wide center band; each per-breakpoint ratio is fitted inside it - only the cropped pixels are transferred. banner.jpg" [ref=f4e250] [cursor=pointer]:
+                          - generic:
+                            - paragraph [ref=f4e251]: A wide center band; each per-breakpoint ratio is fitted inside it - only the cropped pixels are transferred.
+                            - img "banner.jpg" [ref=f4e255]
+                    - button "Create new content" [ref=f4e257] [cursor=pointer]:
+                      - generic:
+                        - img [ref=f4e260]
+                        - text: Create new content
+                  - 'group "id=4 - Per-breakpoint: xs 1:1 -> sm 3:2 -> lg 4:3 (single.jpg) - Text & Media" [ref=f4e262]':
+                    - generic [ref=f4e263]: "id=4 - Per-breakpoint: xs 1:1 -> sm 3:2 -> lg 4:3 (single.jpg) - Text & Media"
+                    - generic [ref=f4e264]:
+                      - generic [ref=f4e265]:
+                        - generic [ref=f4e266]:
+                          - button "Open context menu" [ref=f4e267] [cursor=pointer]:
+                            - img [ref=f4e270]
+                          - generic "English" [ref=f4e272]
+                        - generic [ref=f4e275]: Text & Media
+                        - generic [ref=f4e278]:
+                          - button "Edit" [ref=f4e279] [cursor=pointer]:
+                            - img [ref=f4e282]
+                          - button "Hide" [ref=f4e284] [cursor=pointer]:
+                            - img [ref=f4e288]
+                          - link "Delete" [ref=f4e290] [cursor=pointer]:
+                            - /url: /typo3/record/commit?token=87a9c81a19909c673161a149220c2305a6f0e5d5e41979246ae37308957d4d29&cmd%5Btt_content%5D%5B4%5D%5Bdelete%5D=1&redirect=/typo3/module/web/layout?token%3D5c0a786236971b65053f20a650957a5bcd86dc40c374b2bce3220a01a256465b%26id%3D1
+                            - img [ref=f4e293]
+                          - button "Open context menu" [ref=f4e295] [cursor=pointer]:
+                            - img [ref=f4e298]
+                      - generic [ref=f4e301]:
+                        - 'button "Per-breakpoint: xs 1:1 -> sm 3:2 -> lg 4:3 (single.jpg)" [ref=f4e304] [cursor=pointer]':
+                          - generic: "Per-breakpoint: xs 1:1 -> sm 3:2 -> lg 4:3 (single.jpg)"
+                        - button "An off-center crop region; each per-breakpoint ratio is fitted inside it, honoured server-side. single.jpg" [ref=f4e306] [cursor=pointer]:
+                          - generic:
+                            - paragraph [ref=f4e307]: An off-center crop region; each per-breakpoint ratio is fitted inside it, honoured server-side.
+                            - img "single.jpg" [ref=f4e311]
+                    - button "Create new content" [ref=f4e313] [cursor=pointer]:
+                      - generic:
+                        - img [ref=f4e316]
+                        - text: Create new content

@@ -9,6 +9,8 @@ class AspectRatiosElement extends HTMLElement {
     input;
     fieldId = '';
     value = {};
+    breakpoints = [];
+    swatches = new Map();
     connectedCallback() {
         const existing = this.querySelector('input[type="hidden"]');
         if (existing === null) {
@@ -17,15 +19,16 @@ class AspectRatiosElement extends HTMLElement {
         this.input = existing;
         this.fieldId = this.getAttribute('data-field') ?? existing.id;
         this.value = this.parseValue(this.getAttribute('data-value'));
-        const breakpoints = this.parseBreakpoints(this.getAttribute('data-breakpoints'));
+        this.breakpoints = this.parseBreakpoints(this.getAttribute('data-breakpoints'));
         const allowed = (this.getAttribute('data-allowed') ?? '')
             .split(',')
             .map((ratio) => ratio.trim())
             .filter((ratio) => ratio !== '');
         const container = document.createElement('div');
         container.className = 'imaginator-ar-rows';
-        breakpoints.forEach((breakpoint) => container.appendChild(this.buildRow(breakpoint, allowed)));
+        this.breakpoints.forEach((breakpoint) => container.appendChild(this.buildRow(breakpoint, allowed)));
         this.appendChild(container);
+        this.refreshSwatches();
     }
     buildRow(breakpoint, allowed) {
         const row = document.createElement('div');
@@ -44,8 +47,8 @@ class AspectRatiosElement extends HTMLElement {
         swatchCell.className = 'imaginator-ar-swatch-cell';
         const swatch = document.createElement('span');
         swatch.className = 'imaginator-ar-swatch';
-        this.applySwatch(swatch, select.value);
         swatchCell.appendChild(swatch);
+        this.swatches.set(breakpoint.key, swatch);
         select.addEventListener('change', () => {
             const ratio = select.value;
             if (ratio === '') {
@@ -54,7 +57,8 @@ class AspectRatiosElement extends HTMLElement {
             else {
                 this.value[breakpoint.key] = ratio;
             }
-            this.applySwatch(swatch, ratio);
+            // Changing one breakpoint changes what the larger "inherit" rows preview.
+            this.refreshSwatches();
             this.serialize();
         });
         row.appendChild(label);
@@ -62,14 +66,39 @@ class AspectRatiosElement extends HTMLElement {
         row.appendChild(swatchCell);
         return row;
     }
-    applySwatch(swatch, ratio) {
-        if (ratio === '') {
+    /**
+     * Recompute every swatch. Breakpoints are ordered smallest-first; an unset ("inherit") breakpoint
+     * shows the nearest-smaller set ratio (the one that bubbles up at render time), styled as an
+     * inherited preview. With nothing smaller set, it falls back to a neutral hatched placeholder.
+     */
+    refreshSwatches() {
+        let inherited = null;
+        this.breakpoints.forEach((breakpoint) => {
+            const swatch = this.swatches.get(breakpoint.key);
+            if (swatch === undefined) {
+                return;
+            }
+            const own = this.value[breakpoint.key] ?? '';
+            if (own !== '') {
+                inherited = own;
+                this.applySwatch(swatch, own, false);
+            }
+            else {
+                this.applySwatch(swatch, inherited, true);
+            }
+        });
+    }
+    applySwatch(swatch, ratio, isInherited) {
+        swatch.classList.remove('imaginator-ar-swatch--inherit', 'imaginator-ar-swatch--inherited');
+        if (ratio === null || ratio === '') {
             swatch.style.removeProperty('aspect-ratio');
             swatch.classList.add('imaginator-ar-swatch--inherit');
             return;
         }
-        swatch.classList.remove('imaginator-ar-swatch--inherit');
         swatch.style.aspectRatio = ratio.replace(':', ' / ');
+        if (isInherited) {
+            swatch.classList.add('imaginator-ar-swatch--inherited');
+        }
     }
     serialize() {
         this.input.value = Object.keys(this.value).length === 0 ? '' : JSON.stringify(this.value);

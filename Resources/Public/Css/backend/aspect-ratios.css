@@ -51,7 +51,16 @@ imaginator-aspect-ratios {
   border: 1px solid var(--typo3-component-border-color, rgba(0, 0, 0, 0.25));
 }
 
-/* No ratio chosen: a neutral hatched square placeholder, same height as a real swatch. */
+/* Inherited (this breakpoint is "inherit"): preview the bubbled-up ratio, but muted + dashed so it
+   reads as not-directly-set versus a solid, explicitly chosen ratio. */
+.imaginator-ar-swatch--inherited {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--typo3-component-primary-color, #006ec8);
+  opacity: 0.6;
+}
+
+/* No ratio chosen and nothing smaller to inherit: a neutral hatched square placeholder. */
 .imaginator-ar-swatch--inherit {
   width: 1.75rem;
   background: repeating-linear-gradient(

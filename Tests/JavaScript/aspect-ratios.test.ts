@@ -77,6 +77,33 @@ describe('imaginator-aspect-ratios', () => {
     host.remove();
   });
 
+  it('previews the inherited (next-smaller) ratio on an inherit row', () => {
+    // xs sets 1:1; lg is inherit and should preview that bubbled-up 1:1, flagged as inherited.
+    const host = mount('1:1,16:9', JSON.stringify({ xs: '1:1' }));
+    const lgSwatch = rows(host)[1].querySelector('.imaginator-ar-swatch') as HTMLElement;
+
+    expect(lgSwatch.style.aspectRatio).toBe('1 / 1');
+    expect(lgSwatch.classList.contains('imaginator-ar-swatch--inherited')).toBe(true);
+    host.remove();
+  });
+
+  it('updates inherited previews when a smaller breakpoint changes', () => {
+    const host = mount('1:1,16:9'); // both inherit, nothing set
+    const xsSelect = rows(host)[0].querySelector('select') as HTMLSelectElement;
+    const lgSwatch = rows(host)[1].querySelector('.imaginator-ar-swatch') as HTMLElement;
+
+    // Nothing smaller set yet: lg shows the neutral placeholder.
+    expect(lgSwatch.classList.contains('imaginator-ar-swatch--inherit')).toBe(true);
+
+    xsSelect.value = '16:9';
+    xsSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // lg now inherits xs's 16:9.
+    expect(lgSwatch.style.aspectRatio).toBe('16 / 9');
+    expect(lgSwatch.classList.contains('imaginator-ar-swatch--inherited')).toBe(true);
+    host.remove();
+  });
+
   it('removes the key when inherit is chosen again', () => {
     const host = mount('1:1,16:9', JSON.stringify({ lg: '16:9' }));
     const lgRow = rows(host)[1];
