@@ -1,0 +1,16 @@
+{
+  "name": "@schliesser/imaginator",
+  "private": true,
+  "type": "module",
+  "description": "Build + test toolchain for the imaginator backend web components.",
+  "scripts": {
+    "test": "vitest run",
+    "build:js": "tsc -p Build/jsconfig/tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "jsdom": "^25.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

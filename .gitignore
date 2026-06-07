@@ -1,4 +1,5 @@
 /.Build/
+/node_modules/
 /composer.lock
 /.ddev/
 /.idea/

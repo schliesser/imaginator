@@ -1,0 +1,35 @@
+imaginator-aspect-ratios {
+  display: block;
+}
+
+.imaginator-ar-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.imaginator-ar-row {
+  display: grid;
+  grid-template-columns: 3rem 1fr 3rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.imaginator-ar-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.imaginator-ar-swatch {
+  display: block;
+  width: 3rem;
+  background: var(--typo3-component-border-color, #ccc);
+  border: 1px solid var(--typo3-component-border-color, #999);
+  border-radius: 2px;
+}
+
+.imaginator-ar-swatch--inherit {
+  height: 0.75rem;
+  background: repeating-linear-gradient(45deg, transparent, transparent 3px, #ccc 3px, #ccc 6px);
+}
