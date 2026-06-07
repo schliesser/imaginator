@@ -44,6 +44,11 @@ cp Build/demo/*.jpg .Build/public/fileadmin/demo/
 
 echo "› finalising extensions and caches"
 .Build/bin/typo3 extension:setup
+# Publish public assets to _assets/. In this demo the extension IS the root package, so its
+# Resources/Public (e.g. the backend aspect-ratios web component) is not auto-published by
+# extension:setup the way vendor-installed extensions are; publish it explicitly so v14's
+# importmap can resolve EXT:imaginator/Resources/Public/JavaScript/ in the backend.
+.Build/bin/typo3 asset:publish
 .Build/bin/typo3 cache:flush
 # A fresh install can leave a stale empty page in the page cache; clear it directly.
 mysql -h db -u db -pdb db -e "TRUNCATE cache_pages;" 2>/dev/null || true
