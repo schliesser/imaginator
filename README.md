@@ -89,16 +89,27 @@ browser reuses the preload. This satisfies Lighthouse's "LCP request is discover
 
 ## The image endpoint & signing
 
-Each candidate URL has the form:
+Each candidate URL has one of these forms:
 
 ```
-/_imaginator/{16-hex-signature}/{storageUid}-{fileUid}/{cropVariant}/{width}x{height}.{ext}
+reference: /_imaginator/{16-hex-signature}/r{referenceUid}/{cropVariant}/{width}x{height}.{ext}
+file:      /_imaginator/{16-hex-signature}/f{fileUid}/{cropVariant}/{width}x{height}.{ext}
 ```
 
-A PSR-15 middleware verifies the signature, re-checks the width against the ladder, processes the
-image and **302-redirects to the processed file** with `Cache-Control: public, max-age=31536000,
-immutable`. A forged or tampered URL returns **403**, and only ladder-quantized widths are ever
-processed — so the endpoint cannot be abused to exhaust the server with arbitrary sizes.
+The uid is site-unique, so no storage segment is needed. A PSR-15 middleware verifies the signature,
+re-checks the width against the ladder, processes the image and **302-redirects to the processed
+file** with `Cache-Control: public, max-age=31536000, immutable`. A forged or tampered URL returns
+**403**, and only ladder-quantized widths are ever processed — so the endpoint cannot be abused to
+exhaust the server with arbitrary sizes.
+
+### Crop & focus areas
+
+When an `image` (a FAL `FileReference`) is rendered, the URL keys on the **reference uid** (`r…`) and
+the middleware resolves the editor's **crop variant** server-side: it reads the reference's crop JSON
+and fits the requested ratio inside the **crop area**, centered on the **focus area** — so the framing
+the editor chose is honoured and **no crop geometry is exposed in the URL**. The ladder is bounded by
+the crop area, so a tightly-cropped region is never upscaled. A `src` given as a path or plain file
+uid (`f…`) has no crop data and is centre-cropped to the ratio.
 
 The signing secret is derived automatically from
 `$GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey']`. No configuration is needed, but note that
