@@ -93,7 +93,7 @@
             <h3>{ce.data.header}</h3>
             <f:format.html>{ce.data.bodytext}</f:format.html>
             <f:for each="{ce.media}" as="ref">
-                <i:image image="{ref}" alt="{ce.data.header}"/>
+                <i:image image="{ref}" aspectRatio="{ce.data.tx_imaginator_aspect_ratio}" alt="{ce.data.header}"/>
             </f:for>
         </section>
     </f:for>
