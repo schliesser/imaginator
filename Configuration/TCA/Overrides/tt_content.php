@@ -27,3 +27,7 @@ ExtensionManagementUtility::addToAllTCAtypes(
     '',
     'after:imageorient',
 );
+
+// Per-CType example: a hero-style element only offers wide landscape ratios, while the default set
+// (above) also exposes portraits. Narrow the offered ratios per content type via columnsOverrides.
+$GLOBALS['TCA']['tt_content']['types']['image']['columnsOverrides']['tx_imaginator_aspect_ratios']['config']['allowedRatios'] = '16:9,21:9';

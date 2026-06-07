@@ -57,20 +57,20 @@ SET @hero   = (SELECT uid FROM sys_file WHERE identifier = '/demo/hero.jpg'   LI
 SET @banner = (SELECT uid FROM sys_file WHERE identifier = '/demo/banner.jpg' LIMIT 1);
 SET @single = (SELECT uid FROM sys_file WHERE identifier = '/demo/single.jpg' LIMIT 1);
 
-INSERT INTO tt_content (pid, sorting, colPos, CType, header, bodytext, assets, tx_imaginator_aspect_ratio)
-VALUES (1, 256, 0, 'textmedia', 'Crop: left 40% of hero.jpg, ratio 1:1', '<p>The reference crops the left 40% of a landscape source; the 1:1 CE ratio is then fitted inside that crop area (focus-centered).</p>', 1, '1:1');
+INSERT INTO tt_content (pid, sorting, colPos, CType, header, bodytext, assets, tx_imaginator_aspect_ratios)
+VALUES (1, 256, 0, 'textmedia', 'Per-breakpoint: xs 1:1 -> md 4:3 -> lg 16:9 (hero.jpg)', '<p>One CE ratio map drives every media reference. The reference crops the left 40% of a landscape source; each per-breakpoint ratio is fitted inside that crop area (focus-centered). Resize to watch the picture switch.</p>', 1, '{"xs":"1:1","md":"4:3","lg":"16:9"}');
 INSERT INTO sys_file_reference (pid, uid_local, uid_foreign, tablenames, fieldname, sorting_foreign, crop)
 VALUES (1, @hero, LAST_INSERT_ID(), 'tt_content', 'assets', 1,
   '{"default":{"cropArea":{"x":0,"y":0,"width":0.4,"height":1},"selectedRatio":"NaN","focusArea":{"x":0,"y":0,"width":0,"height":0}}}');
 
-INSERT INTO tt_content (pid, sorting, colPos, CType, header, bodytext, assets, tx_imaginator_aspect_ratio)
-VALUES (1, 512, 0, 'textmedia', 'Crop: center band of banner.jpg, ratio 16:9', '<p>A wide center band; the 16:9 CE ratio is fitted inside it - only the cropped pixels are transferred.</p>', 1, '16:9');
+INSERT INTO tt_content (pid, sorting, colPos, CType, header, bodytext, assets, tx_imaginator_aspect_ratios)
+VALUES (1, 512, 0, 'textmedia', 'Per-breakpoint: xs 4:3 -> lg 21:9 (banner.jpg)', '<p>A wide center band; each per-breakpoint ratio is fitted inside it - only the cropped pixels are transferred.</p>', 1, '{"xs":"4:3","lg":"21:9"}');
 INSERT INTO sys_file_reference (pid, uid_local, uid_foreign, tablenames, fieldname, sorting_foreign, crop)
 VALUES (1, @banner, LAST_INSERT_ID(), 'tt_content', 'assets', 1,
   '{"default":{"cropArea":{"x":0.05,"y":0.35,"width":0.9,"height":0.3},"selectedRatio":"NaN","focusArea":{"x":0,"y":0,"width":0,"height":0}}}');
 
-INSERT INTO tt_content (pid, sorting, colPos, CType, header, bodytext, assets, tx_imaginator_aspect_ratio)
-VALUES (1, 768, 0, 'textmedia', 'Crop: lower-right of single.jpg, ratio 4:3', '<p>An off-center crop region; the 4:3 CE ratio is fitted inside it, honoured server-side.</p>', 1, '4:3');
+INSERT INTO tt_content (pid, sorting, colPos, CType, header, bodytext, assets, tx_imaginator_aspect_ratios)
+VALUES (1, 768, 0, 'textmedia', 'Per-breakpoint: xs 1:1 -> sm 3:2 -> lg 4:3 (single.jpg)', '<p>An off-center crop region; each per-breakpoint ratio is fitted inside it, honoured server-side.</p>', 1, '{"xs":"1:1","sm":"3:2","lg":"4:3"}');
 INSERT INTO sys_file_reference (pid, uid_local, uid_foreign, tablenames, fieldname, sorting_foreign, crop)
 VALUES (1, @single, LAST_INSERT_ID(), 'tt_content', 'assets', 1,
   '{"default":{"cropArea":{"x":0.45,"y":0.3,"width":0.55,"height":0.7},"selectedRatio":"NaN","focusArea":{"x":0,"y":0,"width":0,"height":0}}}');

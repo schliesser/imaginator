@@ -83,17 +83,19 @@
     </section>
 
     <hr>
-    <h2>Content elements &mdash; editor crop applied (<code>r{referenceUid}</code>)</h2>
-    <p>Real <code>tt_content</code> records whose FAL image references carry an editor crop, rendered
-       through <code>&lt;i:image image="{ref}"&gt;</code>. No <code>aspectRatio</code> is passed, so
-       each image renders its crop area's own ratio &mdash; inspect the URLs:
-       <code>/_imaginator/&hellip;/r{uid}/&hellip;</code>.</p>
+    <h2>Content elements &mdash; per-breakpoint CE ratios drive every image (<code>r{referenceUid}</code>)</h2>
+    <p>Real <code>tt_content</code> records whose FAL image references carry an editor crop. The
+       content element sets <em>one</em> per-breakpoint ratio map
+       (<code>tx_imaginator_aspect_ratios</code>), resolved by the <code>AspectRatioProcessor</code>
+       and applied to <em>every</em> media reference via <code>&lt;i:image breakpoints="&hellip;"&gt;</code>.
+       Resize the window: the <code>&lt;picture&gt;</code> switches ratio per breakpoint. Inspect the
+       URLs: <code>/_imaginator/&hellip;/r{uid}/&hellip;</code>.</p>
     <f:for each="{contentElements}" as="ce">
         <section class="ce">
             <h3>{ce.data.header}</h3>
             <f:format.html>{ce.data.bodytext}</f:format.html>
             <f:for each="{ce.media}" as="ref">
-                <i:image image="{ref}" aspectRatio="{ce.data.tx_imaginator_aspect_ratio}" alt="{ce.data.header}"/>
+                <i:image image="{ref}" breakpoints="{ce.imaginatorAspectRatios}" alt="{ce.data.header}"/>
             </f:for>
         </section>
     </f:for>
