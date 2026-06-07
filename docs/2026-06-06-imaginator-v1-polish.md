@@ -1,14 +1,14 @@
-# Imaginator v1 — Polish (Rate Limit, Seams, Upgrade Wizard, Docs)
+# Imaginator v1 — Polish (Rate Limit, Seams, Docs)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development (recommended)
 > or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
 **Goal:** Production-harden v1: rate-limit the local endpoint, lay the **no-op seams** for v2 warmup
-and telemetry, ship an Upgrade Wizard from old `pictureino`, and write user docs.
+and telemetry, and write user docs.
 
 **Architecture:** A rate-limiter guard inside the local endpoint (defense in depth on top of HMAC
 signing); event + interface seams that do nothing in v1 but let v2 add a Messenger worker and metrics
-without touching render/processing code; a TYPO3 Upgrade Wizard migrating old config; docs.
+without touching render/processing code; docs.
 
 **Tech Stack:** PHP 8.3, TYPO3 13.4/14, symfony/rate-limiter, PHPUnit.
 
@@ -21,7 +21,6 @@ without touching render/processing code; a TYPO3 Upgrade Wizard migrating old co
 - `Classes/Event/AfterImageVariantBuiltEvent.php` — dispatched per variant in the renderer.
 - `Classes/Warmup/WarmupInterface.php` + `Classes/Warmup/NullWarmup.php` — v1 no-op.
 - `Classes/Telemetry/MetricsCollectorInterface.php` + `Classes/Telemetry/NullMetricsCollector.php`.
-- `Classes/Upgrade/PictureinoMigrationWizard.php`.
 - `Documentation/` (reST), `README.md`.
 
 ---
@@ -68,26 +67,7 @@ Test: `Tests/Unit/Event/AfterImageVariantBuiltEventTest.php`, `Tests/Functional/
 
 ---
 
-## Task 3: Upgrade Wizard from old pictureino
-
-**Files:** Create `Classes/Upgrade/PictureinoMigrationWizard.php`; Modify `ext_localconf.php` (register)
-Test: `Tests/Functional/Upgrade/PictureinoMigrationWizardTest.php`
-
-- [ ] **Step 1: Failing functional test** — given a DB/site with old `pictureino` settings
-  (`plugin.tx_pictureino` TypoScript and/or old Site-Set `pictureino.*`), `executeUpdate()` writes the
-  equivalent `imaginator.*` settings (breakpoints, maxImageDimensions→maxDimension, retina dropped) and
-  `updateNecessary()` flips to false afterward. Removed features (encrypted URLs, JSON middleware,
-  retina) are reported in the wizard description, not silently dropped.
-- [ ] **Step 2: FAIL.**
-- [ ] **Step 3: Implement** `implements UpgradeWizardInterface` — `getIdentifier`, `getTitle`,
-  `getDescription` (lists removed features + the migration), `updateNecessary`, `executeUpdate`,
-  `getPrerequisites`. Map old keys → new; leave old ext installed/coexisting; the wizard only writes
-  new config + a console summary.
-- [ ] **Step 4: PASS.** - [ ] **Step 5: Commit** `feat: pictureino -> imaginator upgrade wizard`.
-
----
-
-## Task 4: Documentation
+## Task 3: Documentation
 
 **Files:** Create `Documentation/Index.rst`, `Documentation/Editor/Index.rst`,
 `Documentation/Integrator/Index.rst`, `README.md`
@@ -97,7 +77,7 @@ Test: `Tests/Functional/Upgrade/PictureinoMigrationWizardTest.php`
   ViewHelper reference, `priority` usage, security notes (HMAC, key rotation, rate limit).
 - [ ] **Step 2:** Write Editor docs: the aspect-ratio element, per-breakpoint ratios, `auto`.
 - [ ] **Step 3:** Write `README.md`: what it is, the "sharp first paint, zero `sizes`" pitch, the
-  ladder rationale, migration-from-pictureino pointer.
+  ladder rationale.
 - [ ] **Step 4:** Commit `docs: integrator + editor documentation and README`.
 
 (No TDD steps — prose. Verify rendered reST builds clean if a docs render is available.)
@@ -106,8 +86,8 @@ Test: `Tests/Functional/Upgrade/PictureinoMigrationWizardTest.php`
 
 ## Self-Review
 - **Spec coverage:** rate limiting (design §9.8) ✓ T1; warmup/telemetry seams → v2 (§9.2/9.7) ✓ T2;
-  Upgrade Wizard (§9.13) ✓ T3; docs ✓ T4.
-- **Placeholder scan:** code tasks (T1–3) carry exact behaviour + assertions; T4 is intentionally prose.
+  docs ✓ T3.
+- **Placeholder scan:** code tasks (T1–2) carry exact behaviour + assertions; T3 is intentionally prose.
 - **Type consistency:** `WarmupInterface::queue(ImageVariant)`, `MetricsCollectorInterface::record(
   ImageVariant)`, `AfterImageVariantBuiltEvent` carry the same `ImageVariant` from the foundation plan;
   setting keys (`imaginator.rateLimit.*`, `imaginator.maxDimension`) match those defined elsewhere.

@@ -313,9 +313,6 @@ v1 reuses native FAL crop variants).
     public URL rather than a broken image.
 12. **Test matrix:** functional tests for signature verify + each `UrlBuilder` grammar; the element via
     acceptance tests; golden-file tests for ladder/`<picture>` output.
-13. **Upgrade wizard (from old `pictureino` v1):** TYPO3 Upgrade Wizard that migrates old
-    TypoScript/Site-Set settings + flags removed features (encrypted URLs, retina subsystem, JSON
-    middleware). Lets existing v1 sites move to `^2.0` with guidance instead of a silent break.
 
 ---
 
@@ -366,8 +363,7 @@ Once the **[DECIDE]** items are settled, each phase becomes a bite-sized TDD tas
 5. **JS enhancement:** Safari `sizes` fallback; `priority`/preload path; optional refine.
 6. **External processors:** `UrlBuilderInterface` + first provider(s) from §4 decision.
 7. **Aspect-ratio element:** web component, per-breakpoint ratios, live preview, v13/v14 adapter.
-8. **Polish (v1):** warmup/telemetry **seams** (no-op interfaces + events), optional rate limiting,
-   docs, and the **Upgrade Wizard** from old `pictureino` v1.
+8. **Polish (v1):** warmup/telemetry **seams** (no-op interfaces + events), optional rate limiting, docs.
 9. **v2 (separate plan):** Messenger/Scheduler warmup worker, libvips backend, per-breakpoint crop in
    the element, private-image URL mode, telemetry collection.
 
@@ -393,8 +389,8 @@ Once the **[DECIDE]** items are settled, each phase becomes a bite-sized TDD tas
   **seams**: a `pictureino.afterFileProcessed`-style event + a `WarmupInterface` no-op, so v2 adds the
   Messenger/Scheduler worker without touching the render or processing code.
 - [x] **Extension key / name:** **`imaginator`** — composer `schliesser/imaginator`, TER key
-  `imaginator`, PHP namespace `Schliesser\Imaginator\`. Old `pictureino` gets an Upgrade Wizard
-  pointing at it (§9.13). Implementation plan: `2026-06-06-imaginator-v1-foundation.md`.
+  `imaginator`, PHP namespace `Schliesser\Imaginator\`. Implementation plan:
+  `2026-06-06-imaginator-v1-foundation.md`.
 
 ### Constraints (composer)
 ```json

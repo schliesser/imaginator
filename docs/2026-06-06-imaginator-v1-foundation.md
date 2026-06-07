@@ -831,8 +831,7 @@ with no JS. Verified end-to-end by functional tests.**
    Cloudflare Images, Cloudinary; `ExternalImageProcessor`; per-provider golden-file tests.
 4. **`imaginator-v1-aspect-ratio-element`** — CE-level per-breakpoint ratio FormEngine web component,
    ratio swatches, v13/v14 adapter.
-5. **`imaginator-v1-polish`** — rate limiting, warmup/telemetry seams (no-op interfaces + events),
-   Upgrade Wizard from old `pictureino`, docs.
+5. **`imaginator-v1-polish`** — rate limiting, warmup/telemetry seams (no-op interfaces + events), docs.
 
 ---
 
