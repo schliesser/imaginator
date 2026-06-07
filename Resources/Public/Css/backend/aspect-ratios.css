@@ -6,30 +6,59 @@ imaginator-aspect-ratios {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  max-width: 30rem;
 }
 
 .imaginator-ar-row {
-  display: grid;
-  grid-template-columns: 3rem 1fr 3rem;
+  display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
+/* Fixed-width breakpoint key, aligned with the select like a TYPO3 inline label. */
 .imaginator-ar-label {
+  flex: 0 0 2.5rem;
+  margin: 0;
   font-weight: 600;
+  font-size: var(--typo3-font-size-small, 0.875rem);
   text-transform: uppercase;
-  font-size: 0.75rem;
+  color: var(--typo3-text-color-base, inherit);
 }
 
+.imaginator-ar-select {
+  flex: 1 1 auto;
+}
+
+/* Fixed-width track so the swatch column never shifts the selects, regardless of ratio. */
+.imaginator-ar-swatch-cell {
+  flex: 0 0 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+}
+
+/* Fixed height keeps every row the same height; width follows the chosen ratio (set inline by the
+   web component) so the editor sees the shape. */
 .imaginator-ar-swatch {
   display: block;
-  width: 3rem;
-  background: var(--typo3-component-border-color, #ccc);
-  border: 1px solid var(--typo3-component-border-color, #999);
-  border-radius: 2px;
+  height: 100%;
+  width: auto;
+  min-width: 0.5rem;
+  max-width: 100%;
+  border-radius: var(--typo3-border-radius, 4px);
+  background: var(--typo3-component-primary-color, #006ec8);
+  border: 1px solid var(--typo3-component-border-color, rgba(0, 0, 0, 0.25));
 }
 
+/* No ratio chosen: a neutral hatched square placeholder, same height as a real swatch. */
 .imaginator-ar-swatch--inherit {
-  height: 0.75rem;
-  background: repeating-linear-gradient(45deg, transparent, transparent 3px, #ccc 3px, #ccc 6px);
+  width: 1.75rem;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--typo3-component-border-color, #ccc),
+    var(--typo3-component-border-color, #ccc) 3px,
+    transparent 3px,
+    transparent 6px
+  );
 }

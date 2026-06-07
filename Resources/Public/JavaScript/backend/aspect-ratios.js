@@ -7,6 +7,7 @@
  */
 class AspectRatiosElement extends HTMLElement {
     input;
+    fieldId = '';
     value = {};
     connectedCallback() {
         const existing = this.querySelector('input[type="hidden"]');
@@ -14,6 +15,7 @@ class AspectRatiosElement extends HTMLElement {
             return;
         }
         this.input = existing;
+        this.fieldId = this.getAttribute('data-field') ?? existing.id;
         this.value = this.parseValue(this.getAttribute('data-value'));
         const breakpoints = this.parseBreakpoints(this.getAttribute('data-breakpoints'));
         const allowed = (this.getAttribute('data-allowed') ?? '')
@@ -30,17 +32,20 @@ class AspectRatiosElement extends HTMLElement {
         row.className = 'imaginator-ar-row';
         row.dataset.breakpoint = breakpoint.key;
         const label = document.createElement('label');
-        label.className = 'imaginator-ar-label';
-        label.textContent = breakpoint.key;
-        row.appendChild(label);
+        label.className = 'imaginator-ar-label form-label';
+        label.textContent = breakpoint.key.toUpperCase();
         const select = document.createElement('select');
-        select.className = 'imaginator-ar-select';
+        select.className = 'imaginator-ar-select form-select form-select-sm';
         select.appendChild(this.option('', 'inherit'));
         allowed.forEach((ratio) => select.appendChild(this.option(ratio, ratio)));
         select.value = this.value[breakpoint.key] ?? '';
+        label.htmlFor = select.id = `${this.fieldId}-${breakpoint.key}`;
+        const swatchCell = document.createElement('span');
+        swatchCell.className = 'imaginator-ar-swatch-cell';
         const swatch = document.createElement('span');
         swatch.className = 'imaginator-ar-swatch';
         this.applySwatch(swatch, select.value);
+        swatchCell.appendChild(swatch);
         select.addEventListener('change', () => {
             const ratio = select.value;
             if (ratio === '') {
@@ -52,8 +57,9 @@ class AspectRatiosElement extends HTMLElement {
             this.applySwatch(swatch, ratio);
             this.serialize();
         });
+        row.appendChild(label);
         row.appendChild(select);
-        row.appendChild(swatch);
+        row.appendChild(swatchCell);
         return row;
     }
     applySwatch(swatch, ratio) {
