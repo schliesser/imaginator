@@ -7,6 +7,9 @@ maxDimension = 2000
 # cat=Processing; type=string; label=Width-ladder rungs (comma-separated)
 ladder = 320,420,560,740,980,1300,1720,2000
 
+# cat=Processing; type=string; label=Breakpoints for the aspect-ratio element (key:min-width px, comma-separated; xs:0 is the base ratio)
+breakpoints = xs:0,sm:576,md:768,lg:992,xl:1200
+
 # cat=Processing; type=string; label=Negotiated formats (comma-separated, most-preferred first)
 formats = avif,webp
 

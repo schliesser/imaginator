@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\Configuration;
 
+use Schliesser\Imaginator\Dto\Breakpoint;
+
 /**
  * Parsed imaginator configuration. The pure {@see self::fromArray()} parser is unit-tested;
  * the DI side that sources the raw array (Site-Set settings + encryptionKey) lives in
@@ -16,12 +18,14 @@ final readonly class Settings
     public const DEFAULT_FORMATS = ['avif', 'webp'];
     public const DEFAULT_QUALITIES = ['avif' => 50, 'webp' => 72];
     public const DEFAULT_LQIP = 'thumbhash';
+    public const DEFAULT_BREAKPOINTS = ['xs' => 0, 'sm' => 576, 'md' => 768, 'lg' => 992, 'xl' => 1200];
 
     /**
      * @param int[]               $ladder
      * @param list<string>        $secrets index 0 signs, all verify (key rotation)
      * @param string[]            $formats
      * @param array<string, int>  $qualities
+     * @param Breakpoint[]        $breakpoints ordered by minWidth ascending; the min-0 entry is the base
      */
     public function __construct(
         public array $ladder,
@@ -31,6 +35,7 @@ final readonly class Settings
         public array $qualities,
         public string $processor,
         public string $lqip,
+        public array $breakpoints,
     ) {}
 
     /**
@@ -50,7 +55,33 @@ final readonly class Settings
             $qualities !== [] ? $qualities : self::DEFAULT_QUALITIES,
             (string)($raw['processor'] ?? 'local'),
             (string)($raw['lqip'] ?? self::DEFAULT_LQIP),
+            self::breakpoints($raw['breakpoints'] ?? null),
         );
+    }
+
+    /**
+     * Parse a `key:px` comma list into {@see Breakpoint}s sorted by minWidth ascending. Entries
+     * without a valid `key:px` shape are skipped; an empty result falls back to the default set.
+     *
+     * @return Breakpoint[]
+     */
+    private static function breakpoints(mixed $value): array
+    {
+        $parsed = [];
+        foreach (self::stringList($value) as $entry) {
+            if (!preg_match('/^([a-z0-9]+):(\d+)$/i', $entry, $m)) {
+                continue;
+            }
+            $parsed[] = new Breakpoint($m[1], (int)$m[2]);
+        }
+        if ($parsed === []) {
+            foreach (self::DEFAULT_BREAKPOINTS as $key => $minWidth) {
+                $parsed[] = new Breakpoint($key, $minWidth);
+            }
+        }
+        usort($parsed, static fn (Breakpoint $a, Breakpoint $b): int => $a->minWidth <=> $b->minWidth);
+
+        return $parsed;
     }
 
     /** @return list<string> */
