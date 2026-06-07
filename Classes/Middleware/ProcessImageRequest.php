@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Schliesser\Imaginator\Dto\AspectRatio;
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Ladder\LadderFactory;
@@ -62,9 +63,14 @@ final readonly class ProcessImageRequest implements MiddlewareInterface
      */
     private function isRungWidth(CanonicalParams $params): bool
     {
-        $sourceWidth = (int)$this->resourceFactory->getFileObject($params->fileUid)->getProperty('width');
+        $file = $this->resourceFactory->getFileObject($params->fileUid);
+        $sourceWidth = (int)$file->getProperty('width');
+        $sourceHeight = (int)$file->getProperty('height');
+        // The variant's own w:h is its target ratio, so the verify path applies the same
+        // source-height clamp as the render path.
+        $ratio = new AspectRatio(max(1, $params->width), max(1, $params->height));
 
-        return $this->ladderFactory->nearestRung($params->width, $sourceWidth) === $params->width;
+        return $this->ladderFactory->nearestRung($params->width, $sourceWidth, $ratio, $sourceHeight) === $params->width;
     }
 
     private function toVariant(CanonicalParams $params): ImageVariant

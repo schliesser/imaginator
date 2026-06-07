@@ -47,6 +47,7 @@ final class PictureRendererFormatsTest extends TestCase
             storageUid: 1,
             fileUid: 9,
             sourceWidth: 4000,
+            sourceHeight: 4000,
             cropVariant: 'default',
             breakpoints: [new BreakpointRatio(new AspectRatio(16, 9))],
             format: 'jpeg',
@@ -79,6 +80,7 @@ final class PictureRendererFormatsTest extends TestCase
             storageUid: 1,
             fileUid: 9,
             sourceWidth: 4000,
+            sourceHeight: 4000,
             cropVariant: 'default',
             breakpoints: [
                 new BreakpointRatio(new AspectRatio(16, 9), '(min-width:992px)'),

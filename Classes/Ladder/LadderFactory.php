@@ -14,21 +14,28 @@ final class LadderFactory
         private readonly int $maxDimension,
     ) {}
 
-    /** @return Rung[] ascending, capped to min(rung, maxDimension, sourceWidth), deduped */
-    public function build(AspectRatio $ratio, int $sourceWidth): array
+    /**
+     * @param int $sourceHeight when > 0, also clamp so a cover crop to $ratio never upscales
+     *                          vertically (a portrait target from a short source is height-bound)
+     * @return Rung[] ascending, capped to min(rung, maxDimension, sourceWidth, height-bound), deduped
+     */
+    public function build(AspectRatio $ratio, int $sourceWidth, int $sourceHeight = 0): array
     {
         $rungs = [];
-        foreach ($this->clampedWidths($sourceWidth) as $w) {
+        foreach ($this->clampedWidths($sourceWidth, $ratio, $sourceHeight) as $w) {
             $rungs[] = new Rung($w, $ratio->heightFor($w));
         }
 
         return $rungs;
     }
 
-    /** Quantize an arbitrary requested width UP to the nearest available rung width. */
-    public function nearestRung(int $requestedWidth, int $sourceWidth): int
+    /**
+     * Quantize an arbitrary requested width UP to the nearest available rung width. Pass $ratio and
+     * $sourceHeight to apply the same height-bound clamp as {@see build()}.
+     */
+    public function nearestRung(int $requestedWidth, int $sourceWidth, ?AspectRatio $ratio = null, int $sourceHeight = 0): int
     {
-        $widths = $this->clampedWidths($sourceWidth);
+        $widths = $this->clampedWidths($sourceWidth, $ratio, $sourceHeight);
         foreach ($widths as $w) {
             if ($w >= $requestedWidth) {
                 return $w;
@@ -39,11 +46,16 @@ final class LadderFactory
     }
 
     /** @return int[] sorted ascending, unique, >= 1 */
-    private function clampedWidths(int $sourceWidth): array
+    private function clampedWidths(int $sourceWidth, ?AspectRatio $ratio = null, int $sourceHeight = 0): array
     {
+        // Widest crop of $ratio that fits the source height without upscaling: floor(sh * w/h).
+        $maxByHeight = ($sourceHeight > 0 && $ratio !== null)
+            ? (int)floor($sourceHeight * $ratio->width / $ratio->height)
+            : PHP_INT_MAX;
+
         $widths = [];
         foreach ($this->rungWidths as $w) {
-            $clamped = (int)min($w, $this->maxDimension, $sourceWidth);
+            $clamped = (int)min($w, $this->maxDimension, $sourceWidth, $maxByHeight);
             if ($clamped >= 1) {
                 $widths[$clamped] = true;
             }

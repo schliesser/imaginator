@@ -64,6 +64,7 @@ final class ImageViewHelper extends AbstractViewHelper
             storageUid: $original->getStorage()->getUid(),
             fileUid: $original->getUid(),
             sourceWidth: (int)$file->getProperty('width'),
+            sourceHeight: (int)$file->getProperty('height'),
             cropVariant: (string)$this->arguments['cropVariant'],
             breakpoints: $this->breakpoints($this->arguments['aspectRatio']),
             format: $fallbackFormat,

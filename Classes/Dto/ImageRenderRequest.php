@@ -20,6 +20,7 @@ final readonly class ImageRenderRequest
         public int $storageUid,
         public int $fileUid,
         public int $sourceWidth,
+        public int $sourceHeight,
         public string $cropVariant,
         public array $breakpoints,
         public string $format,

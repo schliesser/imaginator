@@ -39,7 +39,7 @@ final readonly class PictureRenderer
         $format = $request->formats[0] ?? $request->format;
         $links = [];
         foreach ($request->breakpoints as $breakpoint) {
-            $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth);
+            $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
             $attrs = [
                 'rel' => 'preload',
                 'as' => 'image',
@@ -80,14 +80,14 @@ final readonly class PictureRenderer
             if ($breakpoint->media === null) {
                 continue;
             }
-            $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth);
+            $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
             foreach ($request->formats as $format) {
                 $sources .= $this->formatSource($request, $rungs, $format, $breakpoint->media, $processor);
             }
         }
         if ($sources === '') {
             // Single ratio: one source per format, no media.
-            $rungs = $this->ladderFactory->build($this->defaultBreakpoint($request)->ratio, $request->sourceWidth);
+            $rungs = $this->ladderFactory->build($this->defaultBreakpoint($request)->ratio, $request->sourceWidth, $request->sourceHeight);
             foreach ($request->formats as $format) {
                 $sources .= $this->formatSource($request, $rungs, $format, null, $processor);
             }
@@ -130,7 +130,7 @@ final readonly class PictureRenderer
 
     private function sourceTag(ImageRenderRequest $request, BreakpointRatio $breakpoint, ImageProcessorInterface $processor): string
     {
-        $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth);
+        $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
 
         return '<source' . $this->attrs([
             'media' => htmlspecialchars((string)$breakpoint->media, ENT_QUOTES),
@@ -141,7 +141,7 @@ final readonly class PictureRenderer
 
     private function renderImg(ImageRenderRequest $request, BreakpointRatio $breakpoint, ImageProcessorInterface $processor): string
     {
-        $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth);
+        $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
         $largest = $rungs[array_key_last($rungs)];
 
         $attrs = [

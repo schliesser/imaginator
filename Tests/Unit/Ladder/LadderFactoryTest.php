@@ -40,4 +40,34 @@ final class LadderFactoryTest extends TestCase
     {
         self::assertSame(2000, $this->factory()->nearestRung(5000, 9999)); // capped by max 2000
     }
+
+    public function testBuildClampsWidthBySourceHeightForPortraitTarget(): void
+    {
+        // 9:16 crop from a short 4000x800 source is height-bound: max width = floor(800 * 9/16) = 450.
+        $rungs = $this->factory()->build(new AspectRatio(9, 16), 4000, 800);
+        $widths = array_map(static fn (Rung $r) => $r->width, $rungs);
+        self::assertSame([320, 450], $widths);
+        // No rung exceeds the source height.
+        foreach ($rungs as $rung) {
+            self::assertLessThanOrEqual(800, $rung->height);
+        }
+    }
+
+    public function testBuildDoesNotOverClampLandscapeTargetFromPortraitSource(): void
+    {
+        // 6:1 crop from a tall 3000x4500 portrait is width-bound, so the height clamp is inert.
+        $rungs = $this->factory()->build(new AspectRatio(6, 1), 3000, 4500);
+        $widths = array_map(static fn (Rung $r) => $r->width, $rungs);
+        self::assertSame([320, 640, 1280, 1920, 2000], $widths);
+    }
+
+    public function testSourceHeightZeroDisablesHeightClamp(): void
+    {
+        $withClamp = $this->factory()->build(new AspectRatio(9, 16), 4000, 800);
+        $withoutClamp = $this->factory()->build(new AspectRatio(9, 16), 4000);
+        self::assertNotSame(
+            array_map(static fn (Rung $r) => $r->width, $withClamp),
+            array_map(static fn (Rung $r) => $r->width, $withoutClamp),
+        );
+    }
 }
