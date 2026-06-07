@@ -48,6 +48,37 @@ echo "› finalising extensions and caches"
 # A fresh install can leave a stale empty page in the page cache; clear it directly.
 mysql -h db -u db -pdb db -e "TRUNCATE cache_pages;" 2>/dev/null || true
 
+echo "› indexing demo images in FAL (warm-up request)"
+curl -sk -o /dev/null "${BASE_URL}" || true
+
+echo "› creating cropped FileReference demo content elements"
+mysql -h db -u db -pdb db <<'SQL' || true
+SET @hero   = (SELECT uid FROM sys_file WHERE identifier = '/demo/hero.jpg'   LIMIT 1);
+SET @banner = (SELECT uid FROM sys_file WHERE identifier = '/demo/banner.jpg' LIMIT 1);
+SET @single = (SELECT uid FROM sys_file WHERE identifier = '/demo/single.jpg' LIMIT 1);
+
+INSERT INTO tt_content (pid, sorting, colPos, CType, header, assets)
+VALUES (1, 256, 0, 'textmedia', 'Crop: left 40% of hero.jpg', 1);
+INSERT INTO sys_file_reference (pid, uid_local, uid_foreign, tablenames, fieldname, sorting_foreign, crop)
+VALUES (1, @hero, LAST_INSERT_ID(), 'tt_content', 'assets', 1,
+  '{"default":{"cropArea":{"x":0,"y":0,"width":0.4,"height":1},"selectedRatio":"NaN","focusArea":{"x":0,"y":0,"width":0,"height":0}}}');
+
+INSERT INTO tt_content (pid, sorting, colPos, CType, header, assets)
+VALUES (1, 512, 0, 'textmedia', 'Crop: center band of banner.jpg', 1);
+INSERT INTO sys_file_reference (pid, uid_local, uid_foreign, tablenames, fieldname, sorting_foreign, crop)
+VALUES (1, @banner, LAST_INSERT_ID(), 'tt_content', 'assets', 1,
+  '{"default":{"cropArea":{"x":0.05,"y":0.35,"width":0.9,"height":0.3},"selectedRatio":"NaN","focusArea":{"x":0,"y":0,"width":0,"height":0}}}');
+
+INSERT INTO tt_content (pid, sorting, colPos, CType, header, assets)
+VALUES (1, 768, 0, 'textmedia', 'Crop: lower-right of single.jpg', 1);
+INSERT INTO sys_file_reference (pid, uid_local, uid_foreign, tablenames, fieldname, sorting_foreign, crop)
+VALUES (1, @single, LAST_INSERT_ID(), 'tt_content', 'assets', 1,
+  '{"default":{"cropArea":{"x":0.45,"y":0.3,"width":0.55,"height":0.7},"selectedRatio":"NaN","focusArea":{"x":0,"y":0,"width":0,"height":0}}}');
+SQL
+
+.Build/bin/typo3 cache:flush
+mysql -h db -u db -pdb db -e "TRUNCATE cache_pages;" 2>/dev/null || true
+
 cat <<EOF
 
 Done.

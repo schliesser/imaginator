@@ -6,4 +6,24 @@ page.10 = FLUIDTEMPLATE
 page.10 {
     templateName = Home
     templateRootPaths.0 = EXT:imaginator/Resources/Private/Demo/Templates/
+
+    # Load this page's content elements + their FAL image references (with editor crop) so the
+    # template can render them through <i:image image="{ref}"> (the r{referenceUid} path).
+    dataProcessing {
+        10 = TYPO3\CMS\Frontend\DataProcessing\DatabaseQueryProcessor
+        10 {
+            table = tt_content
+            pidInList.field = uid
+            where = colPos = 0 AND CType = 'textmedia'
+            orderBy = sorting
+            as = contentElements
+            dataProcessing {
+                10 = TYPO3\CMS\Frontend\DataProcessing\FilesProcessor
+                10 {
+                    references.fieldName = assets
+                    as = media
+                }
+            }
+        }
+    }
 }

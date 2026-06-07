@@ -32,6 +32,19 @@
        pick a different rung (one request per image, no JS).</p>
 
     <section>
+        <h2>File references &mdash; editor crop applied (<code>r{referenceUid}</code>)</h2>
+        <p>Real content elements with FAL image references that carry an editor crop. No
+           <code>aspectRatio</code> is passed, so each renders its crop area's own ratio &mdash;
+           inspect the URLs: <code>/_imaginator/&hellip;/r{uid}/&hellip;</code>.</p>
+        <f:for each="{contentElements}" as="ce">
+            <h3>{ce.data.header}</h3>
+            <f:for each="{ce.media}" as="ref">
+                <i:image image="{ref}" alt="{ce.data.header}"/>
+            </f:for>
+        </f:for>
+    </section>
+
+    <section>
         <h2>Priority / LCP &mdash; above the fold, eager + fetchpriority=high + head preload</h2>
         <i:image src="fileadmin/demo/hero.jpg" aspectRatio="16:9" alt="LCP hero" priority="1"/>
     </section>
