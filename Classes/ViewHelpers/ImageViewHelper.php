@@ -43,6 +43,7 @@ final class ImageViewHelper extends AbstractViewHelper
         $this->registerArgument('image', 'object', 'A FAL File or FileReference object', false, null);
         $this->registerArgument('treatIdAsReference', 'bool', 'Treat src as sys_file_reference uid', false, false);
         $this->registerArgument('aspectRatio', 'mixed', 'Ratio "16:9" or a {media: ratio} map; omit to use the crop variant ratio (reference) or the original image ratio', false, null);
+        $this->registerArgument('breakpoints', 'array', 'Pre-resolved BreakpointRatio[] (e.g. from the content-element AspectRatioProcessor); used when no explicit aspectRatio is given', false, null);
         $this->registerArgument('cropVariant', 'string', 'FAL crop variant', false, 'default');
         $this->registerArgument('alt', 'string', 'Alternative text', false, '');
         $this->registerArgument('title', 'string', 'Title attribute', false, null);
@@ -76,7 +77,7 @@ final class ImageViewHelper extends AbstractViewHelper
             sourceWidth: $sourceWidth,
             sourceHeight: $sourceHeight,
             cropVariant: $cropVariant,
-            breakpoints: $this->breakpoints($this->arguments['aspectRatio'], $sourceWidth, $sourceHeight),
+            breakpoints: $this->breakpoints($this->arguments['aspectRatio'], $this->arguments['breakpoints'] ?? null, $sourceWidth, $sourceHeight),
             format: $fallbackFormat,
             quality: $settings->qualities[$fallbackFormat] ?? 80,
             alt: (string)$this->arguments['alt'],
@@ -126,13 +127,22 @@ final class ImageViewHelper extends AbstractViewHelper
     }
 
     /**
+     * Precedence: an explicit `aspectRatio` on the tag wins; otherwise pre-resolved content-element
+     * `breakpoints` (BreakpointRatio[]); otherwise the croppable region's native ratio.
+     *
+     * @param BreakpointRatio[]|null $ceBreakpoints
      * @return BreakpointRatio[]
      */
-    private function breakpoints(mixed $aspectRatio, int $sourceWidth, int $sourceHeight): array
+    private function breakpoints(mixed $aspectRatio, ?array $ceBreakpoints, int $sourceWidth, int $sourceHeight): array
     {
-        // No ratio given: use the croppable region's own ratio (crop area for a reference, else
-        // the original image), so nothing is cropped beyond what the editor already chose.
         if ($aspectRatio === null || $aspectRatio === '') {
+            // Content-element ratios drive all media when the tag itself sets no ratio.
+            if (is_array($ceBreakpoints) && $ceBreakpoints !== []) {
+                return array_values($ceBreakpoints);
+            }
+
+            // No ratio at all: use the croppable region's own ratio (crop area for a reference, else
+            // the original image), so nothing is cropped beyond what the editor already chose.
             return [new BreakpointRatio(new AspectRatio(max(1, $sourceWidth), max(1, $sourceHeight)))];
         }
 
