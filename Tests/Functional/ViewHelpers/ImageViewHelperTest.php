@@ -67,6 +67,19 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringContainsString('alt="A hero"', $output);
     }
 
+    public function testWithoutAspectRatioUsesTheOriginalImageRatio(): void
+    {
+        // Fixture is 4000x3000 (4:3); largest rung = 2000 wide -> 1500 tall.
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '" alt="Native"/></html>'
+        );
+
+        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1500"/', $output);
+    }
+
     public function testEmitsFormatTiersAndCspFriendlyLqip(): void
     {
         $fileUid = $this->importFixture();
