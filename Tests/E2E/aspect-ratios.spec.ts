@@ -1,7 +1,7 @@
 import { expect, FrameLocator, Page, test } from '@playwright/test';
 
 const BE_USER = process.env.IMAGINATOR_BE_USER ?? 'admin';
-const BE_PASS = process.env.IMAGINATOR_BE_PASS ?? 'Imaginator.2026!';
+const BE_PASS = process.env.IMAGINATOR_BE_PASS ?? 'Password.1';
 
 /** The hero demo content element seeded with xs 1:1 -> md 4:3 -> lg 16:9. */
 const CE_LABEL = /id=2 - Per-breakpoint: xs 1:1/;

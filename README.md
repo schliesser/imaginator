@@ -171,7 +171,7 @@ ddev exec bash Build/Scripts/setup-demo-instance.sh
 ```
 
 - Frontend (demo page): `https://imaginator.ddev.site/`
-- Backend: `https://imaginator.ddev.site/typo3/` — `admin` / `Imaginator.2026!`
+- Backend: `https://imaginator.ddev.site/typo3/` — `admin` / `Password.1`
 
 ### Tests
 
