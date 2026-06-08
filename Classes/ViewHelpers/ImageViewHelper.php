@@ -12,6 +12,7 @@ use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Lqip\LqipGeneratorFactory;
 use Schliesser\Imaginator\Rendering\PictureRenderer;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Page\AssetCollector;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Resource\FileReference;
@@ -24,6 +25,9 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
  */
 final class ImageViewHelper extends AbstractViewHelper
 {
+    /** Shared identifier so every LQIP rule lands in one merged `<style>`. */
+    private const LQIP_STYLE_IDENTIFIER = 'imaginator-lqip';
+
     protected $escapeOutput = false;
 
     public function __construct(
@@ -96,8 +100,8 @@ final class ImageViewHelper extends AbstractViewHelper
     }
 
     /**
-     * Register the LQIP rule as a deduplicated, nonce-able inline stylesheet (rendered in a
-     * `<style>` by the PageRenderer/AssetRenderer) and return the class that selects it.
+     * Register the LQIP rule in a single, deduplicated, nonce-able inline stylesheet (rendered in
+     * one `<style>` by the PageRenderer/AssetRenderer) and return the class that selects it.
      * Returns null when there is no placeholder.
      */
     private function registerLqip(?string $lqip): ?string
@@ -109,9 +113,23 @@ final class ImageViewHelper extends AbstractViewHelper
         $declaration = str_starts_with($lqip, 'data:')
             ? 'background-image:url(' . $lqip . ');background-size:cover'
             : 'background:' . $lqip;
+        $rule = '.' . $class . '{' . $declaration . '}';
 
-        // Identifier == class, so identical placeholders are emitted only once.
-        $this->assetCollector->addInlineStyleSheet($class, '.' . $class . '{' . $declaration . '}');
+        // All placeholders accumulate under ONE identifier, so the AssetRenderer emits a single
+        // `<style>` for the whole page instead of one per image. The class is a content hash, so
+        // checking for its selector dedups identical placeholders shared across images.
+        $existing = $this->assetCollector->getInlineStyleSheets()[self::LQIP_STYLE_IDENTIFIER]['source'] ?? '';
+        if (!str_contains($existing, '.' . $class . '{')) {
+            $options = (new Typo3Version())->getMajorVersion() >= 14
+                ? ['csp' => true]
+                : ['useNonce' => true];
+            $this->assetCollector->addInlineStyleSheet(
+                self::LQIP_STYLE_IDENTIFIER,
+                $existing . $rule,
+                [],
+                $options,
+            );
+        }
 
         return $class;
     }
