@@ -304,14 +304,12 @@ v1 reuses native FAL crop variants).
 6. **CKEditor/RTE inline images:** make bodytext images go through the ladder too (a common gap).
 7. **Telemetry (opt-in):** log which ladder rungs are actually selected to auto-tune the ladder per
    site. Carry over the old `MetricsUtility` idea but make it optional + privacy-safe.
-8. **Defense in depth:** keep a rate limiter on the local endpoint (old ext had one) on top of HMAC
-   signing — signing stops arbitrary sizes, rate limiting stops flooding signed-but-expensive ones.
-9. **Immutable, content-addressed cache headers** (`Cache-Control: public, max-age=31536000, immutable`)
+8. **Immutable, content-addressed cache headers** (`Cache-Control: public, max-age=31536000, immutable`)
    since the signature changes when inputs change.
-10. **`decoding="async"`** everywhere; never block the main thread on decode.
-11. **Graceful no-JS / no-processor degradation:** if processing fails, fall back to the original FAL
+9. **`decoding="async"`** everywhere; never block the main thread on decode.
+10. **Graceful no-JS / no-processor degradation:** if processing fails, fall back to the original FAL
     public URL rather than a broken image.
-12. **Test matrix:** functional tests for signature verify + each `UrlBuilder` grammar; the element via
+11. **Test matrix:** functional tests for signature verify + each `UrlBuilder` grammar; the element via
     acceptance tests; golden-file tests for ladder/`<picture>` output.
 
 ---
@@ -363,7 +361,7 @@ Once the **[DECIDE]** items are settled, each phase becomes a bite-sized TDD tas
 5. **JS enhancement:** Safari `sizes` fallback; `priority`/preload path; optional refine.
 6. **External processors:** `UrlBuilderInterface` + first provider(s) from §4 decision.
 7. **Aspect-ratio element:** web component, per-breakpoint ratios, live preview, v13/v14 adapter.
-8. **Polish (v1):** warmup/telemetry **seams** (no-op interfaces + events), optional rate limiting, docs.
+8. **Polish (v1):** warmup/telemetry **seams** (no-op interfaces + events), docs.
 9. **v2 (separate plan):** Messenger/Scheduler warmup worker, libvips backend, per-breakpoint crop in
    the element, private-image URL mode, telemetry collection.
 
@@ -402,5 +400,4 @@ Once the **[DECIDE]** items are settled, each phase becomes a bite-sized TDD tas
   "typo3/cms-fluid": "^13.4 || ^14.0"
 }
 ```
-No `symfony/rate-limiter` hard dep unless §9.8 rate limiting ships in v1 (then `^7.0`).
 ```
