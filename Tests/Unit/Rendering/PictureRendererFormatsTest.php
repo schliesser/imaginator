@@ -74,6 +74,33 @@ final class PictureRendererFormatsTest extends TestCase
         self::assertLessThan((int)strpos($html, 'image/webp'), (int)strpos($html, 'image/avif'));
     }
 
+    public function testSkipsSourceTierMatchingTheDefaultImgFormat(): void
+    {
+        // webp is both a negotiated format AND the <img> default -> the webp <source> is redundant
+        // (any client skipping <source avif> lands on the webp <img> anyway). It must not be emitted.
+        $request = new ImageRenderRequest(
+            isReference: false,
+            uid: 9,
+            sourceWidth: 4000,
+            sourceHeight: 4000,
+            cropVariant: 'default',
+            breakpoints: [new BreakpointRatio(new AspectRatio(16, 9))],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+            formats: ['avif', 'webp'],
+        );
+
+        $html = $this->renderer()->render($request, $this->fakeProcessor());
+
+        self::assertStringContainsString('<source type="image/avif"', $html);
+        self::assertStringNotContainsString('<source type="image/webp"', $html);
+        self::assertMatchesRegularExpression(
+            '#<img [^>]*srcset="/url/webp/320x180 320w, /url/webp/640x360 640w"#',
+            $html
+        );
+    }
+
     public function testArtDirectionRepeatsEachBreakpointPerFormat(): void
     {
         $request = new ImageRenderRequest(
