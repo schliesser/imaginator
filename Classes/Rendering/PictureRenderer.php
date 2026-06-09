@@ -74,6 +74,7 @@ final readonly class PictureRenderer
         }
         if ($priority) {
             $attrs['fetchpriority'] = 'high';
+            $attrs['loading'] = 'eager';
         } else {
             $attrs['loading'] = 'lazy';
         }
@@ -189,6 +190,7 @@ final readonly class PictureRenderer
         }
         if ($request->priority) {
             $attrs['fetchpriority'] = 'high';
+            $attrs['loading'] = 'eager';
         } else {
             $attrs['loading'] = 'lazy';
         }

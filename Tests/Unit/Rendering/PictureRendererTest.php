@@ -109,7 +109,7 @@ final class PictureRendererTest extends TestCase
         $expected = '<img src="/img/9/640x360.webp"'
             . ' srcset="/img/9/320x180.webp 320w, /img/9/640x360.webp 640w"'
             . ' sizes="100vw" width="640" height="360" alt="A hero" class="lead"'
-            . ' fetchpriority="high" decoding="async">';
+            . ' fetchpriority="high" loading="eager" decoding="async">';
 
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
