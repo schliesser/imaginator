@@ -20,6 +20,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 final class AspectRatiosElement extends AbstractFormElement
 {
+    public const NODE_NAME = 'imaginatorAspectRatios';
     private const MODULE = '@schliesser/imaginator/backend/aspect-ratios.js';
 
     public function render(): array

@@ -50,7 +50,7 @@ final class AspectRatiosFieldType extends AbstractFieldType
         // `renderType:` in the block YAML cannot detach the field from its editor.
         $config = [
             'type' => $this->getTcaType(),
-            'renderType' => AspectRatiosElementRegistration::NODE_NAME,
+            'renderType' => AspectRatiosElement::NODE_NAME,
             'allowedRatios' => $this->allowedRatios,
         ];
         $tca['config'] = array_replace($tca['config'] ?? [], $config);
