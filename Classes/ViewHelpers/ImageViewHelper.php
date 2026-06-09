@@ -28,6 +28,9 @@ final class ImageViewHelper extends AbstractViewHelper
     /** Shared identifier so every LQIP rule lands in one merged `<style>`. */
     private const LQIP_STYLE_IDENTIFIER = 'imaginator-lqip';
 
+    /** Universal `<img>` default format. WebP carries alpha + animation and decodes everywhere modern. */
+    private const DEFAULT_FORMAT = 'webp';
+
     protected $escapeOutput = false;
 
     public function __construct(
@@ -66,8 +69,17 @@ final class ImageViewHelper extends AbstractViewHelper
         $original = $isReference ? $file->getOriginalFile() : $file;
         $cropVariant = (string)$this->arguments['cropVariant'];
         $settings = $this->settingsFactory->create();
-        // Stacked AVIF/WebP <source> tiers from settings; the <img> falls back to the original format.
-        $fallbackFormat = $this->fallbackFormat($original->getExtension());
+
+        // Vector/animated formats (svg, ai, eps, gif by default) carry no meaningful width ladder and must
+        // not be transcoded: serve the original file verbatim as a plain <img>.
+        if (in_array(strtolower($original->getExtension()), $settings->excludeExtensions, true)) {
+            return $this->renderer->renderPassthrough(
+                (string)$original->getPublicUrl(),
+                (string)$this->arguments['alt'],
+                $this->arguments['class'] !== null ? (string)$this->arguments['class'] : null,
+                (bool)$this->arguments['priority'],
+            );
+        }
 
         // Bound the ladder by the croppable region (the crop area for references), so the
         // LadderFactory width+height clamp yields the fitted-rect width per breakpoint ratio.
@@ -82,8 +94,8 @@ final class ImageViewHelper extends AbstractViewHelper
             sourceHeight: $sourceHeight,
             cropVariant: $cropVariant,
             breakpoints: $this->breakpoints($this->arguments['aspectRatio'], $this->arguments['breakpoints'] ?? null, $sourceWidth, $sourceHeight),
-            format: $fallbackFormat,
-            quality: $settings->qualities[$fallbackFormat] ?? 80,
+            format: self::DEFAULT_FORMAT,
+            quality: $settings->qualities[self::DEFAULT_FORMAT] ?? 80,
             alt: (string)$this->arguments['alt'],
             class: $this->arguments['class'] !== null ? (string)$this->arguments['class'] : null,
             priority: (bool)$this->arguments['priority'],
@@ -132,16 +144,6 @@ final class ImageViewHelper extends AbstractViewHelper
         }
 
         return $class;
-    }
-
-    private function fallbackFormat(string $extension): string
-    {
-        $extension = strtolower($extension);
-
-        return match ($extension) {
-            '', 'jpg' => 'jpeg',
-            default => $extension,
-        };
     }
 
     /**

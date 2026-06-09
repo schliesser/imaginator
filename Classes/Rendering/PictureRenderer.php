@@ -57,6 +57,30 @@ final readonly class PictureRenderer
         return $links;
     }
 
+    /**
+     * Render an excluded file (vector/animated formats) as a plain `<img>` pointing straight at the
+     * original — no ladder, no srcset, no `<picture>`, no signed processing endpoint. Keeps the same
+     * priority semantics as the processed path (fetchpriority/high vs loading/lazy).
+     */
+    public function renderPassthrough(string $src, string $alt, ?string $class, bool $priority): string
+    {
+        $attrs = [
+            'src' => htmlspecialchars($src, ENT_QUOTES),
+            'alt' => htmlspecialchars($alt, ENT_QUOTES),
+        ];
+        if ($class !== null && $class !== '') {
+            $attrs['class'] = htmlspecialchars($class, ENT_QUOTES);
+        }
+        if ($priority) {
+            $attrs['fetchpriority'] = 'high';
+        } else {
+            $attrs['loading'] = 'lazy';
+        }
+        $attrs['decoding'] = 'async';
+
+        return '<img' . $this->attrs($attrs) . '>';
+    }
+
     public function render(ImageRenderRequest $request, ImageProcessorInterface $processor): string
     {
         if ($request->formats !== []) {
@@ -71,7 +95,7 @@ final readonly class PictureRenderer
 
     /**
      * Emit a `<picture>` with one `<source type="image/{format}">` per negotiated format (in order),
-     * ending with an `<img>` fallback in the original format. Browser picks the first it supports.
+     * ending with an `<img>` in the default format. Browser picks the first it supports.
      */
     private function renderPictureWithFormats(ImageRenderRequest $request, ImageProcessorInterface $processor): string
     {

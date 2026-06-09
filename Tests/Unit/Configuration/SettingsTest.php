@@ -81,4 +81,18 @@ final class SettingsTest extends TestCase
             array_map(static fn (Breakpoint $b): array => [$b->key, $b->minWidth], $settings->breakpoints),
         );
     }
+
+    public function testExcludeExtensionsFallBackToDefault(): void
+    {
+        $settings = Settings::fromArray([], 'key');
+
+        self::assertSame(['svg', 'ai', 'eps', 'gif'], $settings->excludeExtensions);
+    }
+
+    public function testExcludeExtensionsAreParsedTrimmedAndLowercased(): void
+    {
+        $settings = Settings::fromArray(['excludeExtensions' => 'SVG, eps , Ai'], 'key');
+
+        self::assertSame(['svg', 'eps', 'ai'], $settings->excludeExtensions);
+    }
 }

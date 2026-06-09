@@ -38,6 +38,22 @@ final class ImageViewHelperTest extends FunctionalTestCase
         return $storage->getFile('source-4000.jpg')->getUid();
     }
 
+    private function importSvgFixture(): int
+    {
+        $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
+        $storageUid = $storageRepository->createLocalStorage('Fixtures', 'fileadmin/', 'relative', '', true);
+        $storage = $storageRepository->findByUid($storageUid);
+
+        $targetDir = $this->instancePath . '/fileadmin/';
+        GeneralUtility::mkdir_deep($targetDir);
+        file_put_contents(
+            $targetDir . 'logo.svg',
+            '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="50"></svg>',
+        );
+
+        return $storage->getFile('logo.svg')->getUid();
+    }
+
     private function render(string $template): string
     {
         $templateFile = $this->instancePath . '/imaginator-test-' . md5($template) . '.html';
@@ -65,6 +81,42 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringContainsString('/_imaginator/', $output);
         self::assertStringContainsString('.webp', $output);
         self::assertStringContainsString('alt="A hero"', $output);
+    }
+
+    public function testImgFallbackIsWebpRegardlessOfSourceFormat(): void
+    {
+        // Source is a JPEG, yet the <img> fallback must be a universal webp, not the source format.
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="16:9" alt="A hero"/></html>'
+        );
+
+        self::assertMatchesRegularExpression('/<img [^>]*src="[^"]*\.webp"/', $output);
+        self::assertDoesNotMatchRegularExpression('/<img [^>]*src="[^"]*\.(jpe?g)"/', $output);
+    }
+
+    public function testExcludedExtensionIsRenderedAsPassthroughImg(): void
+    {
+        // SVG is in the default excludeExtensions: served as-is, never run through the ladder.
+        $fileUid = $this->importSvgFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' alt="Vector" class="logo" priority="1"/></html>'
+        );
+
+        self::assertMatchesRegularExpression('/<img [^>]*src="[^"]*logo\.svg"/', $output);
+        self::assertStringContainsString('alt="Vector"', $output);
+        self::assertStringContainsString('class="logo"', $output);
+        self::assertStringContainsString('fetchpriority="high"', $output);
+        // No processing machinery: no picture, no srcset, no signed endpoint, no width/height clamp.
+        self::assertStringNotContainsString('<picture>', $output);
+        self::assertStringNotContainsString('srcset', $output);
+        self::assertStringNotContainsString('/_imaginator/', $output);
     }
 
     public function testWithoutAspectRatioUsesTheOriginalImageRatio(): void

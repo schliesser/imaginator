@@ -13,6 +13,9 @@ breakpoints = xs:0,sm:576,md:768,lg:992,xl:1200
 # cat=Processing; type=string; label=Negotiated formats (comma-separated, most-preferred first)
 formats = avif,webp
 
+# cat=Processing; type=string; label=Excluded extensions (comma-separated): served verbatim as a plain <img>, never processed (vector/animated formats)
+excludeExtensions = svg,ai,eps,gif
+
 # cat=Quality; type=int+; label=AVIF quality (AVIF's scale sits lower than JPEG/WebP for the same perceived quality)
 quality.avif = 50
 

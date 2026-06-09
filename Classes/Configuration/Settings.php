@@ -19,6 +19,8 @@ final readonly class Settings
     public const DEFAULT_QUALITIES = ['avif' => 50, 'webp' => 72];
     public const DEFAULT_LQIP = 'thumbhash';
     public const DEFAULT_BREAKPOINTS = ['xs' => 0, 'sm' => 576, 'md' => 768, 'lg' => 992, 'xl' => 1200];
+    /** Non-raster vector formats + gif: served as-is, never run through the ladder/processor. */
+    public const DEFAULT_EXCLUDE_EXTENSIONS = ['svg', 'ai', 'eps', 'gif'];
 
     /**
      * @param int[]               $ladder
@@ -26,6 +28,7 @@ final readonly class Settings
      * @param string[]            $formats
      * @param array<string, int>  $qualities
      * @param Breakpoint[]        $breakpoints ordered by minWidth ascending; the min-0 entry is the base
+     * @param list<string>        $excludeExtensions lowercased file extensions served as-is (no processing)
      */
     public function __construct(
         public array $ladder,
@@ -36,6 +39,7 @@ final readonly class Settings
         public string $processor,
         public string $lqip,
         public array $breakpoints,
+        public array $excludeExtensions,
     ) {}
 
     /**
@@ -46,6 +50,10 @@ final readonly class Settings
         $ladder = self::intList($raw['ladder'] ?? null);
         $formats = self::stringList($raw['formats'] ?? null);
         $qualities = self::qualityMap($raw['qualities'] ?? null);
+        $excludeExtensions = array_values(array_map(
+            'strtolower',
+            self::stringList($raw['excludeExtensions'] ?? null),
+        ));
 
         return new self(
             $ladder !== [] ? $ladder : self::DEFAULT_LADDER,
@@ -56,6 +64,7 @@ final readonly class Settings
             (string)($raw['processor'] ?? 'local'),
             (string)($raw['lqip'] ?? self::DEFAULT_LQIP),
             self::breakpoints($raw['breakpoints'] ?? null),
+            $excludeExtensions !== [] ? $excludeExtensions : self::DEFAULT_EXCLUDE_EXTENSIONS,
         );
     }
 
