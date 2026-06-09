@@ -113,4 +113,29 @@ final class PictureRendererTest extends TestCase
 
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
+
+    public function testEmptyBreakpointsFallsBackToNativeSourceRatioWithoutWarning(): void
+    {
+        // Defensive: a caller must never hand the renderer an empty breakpoint set, but if it does
+        // (e.g. an aspectRatio map that resolved to nothing) we synthesise the native source ratio
+        // instead of indexing array_key_last([]) and emitting an "Undefined array key" warning.
+        $request = new ImageRenderRequest(
+            isReference: false,
+            uid: 9,
+            sourceWidth: 4000,
+            sourceHeight: 4000,
+            cropVariant: 'default',
+            breakpoints: [],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+            formats: ['webp'],
+        );
+
+        $expected = '<picture><img src="/img/9/640x640.webp"'
+            . ' srcset="/img/9/320x320.webp 320w, /img/9/640x640.webp 640w"'
+            . ' sizes="auto" width="640" height="640" alt="A hero" loading="lazy" decoding="async"></picture>';
+
+        self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
+    }
 }

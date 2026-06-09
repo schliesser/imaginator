@@ -132,6 +132,58 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1500"/', $output);
     }
 
+    public function testAspectRatioMapWithBreakpointAliasesEmitsMinWidthSources(): void
+    {
+        // pictureino-compat: {alias: ratio} keys resolve to the configured breakpoint min-widths,
+        // largest-first, with the min-0 (xs) tier as the base <img>.
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="{xs: \'1:1\', md: \'4:3\', lg: \'16:9\'}" alt="A hero"/></html>'
+        );
+
+        self::assertStringContainsString('<picture>', $output);
+        self::assertStringContainsString('media="(min-width:992px)"', $output);
+        self::assertStringContainsString('media="(min-width:768px)"', $output);
+        // The alias is never leaked verbatim as a media string.
+        self::assertStringNotContainsString('media="lg"', $output);
+        self::assertStringNotContainsString('media="md"', $output);
+    }
+
+    public function testAspectRatioMapWithIntegerKeysEmitsMinWidthSources(): void
+    {
+        // Integer keys are literal min-widths in px; key 0 is the base <img>.
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="{0: \'1:1\', 1400: \'21:9\'}" alt="A hero"/></html>'
+        );
+
+        self::assertStringContainsString('media="(min-width:1400px)"', $output);
+        self::assertStringNotContainsString('media="1400"', $output);
+    }
+
+    public function testAspectRatioMapResolvingToNothingFallsBackToNativeRatio(): void
+    {
+        // All keys unknown / ratios auto -> the map resolves to []. The image must still render at
+        // its native ratio rather than crash the renderer with an empty breakpoint set.
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="{xxl: \'16:9\', md: \'auto\'}" alt="A hero"/></html>'
+        );
+
+        // Fixture is 4000x3000 (4:3); native largest rung = 2000 wide -> 1500 tall.
+        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1500"/', $output);
+        self::assertStringNotContainsString('Oops', $output);
+    }
+
     public function testEmitsFormatTiersAndCspFriendlyLqip(): void
     {
         $fileUid = $this->importFixture();
@@ -142,10 +194,12 @@ final class ImageViewHelperTest extends FunctionalTestCase
             . ' aspectRatio="16:9" alt="A hero"/></html>'
         );
 
-        // Stacked AVIF + WebP <source> tiers from the default formats setting.
+        // AVIF <source> tier above the webp <img> default. webp is NOT repeated as a <source>:
+        // it is already the <img> fallback, so a webp <source> would be redundant.
         self::assertStringContainsString('<picture>', $output);
         self::assertStringContainsString('type="image/avif"', $output);
-        self::assertStringContainsString('type="image/webp"', $output);
+        self::assertStringNotContainsString('type="image/webp"', $output);
+        self::assertMatchesRegularExpression('/<img [^>]*src="[^"]*\.webp"/', $output);
 
         // The <img> carries an LQIP class, never an inline style attribute (CSP-friendly).
         self::assertMatchesRegularExpression('/<img [^>]*class="imaginator-lqip-[0-9a-f]{12}"/', $output);

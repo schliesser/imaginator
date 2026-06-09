@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\Rendering;
 
+use Schliesser\Imaginator\Dto\AspectRatio;
 use Schliesser\Imaginator\Dto\BreakpointRatio;
 use Schliesser\Imaginator\Dto\ImageRenderRequest;
 use Schliesser\Imaginator\Dto\ImageVariant;
@@ -106,6 +107,9 @@ final readonly class PictureRenderer
             }
             $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
             foreach ($request->formats as $format) {
+                if ($format === $request->format) {
+                    continue; // already the <img> default; a <source> for it would be redundant
+                }
                 $sources .= $this->formatSource($request, $rungs, $format, $breakpoint->media, $processor);
             }
         }
@@ -113,6 +117,9 @@ final readonly class PictureRenderer
             // Single ratio: one source per format, no media.
             $rungs = $this->ladderFactory->build($this->defaultBreakpoint($request)->ratio, $request->sourceWidth, $request->sourceHeight);
             foreach ($request->formats as $format) {
+                if ($format === $request->format) {
+                    continue; // already the <img> default; a <source> for it would be redundant
+                }
                 $sources .= $this->formatSource($request, $rungs, $format, null, $processor);
             }
         }
@@ -220,6 +227,13 @@ final readonly class PictureRenderer
             if ($breakpoint->media === null) {
                 return $breakpoint;
             }
+        }
+
+        // No base (media-null) tier. Normally the smallest media tier becomes the <img>; if the set
+        // is empty (a ratio map that resolved to nothing) synthesise the native source ratio so the
+        // image still renders instead of indexing array_key_last([]).
+        if ($request->breakpoints === []) {
+            return new BreakpointRatio(new AspectRatio(max(1, $request->sourceWidth), max(1, $request->sourceHeight)));
         }
 
         return $request->breakpoints[array_key_last($request->breakpoints)];

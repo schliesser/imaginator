@@ -1,6 +1,12 @@
 # Demo page rendering for manual testing of the <i:image> ViewHelper.
 # Active only on sites that opt into the "schliesser/imaginator-demo" set.
 
+# Demo only: let content-object exceptions bubble to the (debug) exception handler with a full
+# stack trace instead of swallowing them as the generic "Oops, an error occurred!" placeholder.
+# Pairs with SYS/displayErrors=1 + devIPmask=* in config/system/settings.php. Never ship this on
+# a production site — a thrown ViewHelper would then leak internals to visitors.
+config.contentObjectExceptionHandler = 0
+
 page = PAGE
 page.10 = FLUIDTEMPLATE
 page.10 {

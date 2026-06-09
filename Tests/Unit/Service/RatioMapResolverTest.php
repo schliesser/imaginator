@@ -65,4 +65,58 @@ final class RatioMapResolverTest extends TestCase
         self::assertSame([], $resolver->fromJson('[]', $this->breakpoints()));
         self::assertSame([], $resolver->fromJson('{}', $this->breakpoints()));
     }
+
+    public function testFromMapResolvesAliasKeysLargestFirstWithNullBase(): void
+    {
+        $result = (new RatioMapResolver())->fromMap(['xs' => '1:1', 'lg' => '16:9'], $this->breakpoints());
+
+        self::assertEquals(
+            [
+                new BreakpointRatio(new AspectRatio(16, 9), '(min-width:992px)'),
+                new BreakpointRatio(new AspectRatio(1, 1), null),
+            ],
+            $result,
+        );
+    }
+
+    public function testFromMapResolvesIntegerKeysAsMinWidth(): void
+    {
+        $result = (new RatioMapResolver())->fromMap([768 => '4:3', 1400 => '21:9'], $this->breakpoints());
+
+        self::assertEquals(
+            [
+                new BreakpointRatio(new AspectRatio(21, 9), '(min-width:1400px)'),
+                new BreakpointRatio(new AspectRatio(4, 3), '(min-width:768px)'),
+            ],
+            $result,
+        );
+    }
+
+    public function testFromMapZeroKeyIsBaseWithNullMedia(): void
+    {
+        $result = (new RatioMapResolver())->fromMap([0 => '1:1', 'md' => '4:3'], $this->breakpoints());
+
+        self::assertEquals(
+            [
+                new BreakpointRatio(new AspectRatio(4, 3), '(min-width:768px)'),
+                new BreakpointRatio(new AspectRatio(1, 1), null),
+            ],
+            $result,
+        );
+    }
+
+    public function testFromMapDropsUnknownAliasAndAutoRatio(): void
+    {
+        $result = (new RatioMapResolver())->fromMap(['xxl' => '16:9', 'md' => 'auto', 'lg' => '4:3'], $this->breakpoints());
+
+        self::assertEquals(
+            [new BreakpointRatio(new AspectRatio(4, 3), '(min-width:992px)')],
+            $result,
+        );
+    }
+
+    public function testFromMapEmptyReturnsEmpty(): void
+    {
+        self::assertSame([], (new RatioMapResolver())->fromMap([], $this->breakpoints()));
+    }
 }
