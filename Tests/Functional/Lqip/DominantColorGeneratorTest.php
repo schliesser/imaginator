@@ -48,4 +48,14 @@ final class DominantColorGeneratorTest extends FunctionalTestCase
         self::assertEqualsWithDelta(0x7f, $g, 24);
         self::assertEqualsWithDelta(0x6e, $b, 24);
     }
+
+    public function testReturnsNullForImageWithTransparency(): void
+    {
+        // A solid colour painted behind the sharp image would shine through the image's transparent
+        // pixels, so transparent sources must get no placeholder.
+        $hex = GeneralUtility::makeInstance(DominantColorGenerator::class)
+            ->generate($this->fixtureFile('transparent.png'));
+
+        self::assertNull($hex);
+    }
 }

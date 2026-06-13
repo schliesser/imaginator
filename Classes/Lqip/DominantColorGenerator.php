@@ -22,6 +22,10 @@ final class DominantColorGenerator implements LqipGeneratorInterface
         if ($image === false) {
             return null;
         }
+        // A solid colour behind a transparent image would shine through its transparent pixels.
+        if (ImageTransparency::isPresent($image)) {
+            return null;
+        }
 
         $pixel = imagescale($image, 1, 1, IMG_BILINEAR_FIXED);
         $rgb = imagecolorat($pixel ?: $image, 0, 0);

@@ -40,7 +40,7 @@ printf '# Page rendering is provided by the schliesser/imaginator-demo Site Set.
 
 echo "› placing the demo images into fileadmin"
 mkdir -p .Build/public/fileadmin/demo
-cp Build/demo/*.jpg .Build/public/fileadmin/demo/
+cp Build/demo/*.jpg Build/demo/*.png .Build/public/fileadmin/demo/
 
 echo "› finalising extensions and caches"
 .Build/bin/typo3 extension:setup

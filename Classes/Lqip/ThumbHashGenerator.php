@@ -26,6 +26,10 @@ final class ThumbHashGenerator implements LqipGeneratorInterface
             return null;
         }
         $image = $this->downscale($image);
+        // A blurred preview behind a transparent image would shine through its transparent pixels.
+        if (ImageTransparency::isPresent($image)) {
+            return null;
+        }
 
         $width = imagesx($image);
         $height = imagesy($image);

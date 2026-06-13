@@ -47,4 +47,14 @@ final class ThumbHashGeneratorTest extends FunctionalTestCase
         self::assertNotFalse($binary);
         self::assertGreaterThan(64, strlen($binary));
     }
+
+    public function testReturnsNullForImageWithTransparency(): void
+    {
+        // A placeholder painted behind the sharp image would shine through the image's transparent
+        // pixels, so transparent sources must get no placeholder.
+        $uri = GeneralUtility::makeInstance(ThumbHashGenerator::class)
+            ->generate($this->fixtureFile('transparent.png'));
+
+        self::assertNull($uri);
+    }
 }
