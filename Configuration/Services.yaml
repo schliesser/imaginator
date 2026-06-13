@@ -27,7 +27,3 @@ services:
 
   Schliesser\Imaginator\Middleware\ProcessImageRequest:
     public: true
-
-  # DataProcessor resolved by class name from the content-element TypoScript.
-  Schliesser\Imaginator\DataProcessing\AspectRatioProcessor:
-    public: true

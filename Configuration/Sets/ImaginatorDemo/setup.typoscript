@@ -29,12 +29,6 @@ page.10 {
                     references.fieldName = assets
                     as = media
                 }
-                # Resolve the per-CE per-breakpoint aspect ratios (aspect_ratio JSON)
-                # into a BreakpointRatio[] the template feeds to every <i:image breakpoints="...">.
-                20 = Schliesser\Imaginator\DataProcessing\AspectRatioProcessor
-                20 {
-                    as = imaginatorAspectRatios
-                }
             }
         }
     }

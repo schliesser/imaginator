@@ -54,13 +54,14 @@ final class ImageViewHelperTest extends FunctionalTestCase
         return $storage->getFile('logo.svg')->getUid();
     }
 
-    private function render(string $template): string
+    private function render(string $template, array $variables = []): string
     {
         $templateFile = $this->instancePath . '/imaginator-test-' . md5($template) . '.html';
         file_put_contents($templateFile, $template);
 
         $view = $this->get(ViewFactoryInterface::class)
             ->create(new ViewFactoryData(templatePathAndFilename: $templateFile));
+        $view->assignMultiple($variables);
 
         return $view->render();
     }
@@ -150,6 +151,28 @@ final class ImageViewHelperTest extends FunctionalTestCase
         // The alias is never leaked verbatim as a media string.
         self::assertStringNotContainsString('media="lg"', $output);
         self::assertStringNotContainsString('media="md"', $output);
+    }
+
+    public function testAspectRatioAcceptsRawJsonMapFromDatabase(): void
+    {
+        // The `aspect_ratio` column stores the breakpoint map as a JSON string. Templates that bind
+        // it directly (no AspectRatioProcessor step) pass that raw JSON; the ViewHelper must decode
+        // it like a map instead of choking on it as a single ratio.
+        $fileUid = $this->importFixture();
+
+        // Bound from a variable so Fluid passes the raw JSON STRING (binding the `{...}` inline would
+        // make Fluid build an array instead, which is the already-covered map case).
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="{ratio}" alt="A hero"/></html>',
+            ['ratio' => '{"xs":"1:1","md":"4:3","lg":"16:9"}'],
+        );
+
+        self::assertStringContainsString('<picture>', $output);
+        self::assertStringContainsString('media="(min-width:992px)"', $output);
+        self::assertStringContainsString('media="(min-width:768px)"', $output);
+        self::assertStringNotContainsString('Invalid ratio', $output);
     }
 
     public function testAspectRatioMapWithIntegerKeysEmitsMinWidthSources(): void

@@ -85,9 +85,9 @@
     <hr>
     <h2>Content elements &mdash; per-breakpoint CE ratios drive every image (<code>r{referenceUid}</code>)</h2>
     <p>Real <code>tt_content</code> records whose FAL image references carry an editor crop. The
-       content element sets <em>one</em> per-breakpoint ratio map
-       (<code>aspect_ratio</code>), resolved by the <code>AspectRatioProcessor</code>
-       and applied to <em>every</em> media reference via <code>&lt;i:image breakpoints="&hellip;"&gt;</code>.
+       content element stores <em>one</em> per-breakpoint ratio map in the
+       <code>aspect_ratio</code> column, bound straight into <code>&lt;i:image aspectRatio="&hellip;"&gt;</code>
+       and applied to <em>every</em> media reference.
        Resize the window: the <code>&lt;picture&gt;</code> switches ratio per breakpoint. Inspect the
        URLs: <code>/_imaginator/&hellip;/r{uid}/&hellip;</code>.</p>
     <f:for each="{contentElements}" as="ce">
@@ -95,7 +95,7 @@
             <h3>{ce.data.header}</h3>
             <f:format.html>{ce.data.bodytext}</f:format.html>
             <f:for each="{ce.media}" as="ref">
-                <i:image image="{ref}" breakpoints="{ce.imaginatorAspectRatios}" alt="{ce.data.header}"/>
+                <i:image image="{ref}" aspectRatio="{ce.data.aspect_ratio}" alt="{ce.data.header}"/>
             </f:for>
         </section>
     </f:for>
