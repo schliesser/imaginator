@@ -16,6 +16,7 @@ use Schliesser\Imaginator\Service\RatioMapResolver;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Page\AssetCollector;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Extbase\Service\ImageService;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
@@ -66,6 +67,12 @@ final class ImageViewHelper extends AbstractViewHelper
             $this->arguments['image'] ?? null,
             (bool) ($this->arguments['treatIdAsReference'] ?? false),
         );
+        // getImage() is typed as the bare FileInterface, which declares neither getUid() nor
+        // getOriginalFile(); in practice it returns a File or FileReference. Narrow so those calls
+        // are type-safe (and fail loudly on the impossible case).
+        if (!$file instanceof File && !$file instanceof FileReference) {
+            throw new \RuntimeException('imaginator: unsupported image resource ' . $file::class, 1718000001);
+        }
         $isReference = $file instanceof FileReference;
         $original = $isReference ? $file->getOriginalFile() : $file;
         $cropVariant = (string) $this->arguments['cropVariant'];

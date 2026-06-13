@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Schliesser\Imaginator\Tests\Functional\Lqip;
 
 use Schliesser\Imaginator\Lqip\ThumbHashGenerator;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileInterface;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
@@ -19,12 +21,16 @@ final class ThumbHashGeneratorTest extends FunctionalTestCase
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
         $storageUid = $storageRepository->createLocalStorage('Fixtures', 'fileadmin/', 'relative', '', true);
         $storage = $storageRepository->findByUid($storageUid);
+        self::assertInstanceOf(ResourceStorage::class, $storage);
 
         $targetDir = $this->instancePath . '/fileadmin/';
         GeneralUtility::mkdir_deep($targetDir);
         copy(__DIR__ . '/../Fixtures/Images/' . $name, $targetDir . $name);
 
-        return $storage->getFile($name);
+        $file = $storage->getFile($name);
+        self::assertInstanceOf(File::class, $file);
+
+        return $file;
     }
 
     public function testReturnsBase64DataUri(): void

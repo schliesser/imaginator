@@ -22,6 +22,9 @@ final class AspectRatiosElementTest extends FunctionalTestCase
         $GLOBALS['BE_USER'] = $beUser;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function renderResult(): array
     {
         $element = GeneralUtility::makeInstance(AspectRatiosElement::class);

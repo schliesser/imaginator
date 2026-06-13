@@ -11,7 +11,9 @@ use Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Service\ImageService;
@@ -47,11 +49,13 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
         $storageUid = $storageRepository->createLocalStorage('Fixtures', 'fileadmin/', 'relative', '', true);
         $storage = $storageRepository->findByUid($storageUid);
+        self::assertInstanceOf(ResourceStorage::class, $storage);
 
         $targetDir = $this->instancePath . '/fileadmin/';
         GeneralUtility::mkdir_deep($targetDir);
         copy(__DIR__ . '/../Fixtures/Images/source-4000.jpg', $targetDir . 'source-4000.jpg');
         $file = $storage->getFile('source-4000.jpg');
+        self::assertInstanceOf(File::class, $file);
 
         return new ImageVariant(false, $file->getUid(), 'default', 1280, 720, 'webp', 72);
     }
@@ -94,10 +98,12 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
         $storageUid = $storageRepository->createLocalStorage('Fixtures', 'fileadmin/', 'relative', '', true);
         $storage = $storageRepository->findByUid($storageUid);
+        self::assertInstanceOf(ResourceStorage::class, $storage);
         $targetDir = $this->instancePath . '/fileadmin/';
         GeneralUtility::mkdir_deep($targetDir);
         copy(__DIR__ . '/../Fixtures/Images/source-4000.jpg', $targetDir . 'source-4000.jpg');
         $file = $storage->getFile('source-4000.jpg'); // 4000x3000
+        self::assertInstanceOf(File::class, $file);
 
         // Editor crop variant: the top-left 2000x1500 quadrant, no focus.
         $crop = json_encode([

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Schliesser\Imaginator\Tests\Functional\Imaging;
 
 use Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend;
+use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Service\ImageService;
@@ -29,12 +31,14 @@ final class GraphicsMagickBackendTest extends FunctionalTestCase
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
         $storageUid = $storageRepository->createLocalStorage('Fixtures', 'fileadmin/', 'relative', '', true);
         $storage = $storageRepository->findByUid($storageUid);
+        self::assertInstanceOf(ResourceStorage::class, $storage);
 
         $targetDir = $this->instancePath . '/fileadmin/';
         GeneralUtility::mkdir_deep($targetDir);
         copy(__DIR__ . '/../Fixtures/Images/source-4000.jpg', $targetDir . 'source-4000.jpg');
 
         $file = $storage->getFile('source-4000.jpg');
+        self::assertInstanceOf(File::class, $file);
 
         $backend = new GraphicsMagickBackend(GeneralUtility::makeInstance(ImageService::class));
         $processed = $backend->process($file, [

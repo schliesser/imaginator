@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Schliesser\Imaginator\Tests\Functional\ViewHelpers;
 
 use TYPO3\CMS\Core\Page\AssetCollector;
+use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\View\ViewFactoryData;
@@ -30,12 +32,16 @@ final class ImageViewHelperTest extends FunctionalTestCase
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
         $storageUid = $storageRepository->createLocalStorage('Fixtures', 'fileadmin/', 'relative', '', true);
         $storage = $storageRepository->findByUid($storageUid);
+        self::assertInstanceOf(ResourceStorage::class, $storage);
 
         $targetDir = $this->instancePath . '/fileadmin/';
         GeneralUtility::mkdir_deep($targetDir);
         copy(__DIR__ . '/../Fixtures/Images/source-4000.jpg', $targetDir . 'source-4000.jpg');
 
-        return $storage->getFile('source-4000.jpg')->getUid();
+        $file = $storage->getFile('source-4000.jpg');
+        self::assertInstanceOf(File::class, $file);
+
+        return $file->getUid();
     }
 
     private function importSvgFixture(): int
@@ -43,6 +49,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
         $storageUid = $storageRepository->createLocalStorage('Fixtures', 'fileadmin/', 'relative', '', true);
         $storage = $storageRepository->findByUid($storageUid);
+        self::assertInstanceOf(ResourceStorage::class, $storage);
 
         $targetDir = $this->instancePath . '/fileadmin/';
         GeneralUtility::mkdir_deep($targetDir);
@@ -51,9 +58,15 @@ final class ImageViewHelperTest extends FunctionalTestCase
             '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="50"></svg>',
         );
 
-        return $storage->getFile('logo.svg')->getUid();
+        $file = $storage->getFile('logo.svg');
+        self::assertInstanceOf(File::class, $file);
+
+        return $file->getUid();
     }
 
+    /**
+     * @param array<string, mixed> $variables
+     */
     private function render(string $template, array $variables = []): string
     {
         $templateFile = $this->instancePath . '/imaginator-test-' . md5($template) . '.html';

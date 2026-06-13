@@ -18,7 +18,9 @@ use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\ResponseFactory;
 use TYPO3\CMS\Core\Http\ServerRequest;
+use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Service\ImageService;
@@ -81,11 +83,13 @@ final class ProcessImageRequestTest extends FunctionalTestCase
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
         $storageUid = $storageRepository->createLocalStorage('Fixtures', 'fileadmin/', 'relative', '', true);
         $storage = $storageRepository->findByUid($storageUid);
+        self::assertInstanceOf(ResourceStorage::class, $storage);
 
         $targetDir = $this->instancePath . '/fileadmin/';
         GeneralUtility::mkdir_deep($targetDir);
         copy(__DIR__ . '/../Fixtures/Images/source-4000.jpg', $targetDir . 'source-4000.jpg');
         $file = $storage->getFile('source-4000.jpg');
+        self::assertInstanceOf(File::class, $file);
 
         return new CanonicalParams(false, $file->getUid(), 'default', 1280, 720, 'webp');
     }

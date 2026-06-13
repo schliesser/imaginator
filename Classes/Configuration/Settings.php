@@ -50,10 +50,10 @@ final readonly class Settings
         $ladder = self::intList($raw['ladder'] ?? null);
         $formats = self::stringList($raw['formats'] ?? null);
         $qualities = self::qualityMap($raw['qualities'] ?? null);
-        $excludeExtensions = array_values(array_map(
+        $excludeExtensions = array_map(
             'strtolower',
             self::stringList($raw['excludeExtensions'] ?? null),
-        ));
+        );
 
         return new self(
             $ladder !== [] ? $ladder : self::DEFAULT_LADDER,
@@ -107,7 +107,7 @@ final readonly class Settings
     /** @return int[] */
     private static function intList(mixed $value): array
     {
-        return array_values(array_map(static fn(string $v): int => (int) $v, self::stringList($value)));
+        return array_map(static fn(string $v): int => (int) $v, self::stringList($value));
     }
 
     /** @return list<string> */

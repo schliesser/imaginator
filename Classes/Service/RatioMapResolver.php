@@ -88,7 +88,7 @@ final class RatioMapResolver
      */
     private function resolveMinWidth(int|string $key, array $aliasMinWidths): ?int
     {
-        if (is_int($key) || (is_string($key) && preg_match('/^\d+$/', $key) === 1)) {
+        if (is_int($key) || preg_match('/^\d+$/', $key) === 1) {
             return max(0, (int) $key);
         }
 

@@ -29,7 +29,11 @@
         "typo3/cms-extensionmanager": "^13.4 || ^14.3",
         "typo3/cms-belog": "^13.4 || ^14.3",
         "typo3/cms-beuser": "^13.4 || ^14.3",
-        "typo3/cms-info": "^13.4 || ^14.3"
+        "typo3/cms-info": "^13.4 || ^14.3",
+        "saschaegerer/phpstan-typo3": "^3.0",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "friendsoftypo3/content-blocks": "^2.4"
     },
     "autoload": {
         "psr-4": {
@@ -46,7 +50,8 @@
         "bin-dir": ".Build/bin",
         "allow-plugins": {
             "typo3/cms-composer-installers": true,
-            "typo3/class-alias-loader": true
+            "typo3/class-alias-loader": true,
+            "phpstan/extension-installer": true
         }
     },
     "extra": {

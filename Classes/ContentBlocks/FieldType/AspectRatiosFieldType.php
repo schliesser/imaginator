@@ -23,7 +23,7 @@ use TYPO3\CMS\ContentBlocks\FieldType\WithCommonProperties;
  *     type: AspectRatio
  *     allowedRatios: '16:9,21:9'   # optional; comma-separated, defaults to the full set
  */
-#[FieldType(name: 'AspectRatio', tcaType: 'user', searchable: false)]
+#[FieldType(name: 'AspectRatio', tcaType: 'user')]
 final class AspectRatiosFieldType extends AbstractFieldType
 {
     use WithCommonProperties;
@@ -34,6 +34,9 @@ final class AspectRatiosFieldType extends AbstractFieldType
      */
     private string $allowedRatios = '1:1,4:3,3:2,16:9,21:9,9:16,2:3,3:4';
 
+    /**
+     * @param array<string, mixed> $settings
+     */
     public function createFromArray(array $settings): self
     {
         $self = clone $this;
@@ -43,6 +46,9 @@ final class AspectRatiosFieldType extends AbstractFieldType
         return $self;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getTca(): array
     {
         $tca = $this->toTca();
