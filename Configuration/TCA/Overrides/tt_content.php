@@ -22,13 +22,11 @@ $GLOBALS['TCA']['tt_content']['columns']['aspect_ratio'] = [
     ],
 ];
 
-ExtensionManagementUtility::addToAllTCAtypes(
+// Add to the media element's "mediaAdjustments" palette (next to imagewidth/height/border) so it
+// surfaces only on CEs that actually render images, rather than on every content type.
+ExtensionManagementUtility::addFieldsToPalette(
     'tt_content',
-    'aspect_ratio',
-    '',
-    'after:imageorient',
+    'mediaAdjustments',
+    '--linebreak--,aspect_ratio',
+    'after:imageborder',
 );
-
-// Per-CType example: a hero-style element only offers wide landscape ratios, while the default set
-// (above) also exposes portraits. Narrow the offered ratios per content type via columnsOverrides.
-$GLOBALS['TCA']['tt_content']['types']['image']['columnsOverrides']['aspect_ratio']['config']['allowedRatios'] = '16:9,21:9';

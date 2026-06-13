@@ -41,4 +41,13 @@ final class TcaRegistrationTest extends FunctionalTestCase
         self::assertArrayNotHasKey('tx_imaginator_aspect_ratios', $columns);
         self::assertArrayHasKey('aspect_ratio', $columns);
     }
+
+    public function testFieldIsAddedToMediaAdjustmentsPalette(): void
+    {
+        // The field rides the media element's mediaAdjustments palette, so it shows only on CEs that
+        // render images rather than on every content type.
+        $showitem = $GLOBALS['TCA']['tt_content']['palettes']['mediaAdjustments']['showitem'] ?? '';
+        self::assertIsString($showitem);
+        self::assertStringContainsString('aspect_ratio', $showitem);
+    }
 }
