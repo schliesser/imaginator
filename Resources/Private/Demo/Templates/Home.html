@@ -86,7 +86,7 @@
     <h2>Content elements &mdash; per-breakpoint CE ratios drive every image (<code>r{referenceUid}</code>)</h2>
     <p>Real <code>tt_content</code> records whose FAL image references carry an editor crop. The
        content element sets <em>one</em> per-breakpoint ratio map
-       (<code>tx_imaginator_aspect_ratios</code>), resolved by the <code>AspectRatioProcessor</code>
+       (<code>aspect_ratio</code>), resolved by the <code>AspectRatioProcessor</code>
        and applied to <em>every</em> media reference via <code>&lt;i:image breakpoints="&hellip;"&gt;</code>.
        Resize the window: the <code>&lt;picture&gt;</code> switches ratio per breakpoint. Inspect the
        URLs: <code>/_imaginator/&hellip;/r{uid}/&hellip;</code>.</p>

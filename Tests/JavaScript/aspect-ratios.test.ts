@@ -17,7 +17,7 @@ function mount(allowed: string, value = ''): HTMLElement {
 
   const input = document.createElement('input');
   input.type = 'hidden';
-  input.name = 'data[tt_content][1][tx_imaginator_aspect_ratios]';
+  input.name = 'data[tt_content][1][aspect_ratio]';
   input.value = value;
   host.appendChild(input);
 

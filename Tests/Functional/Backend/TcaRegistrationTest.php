@@ -15,7 +15,7 @@ final class TcaRegistrationTest extends FunctionalTestCase
     {
         self::assertSame(
             'imaginatorAspectRatios',
-            $GLOBALS['TCA']['tt_content']['columns']['tx_imaginator_aspect_ratios']['config']['renderType'],
+            $GLOBALS['TCA']['tt_content']['columns']['aspect_ratio']['config']['renderType'],
         );
     }
 
@@ -32,8 +32,13 @@ final class TcaRegistrationTest extends FunctionalTestCase
         self::assertContains(AspectRatiosElement::class, $classes);
     }
 
-    public function testInterimSingleRatioColumnIsGone(): void
+    public function testLegacyPrefixedColumnsAreGone(): void
     {
-        self::assertArrayNotHasKey('tx_imaginator_aspect_ratio', $GLOBALS['TCA']['tt_content']['columns']);
+        // The field is the unprefixed `aspect_ratio` (matching pictureino, so no DB migration is
+        // needed). Guard against the earlier extension-prefixed names creeping back in.
+        $columns = $GLOBALS['TCA']['tt_content']['columns'];
+        self::assertArrayNotHasKey('tx_imaginator_aspect_ratio', $columns);
+        self::assertArrayNotHasKey('tx_imaginator_aspect_ratios', $columns);
+        self::assertArrayHasKey('aspect_ratio', $columns);
     }
 }

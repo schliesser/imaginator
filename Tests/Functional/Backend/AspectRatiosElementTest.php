@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Schliesser\Imaginator\Tests\Functional\Backend;
 
 use Schliesser\Imaginator\Backend\Form\Element\AspectRatiosElement;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
@@ -12,18 +13,39 @@ final class AspectRatiosElementTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = ['schliesser/imaginator'];
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // renderLabel()/wrapWithFieldsetAndLegend() query the BE user for debug display.
+        $beUser = $this->createMock(BackendUserAuthentication::class);
+        $beUser->method('shallDisplayDebugInformation')->willReturn(false);
+        $GLOBALS['BE_USER'] = $beUser;
+    }
+
     private function renderResult(): array
     {
         $element = GeneralUtility::makeInstance(AspectRatiosElement::class);
         $element->setData([
+            'fieldName' => 'aspect_ratio',
             'parameterArray' => [
-                'itemFormElName' => 'data[tt_content][1][tx_imaginator_aspect_ratios]',
+                'itemFormElName' => 'data[tt_content][1][aspect_ratio]',
                 'itemFormElValue' => '{"xs":"1:1","lg":"16:9"}',
-                'fieldConf' => ['config' => ['allowedRatios' => '1:1,16:9']],
+                'fieldConf' => [
+                    'label' => 'Imaginator aspect ratios',
+                    'config' => ['allowedRatios' => '1:1,16:9'],
+                ],
             ],
         ]);
 
         return $element->render();
+    }
+
+    public function testRendersFieldLabel(): void
+    {
+        $html = $this->renderResult()['html'];
+
+        self::assertStringContainsString('t3js-formengine-label', $html);
+        self::assertStringContainsString('Imaginator aspect ratios', $html);
     }
 
     public function testRendersWebComponentHostWithDataAttributes(): void
@@ -44,7 +66,7 @@ final class AspectRatiosElementTest extends FunctionalTestCase
         $html = $this->renderResult()['html'];
 
         self::assertMatchesRegularExpression(
-            '/<input[^>]*type="hidden"[^>]*name="data\[tt_content\]\[1\]\[tx_imaginator_aspect_ratios\]"/',
+            '/<input[^>]*type="hidden"[^>]*name="data\[tt_content\]\[1\]\[aspect_ratio\]"/',
             $html,
         );
     }

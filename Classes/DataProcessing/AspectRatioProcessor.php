@@ -10,12 +10,12 @@ use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
 
 /**
- * Resolves the content element's `tx_imaginator_aspect_ratios` JSON into the
+ * Resolves the content element's `aspect_ratio` JSON into the
  * {@see \Schliesser\Imaginator\Dto\BreakpointRatio[]} the `<i:image breakpoints="...">` argument
  * consumes, so a single per-CE setting drives the ratio of every image the element renders.
  *
  * Configuration:
- * - `fieldName` (default `tx_imaginator_aspect_ratios`) — source column on the record.
+ * - `fieldName` (default `aspect_ratio`) — source column on the record.
  * - `as` (default `imaginatorAspectRatios`) — target variable for the Fluid template.
  */
 final readonly class AspectRatioProcessor implements DataProcessorInterface
@@ -31,7 +31,7 @@ final readonly class AspectRatioProcessor implements DataProcessorInterface
         array $processorConfiguration,
         array $processedData,
     ): array {
-        $fieldName = (string)($processorConfiguration['fieldName'] ?? 'tx_imaginator_aspect_ratios');
+        $fieldName = (string)($processorConfiguration['fieldName'] ?? 'aspect_ratio');
         $target = (string)($processorConfiguration['as'] ?? 'imaginatorAspectRatios');
         $json = (string)($processedData['data'][$fieldName] ?? '');
 

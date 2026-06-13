@@ -48,7 +48,7 @@ final class CeRatioIntegrationTest extends FunctionalTestCase
             GeneralUtility::makeInstance(ContentObjectRenderer::class),
             [],
             ['as' => 'imaginatorAspectRatios'],
-            ['data' => ['tx_imaginator_aspect_ratios' => '{"xs":"1:1","lg":"16:9"}']],
+            ['data' => ['aspect_ratio' => '{"xs":"1:1","lg":"16:9"}']],
         );
 
         self::assertEquals(

@@ -11,7 +11,7 @@ defined('TYPO3') or die();
 // absent (or `auto`) inherits the next-smaller ratio. Edited via the custom `imaginatorAspectRatios`
 // FormEngine web-component element. `allowedRatios` lists the offered ratios and can be narrowed per
 // CType via `types[...].columnsOverrides`.
-$GLOBALS['TCA']['tt_content']['columns']['tx_imaginator_aspect_ratios'] = [
+$GLOBALS['TCA']['tt_content']['columns']['aspect_ratio'] = [
     'label' => 'Imaginator aspect ratios',
     'description' => 'Per-breakpoint aspect ratios applied to all images in this element. Empty = original / crop ratio.',
     'config' => [
@@ -23,11 +23,11 @@ $GLOBALS['TCA']['tt_content']['columns']['tx_imaginator_aspect_ratios'] = [
 
 ExtensionManagementUtility::addToAllTCAtypes(
     'tt_content',
-    'tx_imaginator_aspect_ratios',
+    'aspect_ratio',
     '',
     'after:imageorient',
 );
 
 // Per-CType example: a hero-style element only offers wide landscape ratios, while the default set
 // (above) also exposes portraits. Narrow the offered ratios per content type via columnsOverrides.
-$GLOBALS['TCA']['tt_content']['types']['image']['columnsOverrides']['tx_imaginator_aspect_ratios']['config']['allowedRatios'] = '16:9,21:9';
+$GLOBALS['TCA']['tt_content']['types']['image']['columnsOverrides']['aspect_ratio']['config']['allowedRatios'] = '16:9,21:9';
