@@ -43,7 +43,7 @@ final class GraphicsMagickBackendTest extends FunctionalTestCase
             'fileExtension' => 'webp',
         ]);
 
-        self::assertSame(1280, (int)$processed->getProperty('width'));
+        self::assertSame(1280, (int) $processed->getProperty('width'));
         self::assertSame('image/webp', $processed->getMimeType());
     }
 }

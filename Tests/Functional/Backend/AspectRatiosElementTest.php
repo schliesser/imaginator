@@ -76,7 +76,7 @@ final class AspectRatiosElementTest extends FunctionalTestCase
         $modules = $this->renderResult()['javaScriptModules'];
 
         self::assertNotEmpty($modules);
-        $names = array_map(static fn ($m): string => $m->getName(), $modules);
-        self::assertNotEmpty(array_filter($names, static fn (string $n): bool => str_contains($n, 'aspect-ratios')));
+        $names = array_map(static fn($m): string => $m->getName(), $modules);
+        self::assertNotEmpty(array_filter($names, static fn(string $n): bool => str_contains($n, 'aspect-ratios')));
     }
 }

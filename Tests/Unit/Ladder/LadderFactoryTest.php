@@ -21,7 +21,7 @@ final class LadderFactoryTest extends TestCase
         // max=2000, source=1500 -> each rung clamped to min(rung, max, source);
         // 1920->1500, 2560->1500 collapse to a single 1500.
         $rungs = $this->factory()->build(new AspectRatio(16, 9), 1500);
-        $widths = array_map(static fn (Rung $r) => $r->width, $rungs);
+        $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
         self::assertSame([320, 640, 1280, 1500], $widths);
     }
 
@@ -45,7 +45,7 @@ final class LadderFactoryTest extends TestCase
     {
         // 9:16 crop from a short 4000x800 source is height-bound: max width = floor(800 * 9/16) = 450.
         $rungs = $this->factory()->build(new AspectRatio(9, 16), 4000, 800);
-        $widths = array_map(static fn (Rung $r) => $r->width, $rungs);
+        $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
         self::assertSame([320, 450], $widths);
         // No rung exceeds the source height.
         foreach ($rungs as $rung) {
@@ -57,7 +57,7 @@ final class LadderFactoryTest extends TestCase
     {
         // 6:1 crop from a tall 3000x4500 portrait is width-bound, so the height clamp is inert.
         $rungs = $this->factory()->build(new AspectRatio(6, 1), 3000, 4500);
-        $widths = array_map(static fn (Rung $r) => $r->width, $rungs);
+        $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
         self::assertSame([320, 640, 1280, 1920, 2000], $widths);
     }
 
@@ -66,8 +66,8 @@ final class LadderFactoryTest extends TestCase
         $withClamp = $this->factory()->build(new AspectRatio(9, 16), 4000, 800);
         $withoutClamp = $this->factory()->build(new AspectRatio(9, 16), 4000);
         self::assertNotSame(
-            array_map(static fn (Rung $r) => $r->width, $withClamp),
-            array_map(static fn (Rung $r) => $r->width, $withoutClamp),
+            array_map(static fn(Rung $r) => $r->width, $withClamp),
+            array_map(static fn(Rung $r) => $r->width, $withoutClamp),
         );
     }
 }

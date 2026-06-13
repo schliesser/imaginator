@@ -38,7 +38,7 @@ final class AspectRatiosFieldType extends AbstractFieldType
     {
         $self = clone $this;
         $self->setCommonProperties($settings);
-        $self->allowedRatios = (string)($settings['allowedRatios'] ?? $self->allowedRatios);
+        $self->allowedRatios = (string) ($settings['allowedRatios'] ?? $self->allowedRatios);
 
         return $self;
     }

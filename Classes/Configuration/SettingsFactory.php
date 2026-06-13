@@ -25,7 +25,7 @@ final class SettingsFactory
 
     public function create(): Settings
     {
-        $encryptionKey = (string)($GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] ?? '');
+        $encryptionKey = (string) ($GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] ?? '');
 
         return Settings::fromArray($this->rawConfiguration(), $encryptionKey);
     }

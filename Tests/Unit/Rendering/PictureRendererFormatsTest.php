@@ -23,7 +23,7 @@ final class PictureRendererFormatsTest extends TestCase
 
     private function fakeProcessor(): ImageProcessorInterface
     {
-        return new class () implements ImageProcessorInterface {
+        return new class implements ImageProcessorInterface {
             public function buildUrl(ImageVariant $variant): string
             {
                 return sprintf('/url/%s/%dx%d', $variant->format, $variant->width, $variant->height);
@@ -71,7 +71,7 @@ final class PictureRendererFormatsTest extends TestCase
             $html
         );
         // Tier order: AVIF source before WebP source.
-        self::assertLessThan((int)strpos($html, 'image/webp'), (int)strpos($html, 'image/avif'));
+        self::assertLessThan((int) strpos($html, 'image/webp'), (int) strpos($html, 'image/avif'));
     }
 
     public function testSkipsSourceTierMatchingTheDefaultImgFormat(): void
@@ -140,7 +140,7 @@ final class PictureRendererFormatsTest extends TestCase
         // Fallback <img> uses the original format and the default (last) breakpoint's ratio.
         self::assertMatchesRegularExpression('#<img [^>]*srcset="/url/jpeg/320x320 320w, /url/jpeg/640x640 640w"#', $html);
         // Ordering: breakpoint-major, format-minor.
-        $order = static fn (string $needle): int => (int)strpos($html, $needle);
+        $order = static fn(string $needle): int => (int) strpos($html, $needle);
         self::assertLessThan($order('image/webp" media="(min-width:992px)"'), $order('image/avif" media="(min-width:992px)"'));
         self::assertLessThan($order('media="(max-width:991px)"'), $order('media="(min-width:992px)"'));
     }

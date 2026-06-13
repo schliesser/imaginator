@@ -58,7 +58,7 @@ final class SettingsTest extends TestCase
 
         self::assertSame(
             [['xs', 0], ['sm', 576], ['lg', 992]],
-            array_map(static fn (Breakpoint $b): array => [$b->key, $b->minWidth], $settings->breakpoints),
+            array_map(static fn(Breakpoint $b): array => [$b->key, $b->minWidth], $settings->breakpoints),
         );
     }
 
@@ -68,7 +68,7 @@ final class SettingsTest extends TestCase
 
         self::assertSame(
             [['xs', 0], ['sm', 576], ['md', 768], ['lg', 992], ['xl', 1200]],
-            array_map(static fn (Breakpoint $b): array => [$b->key, $b->minWidth], $settings->breakpoints),
+            array_map(static fn(Breakpoint $b): array => [$b->key, $b->minWidth], $settings->breakpoints),
         );
     }
 
@@ -78,7 +78,7 @@ final class SettingsTest extends TestCase
 
         self::assertSame(
             [['xs', 0], ['sm', 576]],
-            array_map(static fn (Breakpoint $b): array => [$b->key, $b->minWidth], $settings->breakpoints),
+            array_map(static fn(Breakpoint $b): array => [$b->key, $b->minWidth], $settings->breakpoints),
         );
     }
 

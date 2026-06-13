@@ -165,7 +165,7 @@ final readonly class PictureRenderer
         $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
 
         return '<source' . $this->attrs([
-            'media' => htmlspecialchars((string)$breakpoint->media, ENT_QUOTES),
+            'media' => htmlspecialchars((string) $breakpoint->media, ENT_QUOTES),
             'srcset' => $this->srcset($request, $rungs, $processor),
             'sizes' => $request->priority ? '100vw' : 'auto',
         ]) . '>';
@@ -180,8 +180,8 @@ final readonly class PictureRenderer
             'src' => $processor->buildUrl($this->variant($request, $largest)),
             'srcset' => $this->srcset($request, $rungs, $processor),
             'sizes' => $request->priority ? '100vw' : 'auto',
-            'width' => (string)$largest->width,
-            'height' => (string)$largest->height,
+            'width' => (string) $largest->width,
+            'height' => (string) $largest->height,
             'alt' => htmlspecialchars($request->alt, ENT_QUOTES),
         ];
         $class = $this->classAttribute($request);

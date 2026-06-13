@@ -19,11 +19,11 @@ final readonly class AspectRatio
             throw new \InvalidArgumentException(sprintf('Invalid ratio "%s"', $ratio), 1717600001);
         }
 
-        return new self((int)$m[1], (int)$m[2]);
+        return new self((int) $m[1], (int) $m[2]);
     }
 
     public function heightFor(int $width): int
     {
-        return (int)round($width * $this->height / $this->width);
+        return (int) round($width * $this->height / $this->width);
     }
 }

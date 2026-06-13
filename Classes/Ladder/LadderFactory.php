@@ -42,7 +42,7 @@ final class LadderFactory
             }
         }
 
-        return $widths === [] ? 0 : (int)end($widths);
+        return $widths === [] ? 0 : (int) end($widths);
     }
 
     /** @return int[] sorted ascending, unique, >= 1 */
@@ -50,12 +50,12 @@ final class LadderFactory
     {
         // Widest crop of $ratio that fits the source height without upscaling: floor(sh * w/h).
         $maxByHeight = ($sourceHeight > 0 && $ratio !== null)
-            ? (int)floor($sourceHeight * $ratio->width / $ratio->height)
+            ? (int) floor($sourceHeight * $ratio->width / $ratio->height)
             : PHP_INT_MAX;
 
         $widths = [];
         foreach ($this->rungWidths as $w) {
-            $clamped = (int)min($w, $this->maxDimension, $sourceWidth, $maxByHeight);
+            $clamped = (int) min($w, $this->maxDimension, $sourceWidth, $maxByHeight);
             if ($clamped >= 1) {
                 $widths[$clamped] = true;
             }

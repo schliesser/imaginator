@@ -28,21 +28,21 @@ final class AspectRatiosElement extends AbstractFormElement
         $result = $this->initializeResultArray();
 
         $parameterArray = $this->data['parameterArray'];
-        $name = (string)$parameterArray['itemFormElName'];
-        $value = (string)($parameterArray['itemFormElValue'] ?? '');
-        $allowed = (string)($parameterArray['fieldConf']['config']['allowedRatios'] ?? '');
+        $name = (string) $parameterArray['itemFormElName'];
+        $value = (string) ($parameterArray['itemFormElValue'] ?? '');
+        $allowed = (string) ($parameterArray['fieldConf']['config']['allowedRatios'] ?? '');
 
         // FormEngine instantiates nodes via plain makeInstance (no DI), so build the factory from
         // its single dependency, which is itself makeInstance-able.
         $settingsFactory = new SettingsFactory(GeneralUtility::makeInstance(ExtensionConfiguration::class));
         $breakpoints = $settingsFactory->create()->breakpoints;
         $breakpointsJson = json_encode(array_map(
-            static fn (Breakpoint $b): array => ['key' => $b->key, 'minWidth' => $b->minWidth],
+            static fn(Breakpoint $b): array => ['key' => $b->key, 'minWidth' => $b->minWidth],
             $breakpoints,
         ), JSON_THROW_ON_ERROR);
 
         $fieldId = 'imaginator-aspect-ratios-' . md5($name);
-        $enc = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES);
+        $enc = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES);
 
         $component = sprintf(
             '<imaginator-aspect-ratios data-breakpoints="%s" data-allowed="%s" data-value="%s" data-field="%s">'

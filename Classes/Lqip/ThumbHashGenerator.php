@@ -37,7 +37,7 @@ final class ThumbHashGenerator implements LqipGeneratorInterface
                 $rgba[] = ($color >> 8) & 0xFF;
                 $rgba[] = $color & 0xFF;
                 // GD alpha is 0 (opaque) .. 127 (transparent); ThumbHash wants 0..255 opacity.
-                $rgba[] = 255 - (int)round((($color >> 24) & 0x7F) * (255 / 127));
+                $rgba[] = 255 - (int) round((($color >> 24) & 0x7F) * (255 / 127));
             }
         }
 
@@ -59,7 +59,7 @@ final class ThumbHashGenerator implements LqipGeneratorInterface
             return $image;
         }
         $scale = self::MAX_DIMENSION / $longest;
-        $scaled = imagescale($image, max(1, (int)round($width * $scale)), max(1, (int)round($height * $scale)));
+        $scaled = imagescale($image, max(1, (int) round($width * $scale)), max(1, (int) round($height * $scale)));
 
         return $scaled ?: $image;
     }

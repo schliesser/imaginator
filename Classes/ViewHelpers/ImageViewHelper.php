@@ -62,23 +62,23 @@ final class ImageViewHelper extends AbstractViewHelper
     public function render(): string
     {
         $file = $this->imageService->getImage(
-            (string)($this->arguments['src'] ?? ''),
+            (string) ($this->arguments['src'] ?? ''),
             $this->arguments['image'] ?? null,
-            (bool)($this->arguments['treatIdAsReference'] ?? false),
+            (bool) ($this->arguments['treatIdAsReference'] ?? false),
         );
         $isReference = $file instanceof FileReference;
         $original = $isReference ? $file->getOriginalFile() : $file;
-        $cropVariant = (string)$this->arguments['cropVariant'];
+        $cropVariant = (string) $this->arguments['cropVariant'];
         $settings = $this->settingsFactory->create();
 
         // Vector/animated formats (svg, ai, eps, gif by default) carry no meaningful width ladder and must
         // not be transcoded: serve the original file verbatim as a plain <img>.
         if (in_array(strtolower($original->getExtension()), $settings->excludeExtensions, true)) {
             return $this->renderer->renderPassthrough(
-                (string)$original->getPublicUrl(),
-                (string)$this->arguments['alt'],
-                $this->arguments['class'] !== null ? (string)$this->arguments['class'] : null,
-                (bool)$this->arguments['priority'],
+                (string) $original->getPublicUrl(),
+                (string) $this->arguments['alt'],
+                $this->arguments['class'] !== null ? (string) $this->arguments['class'] : null,
+                (bool) $this->arguments['priority'],
             );
         }
 
@@ -97,9 +97,9 @@ final class ImageViewHelper extends AbstractViewHelper
             breakpoints: $this->breakpoints($this->arguments['aspectRatio'], $settings->breakpoints, $sourceWidth, $sourceHeight),
             format: self::DEFAULT_FORMAT,
             quality: $settings->qualities[self::DEFAULT_FORMAT] ?? 80,
-            alt: (string)$this->arguments['alt'],
-            class: $this->arguments['class'] !== null ? (string)$this->arguments['class'] : null,
-            priority: (bool)$this->arguments['priority'],
+            alt: (string) $this->arguments['alt'],
+            class: $this->arguments['class'] !== null ? (string) $this->arguments['class'] : null,
+            priority: (bool) $this->arguments['priority'],
             formats: $settings->formats,
             lqipClass: $this->registerLqip($this->lqipFactory->get($settings->lqip)->generate($original)),
         );
@@ -174,7 +174,7 @@ final class ImageViewHelper extends AbstractViewHelper
                 return $resolved;
             }
         } elseif ($aspectRatio !== null && $aspectRatio !== '') {
-            return [new BreakpointRatio(AspectRatio::fromString((string)$aspectRatio))];
+            return [new BreakpointRatio(AspectRatio::fromString((string) $aspectRatio))];
         }
 
         // Nothing usable: use the croppable region's own ratio (crop area for a reference, else

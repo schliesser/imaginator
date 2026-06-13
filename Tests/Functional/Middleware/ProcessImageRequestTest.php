@@ -68,7 +68,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
 
     private function passthroughHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response('php://temp', 204);

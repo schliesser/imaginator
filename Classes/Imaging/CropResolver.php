@@ -24,17 +24,17 @@ final readonly class CropResolver
     {
         if (!$isReference) {
             $file = $this->resourceFactory->getFileObject($uid);
-            $width = (int)$file->getProperty('width');
-            $height = (int)$file->getProperty('height');
+            $width = (int) $file->getProperty('width');
+            $height = (int) $file->getProperty('height');
 
             return new CropResolution(new Rectangle(0, 0, $width, $height), new Rectangle(0, 0, 0, 0), $width, $height, $file);
         }
 
         $reference = $this->resourceFactory->getFileReferenceObject($uid);
         $original = $reference->getOriginalFile();
-        $fileWidth = (int)$original->getProperty('width');
-        $fileHeight = (int)$original->getProperty('height');
-        $collection = CropVariantCollection::create((string)$reference->getProperty('crop'));
+        $fileWidth = (int) $original->getProperty('width');
+        $fileHeight = (int) $original->getProperty('height');
+        $collection = CropVariantCollection::create((string) $reference->getProperty('crop'));
 
         // Empty crop area = whole file; empty focus area stays empty (crop centres on the crop area).
         $cropAreaArea = $collection->getCropArea($cropVariant);
@@ -47,7 +47,7 @@ final readonly class CropResolver
             ? new Rectangle(0, 0, 0, 0)
             : $this->toRectangle($focusAreaArea->makeAbsoluteBasedOnFile($original));
 
-        return new CropResolution($cropArea, $focusArea, (int)$cropArea->width, (int)$cropArea->height, $original);
+        return new CropResolution($cropArea, $focusArea, (int) $cropArea->width, (int) $cropArea->height, $original);
     }
 
     private function toRectangle(Area $absolute): Rectangle

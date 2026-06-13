@@ -36,7 +36,7 @@ final class ThumbHashGeneratorTest extends FunctionalTestCase
         self::assertStringStartsWith('data:image/', $uri);
         self::assertStringContainsString(';base64,', $uri);
         // Decodes to a non-trivial raster.
-        $base64 = substr($uri, (int)strpos($uri, ';base64,') + 8);
+        $base64 = substr($uri, (int) strpos($uri, ';base64,') + 8);
         $binary = base64_decode($base64, true);
         self::assertNotFalse($binary);
         self::assertGreaterThan(64, strlen($binary));

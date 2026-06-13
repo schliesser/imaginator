@@ -23,7 +23,7 @@ final class PictureRendererTest extends TestCase
 
     private function fakeProcessor(): ImageProcessorInterface
     {
-        return new class () implements ImageProcessorInterface {
+        return new class implements ImageProcessorInterface {
             public function buildUrl(ImageVariant $variant): string
             {
                 return sprintf('/img/%d/%dx%d.%s', $variant->uid, $variant->width, $variant->height, $variant->format);

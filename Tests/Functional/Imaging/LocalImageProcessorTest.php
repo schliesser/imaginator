@@ -116,7 +116,7 @@ final class LocalImageProcessorTest extends FunctionalTestCase
             'fieldname' => 'image',
             'crop' => $crop,
         ]);
-        $referenceUid = (int)$connection->lastInsertId();
+        $referenceUid = (int) $connection->lastInsertId();
 
         $variant = new ImageVariant(true, $referenceUid, 'default', 1000, 563, 'webp', 72); // 16:9 within the crop
 

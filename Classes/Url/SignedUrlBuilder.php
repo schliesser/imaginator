@@ -41,10 +41,10 @@ final class SignedUrlBuilder
         }
         $params = new CanonicalParams(
             $m[2] === 'r',
-            (int)$m[3],
+            (int) $m[3],
             rawurldecode($m[4]),
-            (int)$m[5],
-            (int)$m[6],
+            (int) $m[5],
+            (int) $m[6],
             $m[7],
         );
         foreach ($this->secrets as $secret) {

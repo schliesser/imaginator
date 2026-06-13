@@ -57,12 +57,12 @@ final readonly class Settings
 
         return new self(
             $ladder !== [] ? $ladder : self::DEFAULT_LADDER,
-            (int)($raw['maxDimension'] ?? self::DEFAULT_MAX_DIMENSION),
+            (int) ($raw['maxDimension'] ?? self::DEFAULT_MAX_DIMENSION),
             self::deriveSecrets($encryptionKey, $raw['secretsRotation'] ?? null),
             $formats !== [] ? $formats : self::DEFAULT_FORMATS,
             $qualities !== [] ? $qualities : self::DEFAULT_QUALITIES,
-            (string)($raw['processor'] ?? 'local'),
-            (string)($raw['lqip'] ?? self::DEFAULT_LQIP),
+            (string) ($raw['processor'] ?? 'local'),
+            (string) ($raw['lqip'] ?? self::DEFAULT_LQIP),
             self::breakpoints($raw['breakpoints'] ?? null),
             $excludeExtensions !== [] ? $excludeExtensions : self::DEFAULT_EXCLUDE_EXTENSIONS,
         );
@@ -81,14 +81,14 @@ final readonly class Settings
             if (!preg_match('/^([a-z0-9]+):(\d+)$/i', $entry, $m)) {
                 continue;
             }
-            $parsed[] = new Breakpoint($m[1], (int)$m[2]);
+            $parsed[] = new Breakpoint($m[1], (int) $m[2]);
         }
         if ($parsed === []) {
             foreach (self::DEFAULT_BREAKPOINTS as $key => $minWidth) {
                 $parsed[] = new Breakpoint($key, $minWidth);
             }
         }
-        usort($parsed, static fn (Breakpoint $a, Breakpoint $b): int => $a->minWidth <=> $b->minWidth);
+        usort($parsed, static fn(Breakpoint $a, Breakpoint $b): int => $a->minWidth <=> $b->minWidth);
 
         return $parsed;
     }
@@ -107,7 +107,7 @@ final readonly class Settings
     /** @return int[] */
     private static function intList(mixed $value): array
     {
-        return array_values(array_map(static fn (string $v): int => (int)$v, self::stringList($value)));
+        return array_values(array_map(static fn(string $v): int => (int) $v, self::stringList($value)));
     }
 
     /** @return list<string> */
@@ -117,13 +117,13 @@ final readonly class Settings
             return [];
         }
         if (!is_array($value)) {
-            $value = explode(',', (string)$value);
+            $value = explode(',', (string) $value);
         }
 
         return array_values(array_filter(array_map(
-            static fn (mixed $v): string => trim((string)$v),
+            static fn(mixed $v): string => trim((string) $v),
             $value,
-        ), static fn (string $v): bool => $v !== ''));
+        ), static fn(string $v): bool => $v !== ''));
     }
 
     /** @return array<string, int> */
@@ -134,7 +134,7 @@ final readonly class Settings
         }
         $map = [];
         foreach ($value as $format => $quality) {
-            $map[(string)$format] = (int)$quality;
+            $map[(string) $format] = (int) $quality;
         }
 
         return $map;
