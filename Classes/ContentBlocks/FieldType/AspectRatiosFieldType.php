@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\ContentBlocks\FieldType;
 
-use Schliesser\Imaginator\Backend\Form\AspectRatiosElementRegistration;
+use Schliesser\Imaginator\Backend\Form\Element\AspectRatiosElement;
 use TYPO3\CMS\ContentBlocks\FieldType\AbstractFieldType;
 use TYPO3\CMS\ContentBlocks\FieldType\FieldType;
 use TYPO3\CMS\ContentBlocks\FieldType\WithCommonProperties;
