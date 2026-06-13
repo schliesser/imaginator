@@ -1,0 +1,7 @@
+.. More information about this file:
+   https://docs.typo3.org/permalink/h2document:includes
+
+.. role:: html(code)
+.. role:: php(code)
+.. role:: typoscript(code)
+.. role:: yaml(code)

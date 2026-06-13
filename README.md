@@ -7,11 +7,11 @@ correctly-sized image in a single request. Candidate URLs are HMAC-signed and se
 image bytes by a local processing endpoint. JavaScript is never required for sharpness.
 
 > **Status.** Local (GraphicsMagick/ImageMagick) processing, the `<i:image>` ViewHelper, stacked
-> **AVIF + WebP `<picture>` tiers**, and **low-quality placeholders** (ThumbHash by default,
-> dominant-colour and none as options) work end-to-end. The JS enhancement layer, external CDN
-> providers (Thumbor/imgproxy/imgix/Cloudflare/Cloudinary), the aspect-ratio backend element, and
-> per-site overrides of the settings below are planned follow-ups (see `docs/`). Full TYPO3 reST
-> documentation will follow.
+> **AVIF + WebP `<picture>` tiers**, **low-quality placeholders** (ThumbHash by default,
+> dominant-colour and none as options) and the **content-element aspect-ratio field** work
+> end-to-end. The JS enhancement layer, external CDN providers
+> (Thumbor/imgproxy/imgix/Cloudflare/Cloudinary) and per-site overrides of the settings below are
+> planned follow-ups (see `docs/`). Rendered reST documentation lives in `Documentation/`.
 
 ## Requirements
 

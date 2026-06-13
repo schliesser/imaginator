@@ -10,3 +10,5 @@
 /config/
 .phpunit.result.cache
 .php-cs-fixer.cache
+/.claude/
+/Documentation-GENERATED-temp/
