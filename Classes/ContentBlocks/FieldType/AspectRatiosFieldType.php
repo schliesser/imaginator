@@ -11,7 +11,7 @@ use TYPO3\CMS\ContentBlocks\FieldType\WithCommonProperties;
 
 /**
  * Exposes the per-breakpoint aspect-ratios field as a Content Blocks field type, so block authors can
- * write `type: AspectRatios` in their YAML instead of hand-rolling the `type: user` TCA. The emitted
+ * write `type: AspectRatio` in their YAML instead of hand-rolling the `type: user` TCA. The emitted
  * TCA mirrors the standalone registration in `Configuration/TCA/Overrides/tt_content.php`: a custom
  * FormEngine node ({@see AspectRatiosElement}) editing a `{"<breakpoint>": "<ratio>"}` JSON map.
  *
@@ -19,11 +19,11 @@ use TYPO3\CMS\ContentBlocks\FieldType\WithCommonProperties;
  * it must never be autoloaded when EXT:content_blocks is absent (it would fatal at class load).
  *
  * YAML usage:
- *   - identifier: aspect_ratios
- *     type: AspectRatios
+ *   - identifier: aspect_ratio
+ *     type: AspectRatio
  *     allowedRatios: '16:9,21:9'   # optional; comma-separated, defaults to the full set
  */
-#[FieldType(name: 'ImaginatorAspectRatios', tcaType: 'user', searchable: false)]
+#[FieldType(name: 'AspectRatio', tcaType: 'user', searchable: false)]
 final class AspectRatiosFieldType extends AbstractFieldType
 {
     use WithCommonProperties;
