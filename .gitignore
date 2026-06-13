@@ -9,3 +9,4 @@
 /var/
 /config/
 .phpunit.result.cache
+.php-cs-fixer.cache

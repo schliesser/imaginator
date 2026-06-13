@@ -11,9 +11,10 @@ defined('TYPO3') or die();
 // absent (or `auto`) inherits the next-smaller ratio. Edited via the custom `imaginatorAspectRatios`
 // FormEngine web-component element. `allowedRatios` lists the offered ratios and can be narrowed per
 // CType via `types[...].columnsOverrides`.
+$ll = 'LLL:EXT:imaginator/Resources/Private/Language/locallang_db.xlf:tt_content.aspect_ratio';
 $GLOBALS['TCA']['tt_content']['columns']['aspect_ratio'] = [
-    'label' => 'Imaginator aspect ratios',
-    'description' => 'Per-breakpoint aspect ratios applied to all images in this element. Empty = original / crop ratio.',
+    'label' => $ll,
+    'description' => $ll . '.description',
     'config' => [
         'type' => 'user',
         'renderType' => 'imaginatorAspectRatios',
