@@ -11,6 +11,14 @@ Imaginator adds an :guilabel:`Aspect ratios` field to the content element's
 :guilabel:`Image height` and :guilabel:`Border`). It appears only on content
 types that render images.
 
+..  figure:: /Images/AspectRatioField.png
+    :alt: The Aspect ratios field in a content element's Media Adjustments palette
+    :class: with-border with-shadow
+    :zoom: lightbox
+
+    The :guilabel:`Aspect ratios` field: each design-system breakpoint picks a
+    ratio (or inherits the next-smaller one), previewed as a swatch.
+
 The field stores a per-breakpoint ratio map as a JSON string, for example:
 
 ..  code-block:: json
