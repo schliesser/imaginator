@@ -70,4 +70,22 @@ final class LadderFactoryTest extends TestCase
             array_map(static fn(Rung $r) => $r->width, $withoutClamp),
         );
     }
+
+    public function testBuildNeverReturnsEmptyForUnreadableSourceWidth(): void
+    {
+        // A source whose width FAL could not determine (0) must not yield an empty ladder — the
+        // renderer reads the largest rung and would fatal on an empty set (broken image).
+        $rungs = $this->factory()->build(new AspectRatio(16, 9), 0, 0);
+        self::assertNotEmpty($rungs);
+        self::assertGreaterThanOrEqual(1, $rungs[array_key_last($rungs)]->width);
+    }
+
+    public function testBuildNeverReturnsEmptyWhenRatioCannotFitShortSource(): void
+    {
+        // Source far too short for the target ratio: the height-bound width floors below 1. Must
+        // still yield at least one rung instead of an empty ladder.
+        $rungs = $this->factory()->build(new AspectRatio(1, 20), 1000, 4);
+        self::assertNotEmpty($rungs);
+        self::assertGreaterThanOrEqual(1, $rungs[array_key_last($rungs)]->width);
+    }
 }

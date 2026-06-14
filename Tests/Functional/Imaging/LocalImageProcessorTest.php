@@ -8,10 +8,13 @@ use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Imaging\CropCalculator;
 use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend;
+use Schliesser\Imaginator\Imaging\Local\Backend\LocalBackendInterface;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\FileInterface;
+use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
@@ -82,6 +85,39 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         $size = getimagesize($processed->absolutePath);
         self::assertNotFalse($size);
         self::assertSame(1280, $size[0]);
+    }
+
+    public function testMaterializeThrowsOnEmptyProcessedOutput(): void
+    {
+        // Some processors (e.g. GraphicsMagick/libheif failing to encode AVIF at large sizes) exit 0
+        // but leave a 0-byte file. Serving a 302 to that yields a broken image; fail loudly instead.
+        $emptyFile = $this->instancePath . '/empty.avif';
+        touch($emptyFile);
+
+        $processedFile = $this->createMock(ProcessedFile::class);
+        $processedFile->method('getForLocalProcessing')->willReturn($emptyFile);
+        $processedFile->method('getMimeType')->willReturn('image/avif');
+
+        $backend = new class ($processedFile) implements LocalBackendInterface {
+            public function __construct(private readonly ProcessedFile $processed) {}
+
+            public function process(FileInterface $file, array $instructions): ProcessedFile
+            {
+                return $this->processed;
+            }
+        };
+
+        $processor = new LocalImageProcessor(
+            new SignedUrlBuilder(['test-secret']),
+            $backend,
+            GeneralUtility::makeInstance(ImageService::class),
+            new CropCalculator(),
+            new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),
+        );
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionCode(1718100001);
+        $processor->materialize($this->variant());
     }
 
     public function testMaterializePublicUrlIsRootRelative(): void

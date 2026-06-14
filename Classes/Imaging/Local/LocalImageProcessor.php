@@ -67,14 +67,30 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
             ]);
         }
 
-        return $this->toProcessedImage($processed);
+        return $this->toProcessedImage($processed, $variant);
     }
 
-    private function toProcessedImage(ProcessedFile $processed): ProcessedImage
+    private function toProcessedImage(ProcessedFile $processed, ImageVariant $variant): ProcessedImage
     {
+        $localPath = $processed->getForLocalProcessing(false);
+        // Some backends exit 0 but leave a 0-byte file (e.g. GraphicsMagick/libheif failing to encode
+        // AVIF at large dimensions). Redirecting to that yields a broken image with a 200; fail loud
+        // instead so the failure surfaces in logs rather than being silently served.
+        if (!is_file($localPath) || filesize($localPath) === 0) {
+            throw new \RuntimeException(
+                sprintf(
+                    'imaginator: empty processed file for %dx%d.%s — the image processor failed to encode it.',
+                    $variant->width,
+                    $variant->height,
+                    $variant->format,
+                ),
+                1718100001,
+            );
+        }
+
         return new ProcessedImage(
             $this->toRootRelativeUrl($this->imageService->getImageUri($processed)),
-            $processed->getForLocalProcessing(false),
+            $localPath,
             $processed->getMimeType(),
         );
     }

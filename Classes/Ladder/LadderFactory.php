@@ -60,6 +60,14 @@ final class LadderFactory
                 $widths[$clamped] = true;
             }
         }
+
+        // Degenerate source (unreadable 0 dimension, or too short for the target ratio so the
+        // height-bound width floors below 1): never hand back an empty ladder — the renderer reads
+        // the largest rung and would fatal on an empty set. Fall back to the largest width the box
+        // allows, floored to 1px. The verify path runs the same clamp, so both still agree.
+        if ($widths === []) {
+            $widths[max(1, (int) min($sourceWidth, $maxByHeight, $this->maxDimension))] = true;
+        }
         ksort($widths);
 
         return array_keys($widths);
