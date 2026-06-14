@@ -1,5 +1,17 @@
-# cat=Processing; type=options[Local=local]; label=Image processor (v1: local only; external providers arrive with the external-providers plan)
+# cat=Processing; type=options[Local (GraphicsMagick)=local,imgproxy (offloaded)=imgproxy]; label=Image processor
 processor = local
+
+# cat=External; type=string; label=imgproxy: base URL of the imgproxy endpoint (e.g. https://imgproxy.example)
+processorBaseUrl =
+
+# cat=External; type=string; label=imgproxy: HMAC key (hex). Empty = insecure/unsigned URLs (dev only)
+processorSignKey =
+
+# cat=External; type=string; label=imgproxy: HMAC salt (hex). Empty = insecure/unsigned URLs (dev only)
+processorSalt =
+
+# cat=External; type=string; label=imgproxy: origin prefix prepended to the source path (leave empty when imgproxy has IMGPROXY_BASE_URL set)
+processorSourceBaseUrl =
 
 # cat=Processing; type=int+; label=Maximum image dimension (px): the width ladder is capped to this
 maxDimension = 2000

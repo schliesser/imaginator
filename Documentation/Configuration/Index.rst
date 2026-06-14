@@ -33,8 +33,8 @@ Settings
     :type: string
     :default: ``local``
 
-    Processing backend. Version 1 ships the ``local`` backend only
-    (GraphicsMagick / ImageMagick).
+    Processing backend: ``local`` (GraphicsMagick / ImageMagick behind the signed
+    endpoint) or ``imgproxy`` (offloaded — see :ref:`configuration-imgproxy`).
 
 ..  confval:: maxDimension
     :name: conf-maxdimension
@@ -106,6 +106,69 @@ Settings
 
     Additional valid signing secrets (comma-separated) for key rotation. See
     :ref:`configuration-signing`.
+
+..  confval:: processorBaseUrl
+    :name: conf-processorbaseurl
+    :type: string
+    :default: (empty)
+
+    imgproxy only: base URL of the imgproxy endpoint (e.g.
+    ``https://imgproxy.example``). See :ref:`configuration-imgproxy`.
+
+..  confval:: processorSignKey
+    :name: conf-processorsignkey
+    :type: string
+    :default: (empty)
+
+    imgproxy only: HMAC **key** (hex). Empty key or salt → unsigned ``insecure``
+    URLs (dev only).
+
+..  confval:: processorSalt
+    :name: conf-processorsalt
+    :type: string
+    :default: (empty)
+
+    imgproxy only: HMAC **salt** (hex).
+
+..  confval:: processorSourceBaseUrl
+    :name: conf-processorsourcebaseurl
+    :type: string
+    :default: (empty)
+
+    imgproxy only: origin prefix prepended to the source path. Leave empty when
+    imgproxy has ``IMGPROXY_BASE_URL`` set (it then resolves the relative path
+    itself).
+
+..  _configuration-imgproxy:
+
+Offloaded processing with imgproxy
+==================================
+
+With :confval:`processor <conf-processor>` set to ``imgproxy``, ``srcset`` URLs
+point straight at an `imgproxy <https://imgproxy.net/>`__ service — the webserver
+never touches pixels, and the signed ``/_imaginator/`` endpoint is unused. Each
+candidate is built as::
+
+    {processorBaseUrl}/{signature}/rs:fill:{w}:{h}/g:sm/q:{quality}/plain/{source}@{ext}
+
+The editor's per-reference crop variant is **not** replayed externally (imgproxy
+uses smart gravity ``g:sm``); a reference resolves to its original file. Offloading
+also sidesteps local encoder limits — e.g. AVIF at large dimensions that a thin
+GraphicsMagick / libheif build fails to encode.
+
+..  tip::
+    For local development, the `ddev-imgproxy
+    <https://github.com/barbieswimcrew/ddev-imgproxy>`__ add-on runs imgproxy
+    next to the web container:
+
+    ..  code-block:: bash
+
+        ddev add-on get barbieswimcrew/ddev-imgproxy
+        ddev restart
+
+    It sets ``IMGPROXY_BASE_URL`` to the web container and runs keyless, so
+    :confval:`processorBaseUrl <conf-processorbaseurl>` is the add-on URL
+    (``https://<project>.ddev.site:8081``) and the sign key/salt stay empty.
 
 ..  _configuration-signing:
 

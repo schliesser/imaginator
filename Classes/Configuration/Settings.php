@@ -40,6 +40,10 @@ final readonly class Settings
         public string $lqip,
         public array $breakpoints,
         public array $excludeExtensions,
+        public string $processorBaseUrl = '',
+        public string $processorSignKey = '',
+        public string $processorSalt = '',
+        public string $processorSourceBaseUrl = '',
     ) {}
 
     /**
@@ -65,6 +69,10 @@ final readonly class Settings
             (string) ($raw['lqip'] ?? self::DEFAULT_LQIP),
             self::breakpoints($raw['breakpoints'] ?? null),
             $excludeExtensions !== [] ? $excludeExtensions : self::DEFAULT_EXCLUDE_EXTENSIONS,
+            (string) ($raw['processorBaseUrl'] ?? ''),
+            (string) ($raw['processorSignKey'] ?? ''),
+            (string) ($raw['processorSalt'] ?? ''),
+            (string) ($raw['processorSourceBaseUrl'] ?? ''),
         );
     }
 
