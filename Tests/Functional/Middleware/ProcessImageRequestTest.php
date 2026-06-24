@@ -122,6 +122,29 @@ final class ProcessImageRequestTest extends FunctionalTestCase
         self::assertStringContainsString('immutable', $response->getHeaderLine('Cache-Control'));
     }
 
+    public function testFixedHeightRungRedirectsToProcessedFile(): void
+    {
+        // A full-bleed hero rung pins a height unrelated to the width (1280x600, not the ratio
+        // height). The verify path reconstructs AspectRatio(1280, 600); because the rendered height
+        // never exceeds the source height, maxByHeight >= 1280 and the rung still validates — the
+        // signed/verify path needs no fixed-height awareness.
+        $params = $this->importFixture();
+        $fixedHeight = new CanonicalParams(
+            $params->isReference,
+            $params->uid,
+            $params->cropVariant,
+            1280,
+            600,
+            $params->format,
+        );
+        $request = new ServerRequest('https://example.com' . $this->signedUrlBuilder->build($fixedHeight));
+
+        $response = $this->middleware()->process($request, $this->passthroughHandler());
+
+        self::assertSame(302, $response->getStatusCode());
+        self::assertStringContainsString('immutable', $response->getHeaderLine('Cache-Control'));
+    }
+
     public function testSignedButNonRungWidthReturns403(): void
     {
         // A valid signature for a width that is not a ladder rung must still be rejected (leaked-secret defense).

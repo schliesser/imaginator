@@ -52,7 +52,7 @@ final class ImageViewHelper extends AbstractViewHelper
         $this->registerArgument('src', 'string', 'File path or uid', false, '');
         $this->registerArgument('image', 'object', 'A FAL File or FileReference object', false, null);
         $this->registerArgument('treatIdAsReference', 'bool', 'Treat src as sys_file_reference uid', false, false);
-        $this->registerArgument('aspectRatio', 'mixed', 'Ratio "16:9", a {breakpoint: ratio} map, or the raw aspect_ratio JSON; omit to use the crop variant ratio (reference) or the original image ratio', false, null);
+        $this->registerArgument('aspectRatio', 'mixed', 'Ratio "16:9", a fixed CSS height "600px" (full-bleed hero: width climbs the ladder, height pinned), a {breakpoint: ratio|height} map, or the raw aspect_ratio JSON; omit to use the crop variant ratio (reference) or the original image ratio', false, null);
         $this->registerArgument('cropVariant', 'string', 'FAL crop variant', false, 'default');
         $this->registerArgument('alt', 'string', 'Alternative text', false, '');
         $this->registerArgument('title', 'string', 'Title attribute', false, null);
@@ -181,7 +181,16 @@ final class ImageViewHelper extends AbstractViewHelper
                 return $resolved;
             }
         } elseif ($aspectRatio !== null && $aspectRatio !== '') {
-            return [new BreakpointRatio(AspectRatio::fromString((string) $aspectRatio))];
+            // A single scalar: either a "16:9" ratio or a fixed CSS height ("600px"/"600") for a
+            // full-bleed hero whose width climbs the ladder while height stays pinned. `auto`/empty
+            // returns null and falls through to the native ratio below.
+            $spec = $this->ratioMapResolver->parseSpec((string) $aspectRatio);
+            if ($spec instanceof AspectRatio) {
+                return [new BreakpointRatio($spec)];
+            }
+            if (is_int($spec)) {
+                return [new BreakpointRatio(fixedHeight: $spec)];
+            }
         }
 
         // Nothing usable: use the croppable region's own ratio (crop area for a reference, else

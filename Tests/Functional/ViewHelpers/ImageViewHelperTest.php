@@ -220,6 +220,43 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringNotContainsString('Oops', $output);
     }
 
+    public function testScalarPxHeightPinsHeightWhileWidthClimbsLadder(): void
+    {
+        // A full-bleed hero: aspectRatio="600px" pins the height. Width still climbs to the largest
+        // rung (2000), height is the DPR-scaled fixed value (2*600=1200), capped at the 3000px source.
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="600px" alt="A hero"/></html>'
+        );
+
+        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1200"/', $output);
+        // The smallest rung keeps the unscaled 600px height.
+        self::assertStringContainsString('x600.webp', $output);
+        self::assertStringContainsString('/_imaginator/', $output);
+    }
+
+    public function testMixedRatioAndFixedHeightMapEmitsPinnedHeightSource(): void
+    {
+        // {xs: "16:9", lg: "600px"}: base <img> keeps the 16:9 ladder (2000x1125), the lg <source>
+        // pins the height (smallest rung is 600px tall).
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="{xs: \'16:9\', lg: \'600px\'}" alt="A hero"/></html>'
+        );
+
+        self::assertStringContainsString('<picture>', $output);
+        self::assertStringContainsString('media="(min-width:992px)"', $output);
+        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1125"/', $output);
+        // The lg tier is the format <source> (avif); its smallest rung keeps the unscaled 600px height.
+        self::assertStringContainsString('x600.avif', $output);
+    }
+
     public function testEmitsFormatTiersAndCspFriendlyLqip(): void
     {
         $fileUid = $this->importFixture();
