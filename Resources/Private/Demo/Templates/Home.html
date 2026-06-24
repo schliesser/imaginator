@@ -15,6 +15,7 @@
 
         /* Full-width image cropped to a fixed height. */
         .banner img { width: 100%; height: 320px; object-fit: cover; }
+        .hero-fixed img { width: 100%; height: 600px; object-fit: cover; }
 
         /* N images per row. */
         .row { display: grid; gap: 1rem; }
@@ -54,6 +55,23 @@
         <h2>Full-width banner &mdash; fixed height (CSS <code>object-fit: cover</code>)</h2>
         <div class="banner">
             <i:image src="fileadmin/demo/banner.jpg" aspectRatio="21:9" alt="Full-width banner"/>
+        </div>
+    </section>
+
+    <section>
+        <h2>Full-bleed hero &mdash; fixed-height tier (<code>aspectRatio="600px"</code>)</h2>
+        <p>Width climbs the ladder, height pinned at 600 (DPR-scaled to 1200). The served crop only
+           gets wider/flatter as the viewport grows &mdash; never taller.</p>
+        <div class="hero-fixed">
+            <i:image src="fileadmin/demo/hero.jpg" aspectRatio="600px" alt="Fixed-height hero"/>
+        </div>
+    </section>
+
+    <section>
+        <h2>Mixed map &mdash; <code>{xs: '16:9', lg: '600px'}</code></h2>
+        <p>Small screens use the 16:9 ladder; at <code>lg</code> the height pins to 600px.</p>
+        <div class="hero-fixed">
+            <i:image src="fileadmin/demo/banner.jpg" aspectRatio="{xs: '16:9', lg: '600px'}" alt="Mixed ratio/fixed-height"/>
         </div>
     </section>
 
