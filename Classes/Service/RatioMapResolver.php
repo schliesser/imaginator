@@ -51,6 +51,7 @@ final class RatioMapResolver
         }
 
         // Collect keyed by min-width so an alias and its numeric equivalent collapse to one tier.
+        // Value is the parsed spec: an AspectRatio or an int fixed height in px.
         $byMinWidth = [];
         foreach ($map as $key => $raw) {
             if (!is_string($raw)) {
@@ -60,22 +61,22 @@ final class RatioMapResolver
             if ($minWidth === null) {
                 continue;
             }
-            $ratio = $this->parseRatio($raw);
-            if ($ratio === null) {
+            $spec = $this->parseSpec($raw);
+            if ($spec === null) {
                 continue;
             }
-            $byMinWidth[$minWidth] = $ratio;
+            $byMinWidth[$minWidth] = $spec;
         }
 
         // Largest-first; the min-0 tier becomes the base <img> (media null).
         krsort($byMinWidth);
 
         $result = [];
-        foreach ($byMinWidth as $minWidth => $ratio) {
-            $result[] = new BreakpointRatio(
-                $ratio,
-                $minWidth === 0 ? null : '(min-width:' . $minWidth . 'px)',
-            );
+        foreach ($byMinWidth as $minWidth => $spec) {
+            $media = $minWidth === 0 ? null : '(min-width:' . $minWidth . 'px)';
+            $result[] = $spec instanceof AspectRatio
+                ? new BreakpointRatio($spec, $media)
+                : new BreakpointRatio(media: $media, fixedHeight: $spec);
         }
 
         return $result;
@@ -95,16 +96,24 @@ final class RatioMapResolver
         return $aliasMinWidths[$key] ?? null;
     }
 
-    private function parseRatio(string $value): ?AspectRatio
+    /**
+     * Parse a single tier value: a `W:H` aspect ratio, an `Npx`/`N` fixed height in px, or null for
+     * an empty/`auto` tier (which is skipped so native `<picture>` inheritance carries the smaller
+     * ratio up). Any other non-empty token is a malformed entry and throws.
+     *
+     * @return AspectRatio|int|null int = fixed height in px
+     */
+    public function parseSpec(string $value): AspectRatio|int|null
     {
         $value = trim($value);
         if ($value === '' || strtolower($value) === 'auto') {
             return null;
         }
-        try {
-            return AspectRatio::fromString($value);
-        } catch (\InvalidArgumentException) {
-            return null;
+        if (preg_match('/^(\d+)(?:px)?$/', $value, $m) === 1) {
+            return (int) $m[1];
         }
+
+        // Throws InvalidArgumentException on anything that is not a valid `W:H` ratio.
+        return AspectRatio::fromString($value);
     }
 }

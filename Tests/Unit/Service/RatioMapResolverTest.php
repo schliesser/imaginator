@@ -46,14 +46,59 @@ final class RatioMapResolverTest extends TestCase
         );
     }
 
-    public function testAutoOrUnknownRatioIsOmitted(): void
+    public function testAutoRatioIsOmitted(): void
     {
-        $result = (new RatioMapResolver())->fromJson('{"xs":"auto","lg":"nonsense","md":"4:3"}', $this->breakpoints());
+        $result = (new RatioMapResolver())->fromJson('{"xs":"auto","md":"4:3"}', $this->breakpoints());
 
         self::assertEquals(
             [new BreakpointRatio(new AspectRatio(4, 3), '(min-width:768px)')],
             $result,
         );
+    }
+
+    public function testUnparsableValueThrows(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new RatioMapResolver())->fromJson('{"xs":"auto","lg":"nonsense","md":"4:3"}', $this->breakpoints());
+    }
+
+    public function testParseSpecReturnsRatioPxHeightOrNull(): void
+    {
+        $resolver = new RatioMapResolver();
+
+        self::assertEquals(new AspectRatio(16, 9), $resolver->parseSpec('16:9'));
+        self::assertSame(600, $resolver->parseSpec('600px'));
+        self::assertSame(600, $resolver->parseSpec('600'));
+        self::assertNull($resolver->parseSpec('auto'));
+        self::assertNull($resolver->parseSpec(''));
+    }
+
+    public function testParseSpecThrowsOnGarbage(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new RatioMapResolver())->parseSpec('foo');
+    }
+
+    public function testFromMapParsesPxValueAsFixedHeightTier(): void
+    {
+        $result = (new RatioMapResolver())->fromMap(['xs' => '16:9', 'lg' => '600px'], $this->breakpoints());
+
+        self::assertEquals(
+            [
+                new BreakpointRatio(media: '(min-width:992px)', fixedHeight: 600),
+                new BreakpointRatio(new AspectRatio(16, 9), null),
+            ],
+            $result,
+        );
+    }
+
+    public function testFromMapThrowsOnBadValue(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new RatioMapResolver())->fromMap(['lg' => 'foo'], $this->breakpoints());
     }
 
     public function testEmptyOrInvalidJsonReturnsEmptyArray(): void
