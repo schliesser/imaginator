@@ -38,8 +38,14 @@ final readonly class PictureRenderer
             return [];
         }
         $format = $request->formats[0] ?? $request->format;
+        // When the tier set is resolution-gated, the media-null base is the default-format <img>
+        // (preload-scanned anyway); a preferred-format preload for it would mismatch and double-fetch.
+        $hasGated = array_filter($request->breakpoints, static fn(BreakpointRatio $b): bool => $b->resolutionGated) !== [];
         $links = [];
         foreach ($request->breakpoints as $breakpoint) {
+            if ($hasGated && $breakpoint->media === null) {
+                continue;
+            }
             $rungs = $this->rungs($breakpoint, $request);
             $attrs = [
                 'rel' => 'preload',
@@ -108,8 +114,10 @@ final readonly class PictureRenderer
             }
             $rungs = $this->rungs($breakpoint, $request);
             foreach ($request->formats as $format) {
-                if ($format === $request->format) {
-                    continue; // already the <img> default; a <source> for it would be redundant
+                if ($format === $request->format && !$breakpoint->resolutionGated) {
+                    // Normally the default format is the <img>; but a resolution-gated tier needs it
+                    // as a <source> too — the 1x <img> cannot serve a high-DPR non-avif request.
+                    continue;
                 }
                 $sources .= $this->formatSource($request, $rungs, $format, $breakpoint->media, $processor);
             }

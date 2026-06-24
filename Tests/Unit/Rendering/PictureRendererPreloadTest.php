@@ -76,4 +76,35 @@ final class PictureRendererPreloadTest extends TestCase
     {
         self::assertSame([], $this->renderer()->preloadLinks($this->request(false), $this->fakeProcessor()));
     }
+
+    public function testResolutionGatedHeroSkipsTheMediaNullBasePreload(): void
+    {
+        // The 1x base is the webp <img>, preload-scanned anyway; an avif media-null preload would
+        // mismatch it and double-fetch. Only the gated (high-DPR) variants get a media-scoped preload.
+        $request = new ImageRenderRequest(
+            isReference: false,
+            uid: 9,
+            sourceWidth: 4000,
+            sourceHeight: 4000,
+            cropVariant: 'default',
+            breakpoints: [
+                new BreakpointRatio(media: '(min-resolution:1.5dppx)', fixedHeight: 1200, resolutionGated: true),
+                new BreakpointRatio(media: null, fixedHeight: 600),
+            ],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+            priority: true,
+            formats: ['avif', 'webp'],
+        );
+
+        self::assertSame(
+            [
+                '<link rel="preload" as="image"'
+                . ' imagesrcset="/url/avif/320x1200 320w, /url/avif/640x1200 640w"'
+                . ' imagesizes="100vw" type="image/avif" fetchpriority="high" media="(min-resolution:1.5dppx)">',
+            ],
+            $this->renderer()->preloadLinks($request, $this->fakeProcessor()),
+        );
+    }
 }

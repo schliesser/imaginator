@@ -166,6 +166,39 @@ final class PictureRendererTest extends TestCase
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
 
+    public function testResolutionGatedFixedHeightTiersEmitBothFormatsAsSources(): void
+    {
+        // Pre-expanded DPR tiers: the gated 2x source must carry BOTH formats (the 1x <img> cannot
+        // satisfy a high-DPR non-avif request). The 1x base remains the webp <img>.
+        $request = new ImageRenderRequest(
+            isReference: false,
+            uid: 9,
+            sourceWidth: 4000,
+            sourceHeight: 4000,
+            cropVariant: 'default',
+            breakpoints: [
+                new BreakpointRatio(media: '(min-resolution:1.5dppx)', fixedHeight: 1200, resolutionGated: true),
+                new BreakpointRatio(media: null, fixedHeight: 600),
+            ],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+            formats: ['avif', 'webp'],
+        );
+
+        $expected = '<picture>'
+            . '<source type="image/avif" media="(min-resolution:1.5dppx)"'
+            . ' srcset="/img/9/320x1200.avif 320w, /img/9/640x1200.avif 640w" sizes="auto">'
+            . '<source type="image/webp" media="(min-resolution:1.5dppx)"'
+            . ' srcset="/img/9/320x1200.webp 320w, /img/9/640x1200.webp 640w" sizes="auto">'
+            . '<img src="/img/9/640x600.webp"'
+            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x600.webp 640w"'
+            . ' sizes="auto" width="640" height="600" alt="A hero" loading="lazy" decoding="async">'
+            . '</picture>';
+
+        self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
+    }
+
     public function testEmptyBreakpointsFallsBackToNativeSourceRatioWithoutWarning(): void
     {
         // Defensive: a caller must never hand the renderer an empty breakpoint set, but if it does
