@@ -29,6 +29,16 @@ Declare the ViewHelper namespace once per template and call :html:`<i:image>`.
                  aspectRatio="{'(min-width:992px)': '16:9', '(max-width:991px)': '1:1'}"
                  alt="Hero"/>
 
+        {# Full-bleed hero: a fixed CSS height instead of a ratio. Width climbs
+           the ladder, the height stays pinned (the rendered image only gets
+           wider/flatter from tablet to 4K, never taller). #}
+        <i:image image="{hero}" aspectRatio="600px" alt="Hero"/>
+
+        {# Mix ratio and fixed-height tiers per breakpoint: a portrait-ish ratio
+           on small screens, a pinned height on large ones. #}
+        <i:image image="{hero}"
+                 aspectRatio="{xs: '16:9', lg: '600px'}" alt="Hero"/>
+
         {# LCP / above-the-fold image #}
         <i:image image="{hero}" aspectRatio="16:9" alt="Hero" priority="1"/>
     </html>
@@ -61,9 +71,11 @@ Arguments
     *   -   ``aspectRatio``
         -   string | map
         -   –
-        -   ``"W:H"``, a ``{breakpoint: "W:H"}`` map, or the raw
-            :ref:`aspect_ratio JSON <editor>`. Omitted: the crop variant (for a
-            reference) or original image ratio.
+        -   ``"W:H"``, a fixed CSS height ``"600px"`` (full-bleed hero: width
+            climbs the ladder, height pinned), a ``{breakpoint: "W:H"|"Npx"}``
+            map, or the raw :ref:`aspect_ratio JSON <editor>`. Omitted: the crop
+            variant (for a reference) or original image ratio. A malformed tier
+            value raises an error; ``auto`` / empty skips the tier.
     *   -   ``cropVariant``
         -   string
         -   ``default``
@@ -87,6 +99,23 @@ Arguments
 
 :html:`width` and :html:`height` are always emitted from the largest rung, so
 there is zero layout shift.
+
+..  _usage-fixed-height:
+
+Fixed-height tiers
+==================
+
+A tier value of ``"600px"`` (or ``"600"``) pins the **height** instead of
+deriving it from a ratio. Width still climbs the ladder, so a full-bleed hero
+keeps a constant CSS height across viewports while the served crop only gets
+wider and flatter — never needlessly taller — from tablet to 4K.
+
+The ``px`` value is treated as a **CSS** height and auto-scaled for high-DPR
+screens up to a factor of 2: the smallest rung is served at the given height,
+larger rungs up to twice it, so retina stays sharp. The extra vertical pixels
+are re-cropped by the browser, so pair a fixed-height image with CSS such as
+``width:100%; height:600px; object-fit:cover``. The height is never scaled
+beyond the source image's own height.
 
 ..  _usage-priority:
 

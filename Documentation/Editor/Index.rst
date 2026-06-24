@@ -30,6 +30,10 @@ Keys are :confval:`breakpoint aliases <conf-breakpoints>` (``md``, ``lg``, …) 
 literal min-widths in pixels (``768``; ``0`` is the base). A breakpoint that is
 absent — or set to ``auto`` — inherits the next-smaller ratio.
 
+A value may also be a fixed CSS height (``"600px"``) instead of a ``"W:H"``
+ratio: that tier pins the height while the width climbs the ladder — a
+full-bleed hero. See :ref:`usage-fixed-height`.
+
 Binding the field
 =================
 
