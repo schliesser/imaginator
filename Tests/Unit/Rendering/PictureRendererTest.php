@@ -114,6 +114,58 @@ final class PictureRendererTest extends TestCase
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
 
+    public function testFixedHeightTierRendersImgWithPinnedHeightLadder(): void
+    {
+        // A full-bleed hero: width climbs the ladder, height pinned at 600 (DPR-scaled to 1200 on
+        // the larger rung). width/height attrs come from the largest rung.
+        $request = new ImageRenderRequest(
+            isReference: false,
+            uid: 9,
+            sourceWidth: 4000,
+            sourceHeight: 4000,
+            cropVariant: 'default',
+            breakpoints: [new BreakpointRatio(media: null, fixedHeight: 600)],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+        );
+
+        $expected = '<img src="/img/9/640x1200.webp"'
+            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x1200.webp 640w"'
+            . ' sizes="auto" width="640" height="1200" alt="A hero" loading="lazy" decoding="async">';
+
+        self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
+    }
+
+    public function testMixedRatioAndFixedHeightTiersRenderPicture(): void
+    {
+        // {xs: "16:9", lg: "600px"}: base <img> keeps the 16:9 ladder, the lg <source> pins height.
+        $request = new ImageRenderRequest(
+            isReference: false,
+            uid: 9,
+            sourceWidth: 4000,
+            sourceHeight: 4000,
+            cropVariant: 'default',
+            breakpoints: [
+                new BreakpointRatio(media: '(min-width:992px)', fixedHeight: 600),
+                new BreakpointRatio(new AspectRatio(16, 9)),
+            ],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+        );
+
+        $expected = '<picture>'
+            . '<source media="(min-width:992px)"'
+            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x1200.webp 640w" sizes="auto">'
+            . '<img src="/img/9/640x360.webp"'
+            . ' srcset="/img/9/320x180.webp 320w, /img/9/640x360.webp 640w"'
+            . ' sizes="auto" width="640" height="360" alt="A hero" loading="lazy" decoding="async">'
+            . '</picture>';
+
+        self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
+    }
+
     public function testEmptyBreakpointsFallsBackToNativeSourceRatioWithoutWarning(): void
     {
         // Defensive: a caller must never hand the renderer an empty breakpoint set, but if it does

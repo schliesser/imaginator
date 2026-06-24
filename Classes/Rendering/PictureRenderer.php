@@ -40,7 +40,7 @@ final readonly class PictureRenderer
         $format = $request->formats[0] ?? $request->format;
         $links = [];
         foreach ($request->breakpoints as $breakpoint) {
-            $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
+            $rungs = $this->rungs($breakpoint, $request);
             $attrs = [
                 'rel' => 'preload',
                 'as' => 'image',
@@ -106,7 +106,7 @@ final readonly class PictureRenderer
             if ($breakpoint->media === null) {
                 continue;
             }
-            $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
+            $rungs = $this->rungs($breakpoint, $request);
             foreach ($request->formats as $format) {
                 if ($format === $request->format) {
                     continue; // already the <img> default; a <source> for it would be redundant
@@ -115,8 +115,8 @@ final readonly class PictureRenderer
             }
         }
         if ($sources === '') {
-            // Single ratio: one source per format, no media.
-            $rungs = $this->ladderFactory->build($this->defaultBreakpoint($request)->ratio, $request->sourceWidth, $request->sourceHeight);
+            // Single tier: one source per format, no media.
+            $rungs = $this->rungs($this->defaultBreakpoint($request), $request);
             foreach ($request->formats as $format) {
                 if ($format === $request->format) {
                     continue; // already the <img> default; a <source> for it would be redundant
@@ -162,7 +162,7 @@ final readonly class PictureRenderer
 
     private function sourceTag(ImageRenderRequest $request, BreakpointRatio $breakpoint, ImageProcessorInterface $processor): string
     {
-        $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
+        $rungs = $this->rungs($breakpoint, $request);
 
         return '<source' . $this->attrs([
             'media' => htmlspecialchars((string) $breakpoint->media, ENT_QUOTES),
@@ -173,7 +173,7 @@ final readonly class PictureRenderer
 
     private function renderImg(ImageRenderRequest $request, BreakpointRatio $breakpoint, ImageProcessorInterface $processor): string
     {
-        $rungs = $this->ladderFactory->build($breakpoint->ratio, $request->sourceWidth, $request->sourceHeight);
+        $rungs = $this->rungs($breakpoint, $request);
         $largest = $rungs[array_key_last($rungs)];
 
         $attrs = [
@@ -208,6 +208,22 @@ final readonly class PictureRenderer
         }
 
         return implode(', ', $candidates);
+    }
+
+    /**
+     * Build one tier's width ladder, passing the tier's fixed height (if any) so a hero pins its
+     * height while the ratio tiers derive it. Processor-agnostic: only widths/heights vary here.
+     *
+     * @return Rung[]
+     */
+    private function rungs(BreakpointRatio $breakpoint, ImageRenderRequest $request): array
+    {
+        return $this->ladderFactory->build(
+            $breakpoint->ratio,
+            $request->sourceWidth,
+            $request->sourceHeight,
+            $breakpoint->fixedHeight,
+        );
     }
 
     private function variant(ImageRenderRequest $request, Rung $rung, ?string $format = null): ImageVariant
