@@ -8,6 +8,13 @@ use Schliesser\Imaginator\Dto\AspectRatio;
 
 final class LadderFactory
 {
+    /**
+     * Largest device-pixel-ratio a fixed-height tier sizes for: the smallest rung serves the height
+     * at 1x, larger rungs scale up to this so a full-bleed hero stays crisp on retina; the surplus
+     * vertical pixels are re-cropped by `object-fit:cover`.
+     */
+    private const DPR_CAP = 2;
+
     /** @param int[] $rungWidths configured ladder rung widths */
     public function __construct(
         private readonly array $rungWidths,
@@ -15,18 +22,63 @@ final class LadderFactory
     ) {}
 
     /**
-     * @param int $sourceHeight when > 0, also clamp so a cover crop to $ratio never upscales
-     *                          vertically (a portrait target from a short source is height-bound)
-     * @return Rung[] ascending, capped to min(rung, maxDimension, sourceWidth, height-bound), deduped
+     * Build the width ladder for one tier. With $fixedHeight === null the height follows $ratio
+     * (the classic case). With $fixedHeight set the height is pinned (a full-bleed hero): width
+     * climbs the ladder while height stays the fixed CSS px value, DPR-scaled and clamped to the
+     * source — $ratio is then ignored and may be null.
+     *
+     * @param int      $sourceHeight when > 0, ratio mode clamps width so a cover crop never upscales
+     *                               vertically; fixed-height mode clamps each rung height to it
+     * @param int|null $fixedHeight  fixed CSS-px tier height; null = derive height from $ratio
+     * @return Rung[] ascending by width, deduped
      */
-    public function build(AspectRatio $ratio, int $sourceWidth, int $sourceHeight = 0): array
+    public function build(?AspectRatio $ratio, int $sourceWidth, int $sourceHeight = 0, ?int $fixedHeight = null): array
     {
+        if ($fixedHeight !== null) {
+            return $this->buildFixedHeight($sourceWidth, $sourceHeight, $fixedHeight);
+        }
+        if ($ratio === null) {
+            throw new \InvalidArgumentException('LadderFactory::build needs a ratio or a fixedHeight.', 1719223300);
+        }
+
         $rungs = [];
         foreach ($this->clampedWidths($sourceWidth, $ratio, $sourceHeight) as $w) {
             $rungs[] = new Rung($w, $ratio->heightFor($w));
         }
 
         return $rungs;
+    }
+
+    /**
+     * Fixed-height tier: widths are clamped by box only (height is independent), then each rung gets
+     * the pinned height scaled by its position on the ladder up to {@see self::DPR_CAP}, clamped to
+     * the source height so nothing upscales vertically — which keeps the middleware's reconstructed
+     * `maxByHeight >= width`, so the signed URL still verifies.
+     *
+     * @return Rung[]
+     */
+    private function buildFixedHeight(int $sourceWidth, int $sourceHeight, int $fixedHeight): array
+    {
+        $widths = $this->clampedWidths($sourceWidth);
+        $smallest = $widths[0];
+
+        $rungs = [];
+        foreach ($widths as $w) {
+            $rungs[] = new Rung($w, $this->fixedHeightFor($w, $smallest, $fixedHeight, $sourceHeight));
+        }
+
+        return $rungs;
+    }
+
+    private function fixedHeightFor(int $width, int $smallestWidth, int $fixedHeight, int $sourceHeight): int
+    {
+        $scale = min((float) self::DPR_CAP, max(1.0, $width / $smallestWidth));
+        $height = (int) round($fixedHeight * $scale);
+        if ($sourceHeight > 0) {
+            $height = min($height, $sourceHeight);
+        }
+
+        return max(1, $height);
     }
 
     /**

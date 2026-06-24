@@ -88,4 +88,43 @@ final class LadderFactoryTest extends TestCase
         self::assertNotEmpty($rungs);
         self::assertGreaterThanOrEqual(1, $rungs[array_key_last($rungs)]->width);
     }
+
+    public function testFixedHeightPinsHeightAndScalesByDprCap(): void
+    {
+        // Fixed 600px hero: width climbs the (width-only clamped) ladder; height starts at 600 on the
+        // smallest rung and scales up to 2x (DPR cap 2) on the larger rungs, never beyond.
+        $rungs = $this->factory()->build(null, 9999, 9999, 600);
+        $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
+        $heights = array_map(static fn(Rung $r) => $r->height, $rungs);
+
+        self::assertSame([320, 640, 1280, 1920, 2000], $widths);
+        self::assertSame([600, 1200, 1200, 1200, 1200], $heights);
+    }
+
+    public function testFixedHeightNeverUpscalesPastSourceHeight(): void
+    {
+        // A 700px-tall source caps every rung at 700 — no vertical upscale (keeps the verify path's
+        // reconstructed maxByHeight >= width, so signed URLs still validate).
+        $rungs = $this->factory()->build(null, 9999, 700, 600);
+        $heights = array_map(static fn(Rung $r) => $r->height, $rungs);
+
+        self::assertSame([600, 700, 700, 700, 700], $heights);
+    }
+
+    public function testFixedHeightClampsWidthBySourceWidth(): void
+    {
+        $rungs = $this->factory()->build(null, 1500, 9999, 600);
+        $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
+
+        self::assertSame([320, 640, 1280, 1500], $widths);
+    }
+
+    public function testFixedHeightSingleRungSourceKeepsBaseHeight(): void
+    {
+        // A source narrower than the smallest rung collapses to one rung; its height stays the
+        // unscaled fixed height.
+        $rungs = $this->factory()->build(null, 300, 9999, 600);
+
+        self::assertEquals([new Rung(300, 600)], $rungs);
+    }
 }
