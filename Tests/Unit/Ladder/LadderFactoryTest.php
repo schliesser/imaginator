@@ -89,26 +89,26 @@ final class LadderFactoryTest extends TestCase
         self::assertGreaterThanOrEqual(1, $rungs[array_key_last($rungs)]->width);
     }
 
-    public function testFixedHeightPinsHeightAndScalesByDprCap(): void
+    public function testFixedHeightPinsFlatHeightAcrossRungs(): void
     {
-        // Fixed 600px hero: width climbs the (width-only clamped) ladder; height starts at 600 on the
-        // smallest rung and scales up to 2x (DPR cap 2) on the larger rungs, never beyond.
+        // Fixed-height hero: width climbs the (width-only clamped) ladder; height is the flat pinned
+        // value on every rung. The DPR multiple lives in the expanded tier's fixedHeight, not here.
         $rungs = $this->factory()->build(null, 9999, 9999, 600);
         $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
         $heights = array_map(static fn(Rung $r) => $r->height, $rungs);
 
         self::assertSame([320, 640, 1280, 1920, 2000], $widths);
-        self::assertSame([600, 1200, 1200, 1200, 1200], $heights);
+        self::assertSame([600, 600, 600, 600, 600], $heights);
     }
 
     public function testFixedHeightNeverUpscalesPastSourceHeight(): void
     {
         // A 700px-tall source caps every rung at 700 — no vertical upscale (keeps the verify path's
         // reconstructed maxByHeight >= width, so signed URLs still validate).
-        $rungs = $this->factory()->build(null, 9999, 700, 600);
+        $rungs = $this->factory()->build(null, 9999, 700, 1800);
         $heights = array_map(static fn(Rung $r) => $r->height, $rungs);
 
-        self::assertSame([600, 700, 700, 700, 700], $heights);
+        self::assertSame([700, 700, 700, 700, 700], $heights);
     }
 
     public function testFixedHeightClampsWidthBySourceWidth(): void

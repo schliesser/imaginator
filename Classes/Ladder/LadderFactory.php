@@ -8,13 +8,6 @@ use Schliesser\Imaginator\Dto\AspectRatio;
 
 final class LadderFactory
 {
-    /**
-     * Largest device-pixel-ratio a fixed-height tier sizes for: the smallest rung serves the height
-     * at 1x, larger rungs scale up to this so a full-bleed hero stays crisp on retina; the surplus
-     * vertical pixels are re-cropped by `object-fit:cover`.
-     */
-    private const DPR_CAP = 2;
-
     /** @param int[] $rungWidths configured ladder rung widths */
     public function __construct(
         private readonly array $rungWidths,
@@ -50,35 +43,24 @@ final class LadderFactory
     }
 
     /**
-     * Fixed-height tier: widths are clamped by box only (height is independent), then each rung gets
-     * the pinned height scaled by its position on the ladder up to {@see self::DPR_CAP}, clamped to
-     * the source height so nothing upscales vertically — which keeps the middleware's reconstructed
-     * `maxByHeight >= width`, so the signed URL still verifies.
+     * Fixed-height tier: widths are clamped by box only (height is independent), then every rung gets
+     * the same flat pinned height, clamped to the source height so nothing upscales vertically —
+     * which keeps the middleware's reconstructed `maxByHeight >= width`, so the signed URL still
+     * verifies. The per-DPR multiple (H, 2H, 3H) lives in the expanded tier's $fixedHeight, not here.
      *
      * @return Rung[]
      */
     private function buildFixedHeight(int $sourceWidth, int $sourceHeight, int $fixedHeight): array
     {
-        $widths = $this->clampedWidths($sourceWidth);
-        $smallest = $widths[0];
+        $height = $sourceHeight > 0 ? min($fixedHeight, $sourceHeight) : $fixedHeight;
+        $height = max(1, $height);
 
         $rungs = [];
-        foreach ($widths as $w) {
-            $rungs[] = new Rung($w, $this->fixedHeightFor($w, $smallest, $fixedHeight, $sourceHeight));
+        foreach ($this->clampedWidths($sourceWidth) as $w) {
+            $rungs[] = new Rung($w, $height);
         }
 
         return $rungs;
-    }
-
-    private function fixedHeightFor(int $width, int $smallestWidth, int $fixedHeight, int $sourceHeight): int
-    {
-        $scale = min((float) self::DPR_CAP, max(1.0, $width / $smallestWidth));
-        $height = (int) round($fixedHeight * $scale);
-        if ($sourceHeight > 0) {
-            $height = min($height, $sourceHeight);
-        }
-
-        return max(1, $height);
     }
 
     /**

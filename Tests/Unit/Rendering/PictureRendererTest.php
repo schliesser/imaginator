@@ -114,10 +114,10 @@ final class PictureRendererTest extends TestCase
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
 
-    public function testFixedHeightTierRendersImgWithPinnedHeightLadder(): void
+    public function testFixedHeightTierRendersImgWithFlatPinnedHeightLadder(): void
     {
-        // A full-bleed hero: width climbs the ladder, height pinned at 600 (DPR-scaled to 1200 on
-        // the larger rung). width/height attrs come from the largest rung.
+        // A full-bleed hero tier: width climbs the ladder, height is flat-pinned on every rung. The
+        // DPR multiple is applied by the expander upstream, not by the ladder.
         $request = new ImageRenderRequest(
             isReference: false,
             uid: 9,
@@ -130,16 +130,16 @@ final class PictureRendererTest extends TestCase
             alt: 'A hero',
         );
 
-        $expected = '<img src="/img/9/640x1200.webp"'
-            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x1200.webp 640w"'
-            . ' sizes="auto" width="640" height="1200" alt="A hero" loading="lazy" decoding="async">';
+        $expected = '<img src="/img/9/640x600.webp"'
+            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x600.webp 640w"'
+            . ' sizes="auto" width="640" height="600" alt="A hero" loading="lazy" decoding="async">';
 
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
 
     public function testMixedRatioAndFixedHeightTiersRenderPicture(): void
     {
-        // {xs: "16:9", lg: "600px"}: base <img> keeps the 16:9 ladder, the lg <source> pins height.
+        // {xs: "16:9", lg: "600px"}: base <img> keeps the 16:9 ladder, the lg <source> pins a flat height.
         $request = new ImageRenderRequest(
             isReference: false,
             uid: 9,
@@ -157,7 +157,7 @@ final class PictureRendererTest extends TestCase
 
         $expected = '<picture>'
             . '<source media="(min-width:992px)"'
-            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x1200.webp 640w" sizes="auto">'
+            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x600.webp 640w" sizes="auto">'
             . '<img src="/img/9/640x360.webp"'
             . ' srcset="/img/9/320x180.webp 320w, /img/9/640x360.webp 640w"'
             . ' sizes="auto" width="640" height="360" alt="A hero" loading="lazy" decoding="async">'
