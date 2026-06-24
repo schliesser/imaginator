@@ -20,10 +20,12 @@ final class SettingsTest extends TestCase
             'processor' => 'local',
             'lqip' => 'dominant-color',
             'secretsRotation' => ['old-secret'],
+            'fixedHeightDprCap' => '2',
         ], 'enc-key');
 
         self::assertSame([320, 640, 1280], $settings->ladder);
         self::assertSame(1800, $settings->maxDimension);
+        self::assertSame(2, $settings->fixedHeightDprCap);
         self::assertSame(['webp'], $settings->formats);
         self::assertSame(['webp' => 70], $settings->qualities);
         self::assertSame('local', $settings->processor);
@@ -38,6 +40,7 @@ final class SettingsTest extends TestCase
 
         self::assertSame(Settings::DEFAULT_LADDER, $settings->ladder);
         self::assertSame(Settings::DEFAULT_MAX_DIMENSION, $settings->maxDimension);
+        self::assertSame(Settings::DEFAULT_FIXED_HEIGHT_DPR_CAP, $settings->fixedHeightDprCap);
         self::assertSame(Settings::DEFAULT_FORMATS, $settings->formats);
         self::assertSame('local', $settings->processor);
         self::assertSame('thumbhash', $settings->lqip);

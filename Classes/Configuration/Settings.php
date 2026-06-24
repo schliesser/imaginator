@@ -15,6 +15,8 @@ final readonly class Settings
 {
     public const DEFAULT_LADDER = [320, 420, 560, 740, 980, 1300, 1720, 2000];
     public const DEFAULT_MAX_DIMENSION = 2000;
+    /** Highest device-pixel-ratio a fixed-height hero ships a `min-resolution` source for (1x..cap). */
+    public const DEFAULT_FIXED_HEIGHT_DPR_CAP = 3;
     public const DEFAULT_FORMATS = ['avif', 'webp'];
     public const DEFAULT_QUALITIES = ['avif' => 50, 'webp' => 72];
     public const DEFAULT_LQIP = 'thumbhash';
@@ -33,6 +35,7 @@ final readonly class Settings
     public function __construct(
         public array $ladder,
         public int $maxDimension,
+        public int $fixedHeightDprCap,
         public array $secrets,
         public array $formats,
         public array $qualities,
@@ -62,6 +65,7 @@ final readonly class Settings
         return new self(
             $ladder !== [] ? $ladder : self::DEFAULT_LADDER,
             (int) ($raw['maxDimension'] ?? self::DEFAULT_MAX_DIMENSION),
+            (int) ($raw['fixedHeightDprCap'] ?? self::DEFAULT_FIXED_HEIGHT_DPR_CAP),
             self::deriveSecrets($encryptionKey, $raw['secretsRotation'] ?? null),
             $formats !== [] ? $formats : self::DEFAULT_FORMATS,
             $qualities !== [] ? $qualities : self::DEFAULT_QUALITIES,
