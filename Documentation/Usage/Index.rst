@@ -110,12 +110,18 @@ deriving it from a ratio. Width still climbs the ladder, so a full-bleed hero
 keeps a constant CSS height across viewports while the served crop only gets
 wider and flatter — never needlessly taller — from tablet to 4K.
 
-The ``px`` value is treated as a **CSS** height and auto-scaled for high-DPR
-screens up to a factor of 2: the smallest rung is served at the given height,
-larger rungs up to twice it, so retina stays sharp. The extra vertical pixels
-are re-cropped by the browser, so pair a fixed-height image with CSS such as
-``width:100%; height:600px; object-fit:cover``. The height is never scaled
-beyond the source image's own height.
+The ``px`` value is a **CSS** height. To stay sharp on high-DPR screens the tier
+is emitted as several ``<source>``\ s gated by ``min-resolution``: 1× serves the
+given height, 2× serves twice it, 3× three times — up to
+:confval:`fixedHeightDprCap <conf-fixed-height-dpr-cap>` (default 3). A low-DPR
+screen matches no ``min-resolution`` source and gets the cheap 1× height; a
+retina screen matches a gated source and stays crisp. Height is chosen by the
+device pixel ratio, width by the layout — so the served pixels match the need
+with no waste. Heights are never scaled beyond the source image's own height.
+
+Pair a fixed-height image with CSS such as
+``width:100%; height:600px; object-fit:cover``; any surplus served height is
+re-cropped by ``object-fit``.
 
 ..  _usage-priority:
 

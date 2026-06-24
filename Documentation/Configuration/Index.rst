@@ -43,6 +43,15 @@ Settings
 
     Largest image dimension in pixels. The width ladder is capped to this value.
 
+..  confval:: fixedHeightDprCap
+    :name: conf-fixed-height-dpr-cap
+    :type: integer
+    :default: ``3``
+
+    Highest device pixel ratio a :ref:`fixed-height tier <usage-fixed-height>`
+    ships a ``min-resolution`` ``<source>`` for. ``3`` emits 1×/2×/3× tiers; ``2``
+    drops the 3× tier; ``1`` disables per-DPR sources (single 1× height).
+
 ..  confval:: ladder
     :name: conf-ladder
     :type: string
