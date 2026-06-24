@@ -145,6 +145,27 @@ final class ProcessImageRequestTest extends FunctionalTestCase
         self::assertStringContainsString('immutable', $response->getHeaderLine('Cache-Control'));
     }
 
+    public function testFixedHeightThreeXRungRedirectsToProcessedFile(): void
+    {
+        // A 3x DPR variant pins a tall height (2000x1800) unrelated to the width. On the 3000x2000
+        // fixture 1800 <= source height, so the reconstructed maxByHeight >= 2000 and the rung still
+        // verifies — confirming the resolution tiers need no change to the signed/verify path.
+        $params = $this->importFixture();
+        $threeX = new CanonicalParams(
+            $params->isReference,
+            $params->uid,
+            $params->cropVariant,
+            2000,
+            1800,
+            $params->format,
+        );
+        $request = new ServerRequest('https://example.com' . $this->signedUrlBuilder->build($threeX));
+
+        $response = $this->middleware()->process($request, $this->passthroughHandler());
+
+        self::assertSame(302, $response->getStatusCode());
+    }
+
     public function testSignedButNonRungWidthReturns403(): void
     {
         // A valid signature for a width that is not a ladder rung must still be rejected (leaked-secret defense).

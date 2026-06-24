@@ -220,10 +220,10 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringNotContainsString('Oops', $output);
     }
 
-    public function testScalarPxHeightPinsHeightWhileWidthClimbsLadder(): void
+    public function testScalarPxHeightEmitsPerDprResolutionSources(): void
     {
-        // A full-bleed hero: aspectRatio="600px" pins the height. Width still climbs to the largest
-        // rung (2000), height is the DPR-scaled fixed value (2*600=1200), capped at the 3000px source.
+        // A full-bleed hero: aspectRatio="600px" pins the height by real DPR. The 1x <img> is 600px
+        // tall; min-resolution <source>s serve 2x (1200) and 3x (1800), each in BOTH formats.
         $fileUid = $this->importFixture();
 
         $output = $this->render(
@@ -232,16 +232,23 @@ final class ImageViewHelperTest extends FunctionalTestCase
             . ' aspectRatio="600px" alt="A hero"/></html>'
         );
 
-        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1200"/', $output);
-        // The smallest rung keeps the unscaled 600px height.
+        // 1x base <img> keeps the flat 600px height.
+        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="600"/', $output);
+        // DPR-gated sources for 2x and 3x, in avif AND webp.
+        self::assertStringContainsString('media="(min-resolution:1.5dppx)"', $output);
+        self::assertStringContainsString('media="(min-resolution:2.5dppx)"', $output);
+        self::assertMatchesRegularExpression('#type="image/webp" media="\(min-resolution:1\.5dppx\)"#', $output);
+        self::assertMatchesRegularExpression('#type="image/avif" media="\(min-resolution:2\.5dppx\)"#', $output);
+        // Heights are flat per tier: 600 / 1200 / 1800.
         self::assertStringContainsString('x600.webp', $output);
-        self::assertStringContainsString('/_imaginator/', $output);
+        self::assertStringContainsString('x1200.avif', $output);
+        self::assertStringContainsString('x1800.avif', $output);
     }
 
-    public function testMixedRatioAndFixedHeightMapEmitsPinnedHeightSource(): void
+    public function testMixedRatioAndFixedHeightMapCombinesMinWidthAndResolution(): void
     {
-        // {xs: "16:9", lg: "600px"}: base <img> keeps the 16:9 ladder (2000x1125), the lg <source>
-        // pins the height (smallest rung is 600px tall).
+        // {xs: "16:9", lg: "600px"}: base <img> keeps the 16:9 ladder (2000x1125); the lg tier pins a
+        // flat height per DPR, its media combining the breakpoint min-width with min-resolution.
         $fileUid = $this->importFixture();
 
         $output = $this->render(
@@ -251,9 +258,9 @@ final class ImageViewHelperTest extends FunctionalTestCase
         );
 
         self::assertStringContainsString('<picture>', $output);
-        self::assertStringContainsString('media="(min-width:992px)"', $output);
+        self::assertStringContainsString('media="(min-width:992px) and (min-resolution:1.5dppx)"', $output);
         self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1125"/', $output);
-        // The lg tier is the format <source> (avif); its smallest rung keeps the unscaled 600px height.
+        // lg 1x source keeps the flat 600px height.
         self::assertStringContainsString('x600.avif', $output);
     }
 

@@ -12,6 +12,7 @@ use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Lqip\LqipGeneratorFactory;
 use Schliesser\Imaginator\Rendering\PictureRenderer;
+use Schliesser\Imaginator\Service\DprTierExpander;
 use Schliesser\Imaginator\Service\RatioMapResolver;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Page\AssetCollector;
@@ -45,6 +46,7 @@ final class ImageViewHelper extends AbstractViewHelper
         private readonly PageRenderer $pageRenderer,
         private readonly CropResolver $cropResolver,
         private readonly RatioMapResolver $ratioMapResolver,
+        private readonly DprTierExpander $dprTierExpander,
     ) {}
 
     public function initializeArguments(): void
@@ -95,13 +97,20 @@ final class ImageViewHelper extends AbstractViewHelper
         $sourceWidth = $resolution->sourceWidth;
         $sourceHeight = $resolution->sourceHeight;
 
+        // Per-DPR expansion: each fixed-height tier becomes 1x..cap min-resolution sources so a hero
+        // serves its pinned height at the device's real pixel ratio. Ratio tiers pass through.
+        $breakpoints = $this->dprTierExpander->expand(
+            $this->breakpoints($this->arguments['aspectRatio'], $settings->breakpoints, $sourceWidth, $sourceHeight),
+            $settings->fixedHeightDprCap,
+        );
+
         $request = new ImageRenderRequest(
             isReference: $isReference,
             uid: $file->getUid(),
             sourceWidth: $sourceWidth,
             sourceHeight: $sourceHeight,
             cropVariant: $cropVariant,
-            breakpoints: $this->breakpoints($this->arguments['aspectRatio'], $settings->breakpoints, $sourceWidth, $sourceHeight),
+            breakpoints: $breakpoints,
             format: self::DEFAULT_FORMAT,
             quality: $settings->qualities[self::DEFAULT_FORMAT] ?? 80,
             alt: (string) $this->arguments['alt'],
