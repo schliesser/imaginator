@@ -9,6 +9,10 @@ namespace Schliesser\Imaginator\Dto;
  * height in CSS px (width climbs the ladder, height stays pinned — the full-bleed hero case).
  * Exactly one of `ratio`/`fixedHeight` is set. A null media makes this the default `<img>`
  * (single-tier case or the `<picture>` fallback); a non-null media emits a `<source media>` tier.
+ *
+ * `resolutionGated` marks a `>1x` fixed-height variant produced by the DPR expander (its media
+ * carries a `min-resolution` clause). Such a tier must emit the default format as a `<source>` too,
+ * because the 1x `<img>` cannot satisfy a high-DPR request in a non-avif browser.
  */
 final readonly class BreakpointRatio
 {
@@ -16,6 +20,7 @@ final readonly class BreakpointRatio
         public ?AspectRatio $ratio = null,
         public ?string $media = null,
         public ?int $fixedHeight = null,
+        public bool $resolutionGated = false,
     ) {
         if (($this->ratio === null) === ($this->fixedHeight === null)) {
             throw new \InvalidArgumentException(

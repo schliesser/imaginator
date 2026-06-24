@@ -39,4 +39,12 @@ final class BreakpointRatioTest extends TestCase
 
         new BreakpointRatio(new AspectRatio(16, 9), null, 600);
     }
+
+    public function testResolutionGatedDefaultsFalseAndIsSettable(): void
+    {
+        self::assertFalse((new BreakpointRatio(new AspectRatio(16, 9)))->resolutionGated);
+        self::assertTrue(
+            (new BreakpointRatio(media: '(min-resolution:1.5dppx)', fixedHeight: 1200, resolutionGated: true))->resolutionGated,
+        );
+    }
 }
