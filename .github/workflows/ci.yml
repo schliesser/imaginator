@@ -198,6 +198,8 @@ jobs:
           mkdir -p config/system
           cat > config/system/additional.php <<'PHP'
           <?php
+          // `typo3 setup` pins trustedHostsPattern to SERVER_NAME; allow the ddev host Playwright uses.
+          $GLOBALS['TYPO3_CONF_VARS']['SYS']['trustedHostsPattern'] = '.*';
           $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processor'] = 'imgproxy';
           $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processorBaseUrl'] = 'https://imaginator.ddev.site:8081';
           PHP
