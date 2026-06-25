@@ -23,10 +23,11 @@ Declare the ViewHelper namespace once per template and call :html:`<i:image>`.
                  alt="A product"/>
 
         {# Art direction: per-breakpoint ratios render a <picture> with one
-           <source> each. The map is {mediaQuery: ratio}; the entry whose media
-           is empty (or the last entry) becomes the <img> fallback. #}
+           <source> each. Keys are breakpoint aliases (xs, lg, …) or px min-widths
+           (0, 992, …); each becomes a (min-width:Npx) <source>, and the min-0/xs
+           entry becomes the <img> fallback. #}
         <i:image image="{hero}"
-                 aspectRatio="{'(min-width:992px)': '16:9', '(max-width:991px)': '1:1'}"
+                 aspectRatio="{xs: '1:1', lg: '16:9'}"
                  alt="Hero"/>
 
         {# Full-bleed hero: a fixed CSS height instead of a ratio. Width climbs
