@@ -50,4 +50,18 @@ final class TcaRegistrationTest extends FunctionalTestCase
         self::assertIsString($showitem);
         self::assertStringContainsString('aspect_ratio', $showitem);
     }
+
+    public function testDefaultCropVariantOffersAFocusAreaWithCoreAspectRatios(): void
+    {
+        // The feature toggle defaults on, so a real boot must register the focus area on the default
+        // crop variant of file references — keeping core's stock ratio set intact (declaring
+        // cropVariants at all drops core's implicit default, so we re-supply it verbatim).
+        $default = $GLOBALS['TCA']['sys_file_reference']['columns']['crop']['config']['cropVariants']['default'] ?? null;
+        self::assertIsArray($default);
+        self::assertSame(['16:9', '3:2', '4:3', '1:1', 'NaN'], array_keys($default['allowedAspectRatios']));
+        self::assertSame(
+            ['x' => 1 / 3, 'y' => 1 / 3, 'width' => 1 / 3, 'height' => 1 / 3],
+            $default['focusArea'],
+        );
+    }
 }

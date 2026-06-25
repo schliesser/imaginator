@@ -29,6 +29,9 @@ final class FocusAreaTcaOverrideTest extends TestCase
         include self::OVERRIDE;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function default(): array
     {
         return $GLOBALS['TCA']['sys_file_reference']['columns']['crop']['config']['cropVariants']['default'];
