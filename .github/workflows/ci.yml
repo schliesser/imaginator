@@ -194,11 +194,14 @@ jobs:
       - name: Point imaginator at imgproxy
         # The project dir is mounted into the DDEV web container, so write the config on the host
         # (a nested heredoc inside `ddev exec "…"` breaks the outer shell parse) and flush in-container.
+        # APPEND — do not clobber: ddev generates this additional.php (DB creds, trustedHostsPattern,
+        # dev settings). Overwriting it drops trustedHostsPattern and 500s on the imaginator.ddev.site
+        # host header. Seed `<?php` only if ddev didn't already create the file.
         run: |
           mkdir -p config/system
-          cat > config/system/additional.php <<'PHP'
-          <?php
-          // `typo3 setup` pins trustedHostsPattern to SERVER_NAME; allow the ddev host Playwright uses.
+          F=config/system/additional.php
+          [ -f "$F" ] || echo '<?php' > "$F"
+          cat >> "$F" <<'PHP'
           $GLOBALS['TYPO3_CONF_VARS']['SYS']['trustedHostsPattern'] = '.*';
           $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processor'] = 'imgproxy';
           $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processorBaseUrl'] = 'https://imaginator.ddev.site:8081';
