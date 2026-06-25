@@ -151,6 +151,9 @@ final readonly class PictureRenderer
         }
         $attrs['srcset'] = $this->srcset($request, $rungs, $processor, $format);
         $attrs['sizes'] = $request->priority ? '100vw' : 'auto';
+        $largest = $rungs[array_key_last($rungs)];
+        $attrs['width'] = (string) $largest->width;
+        $attrs['height'] = (string) $largest->height;
 
         return '<source' . $this->attrs($attrs) . '>';
     }
@@ -171,11 +174,17 @@ final readonly class PictureRenderer
     private function sourceTag(ImageRenderRequest $request, BreakpointRatio $breakpoint, ImageProcessorInterface $processor): string
     {
         $rungs = $this->rungs($breakpoint, $request);
+        $largest = $rungs[array_key_last($rungs)];
 
+        // width/height per <source> so the browser sizes the box to the *selected* breakpoint's
+        // ratio, not the <img>'s — without them an art-directed <picture> renders every source in
+        // the <img>'s aspect ratio (the box never changes shape across breakpoints).
         return '<source' . $this->attrs([
             'media' => htmlspecialchars((string) $breakpoint->media, ENT_QUOTES),
             'srcset' => $this->srcset($request, $rungs, $processor),
             'sizes' => $request->priority ? '100vw' : 'auto',
+            'width' => (string) $largest->width,
+            'height' => (string) $largest->height,
         ]) . '>';
     }
 

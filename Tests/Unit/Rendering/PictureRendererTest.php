@@ -81,7 +81,7 @@ final class PictureRendererTest extends TestCase
 
         $expected = '<picture>'
             . '<source media="(min-width:992px)"'
-            . ' srcset="/img/9/320x180.webp 320w, /img/9/640x360.webp 640w" sizes="auto">'
+            . ' srcset="/img/9/320x180.webp 320w, /img/9/640x360.webp 640w" sizes="auto" width="640" height="360">'
             . '<img src="/img/9/640x480.webp"'
             . ' srcset="/img/9/320x240.webp 320w, /img/9/640x480.webp 640w"'
             . ' sizes="auto" width="640" height="480" alt="A hero" loading="lazy" decoding="async">'
@@ -157,7 +157,7 @@ final class PictureRendererTest extends TestCase
 
         $expected = '<picture>'
             . '<source media="(min-width:992px)"'
-            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x600.webp 640w" sizes="auto">'
+            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x600.webp 640w" sizes="auto" width="640" height="600">'
             . '<img src="/img/9/640x360.webp"'
             . ' srcset="/img/9/320x180.webp 320w, /img/9/640x360.webp 640w"'
             . ' sizes="auto" width="640" height="360" alt="A hero" loading="lazy" decoding="async">'
@@ -188,9 +188,9 @@ final class PictureRendererTest extends TestCase
 
         $expected = '<picture>'
             . '<source type="image/avif" media="(min-resolution:1.5dppx)"'
-            . ' srcset="/img/9/320x1200.avif 320w, /img/9/640x1200.avif 640w" sizes="auto">'
+            . ' srcset="/img/9/320x1200.avif 320w, /img/9/640x1200.avif 640w" sizes="auto" width="640" height="1200">'
             . '<source type="image/webp" media="(min-resolution:1.5dppx)"'
-            . ' srcset="/img/9/320x1200.webp 320w, /img/9/640x1200.webp 640w" sizes="auto">'
+            . ' srcset="/img/9/320x1200.webp 320w, /img/9/640x1200.webp 640w" sizes="auto" width="640" height="1200">'
             . '<img src="/img/9/640x600.webp"'
             . ' srcset="/img/9/320x600.webp 320w, /img/9/640x600.webp 640w"'
             . ' sizes="auto" width="640" height="600" alt="A hero" loading="lazy" decoding="async">'

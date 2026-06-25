@@ -59,11 +59,11 @@ final class PictureRendererFormatsTest extends TestCase
         $html = $this->renderer()->render($request, $this->fakeProcessor());
 
         self::assertStringContainsString(
-            '<source type="image/avif" srcset="/url/avif/320x180 320w, /url/avif/640x360 640w" sizes="auto">',
+            '<source type="image/avif" srcset="/url/avif/320x180 320w, /url/avif/640x360 640w" sizes="auto" width="640" height="360">',
             $html
         );
         self::assertStringContainsString(
-            '<source type="image/webp" srcset="/url/webp/320x180 320w, /url/webp/640x360 640w" sizes="auto">',
+            '<source type="image/webp" srcset="/url/webp/320x180 320w, /url/webp/640x360 640w" sizes="auto" width="640" height="360">',
             $html
         );
         self::assertMatchesRegularExpression(
@@ -122,19 +122,19 @@ final class PictureRendererFormatsTest extends TestCase
         $html = $this->renderer()->render($request, $this->fakeProcessor());
 
         self::assertStringContainsString(
-            '<source type="image/avif" media="(min-width:992px)" srcset="/url/avif/320x180 320w, /url/avif/640x360 640w" sizes="auto">',
+            '<source type="image/avif" media="(min-width:992px)" srcset="/url/avif/320x180 320w, /url/avif/640x360 640w" sizes="auto" width="640" height="360">',
             $html
         );
         self::assertStringContainsString(
-            '<source type="image/webp" media="(min-width:992px)" srcset="/url/webp/320x180 320w, /url/webp/640x360 640w" sizes="auto">',
+            '<source type="image/webp" media="(min-width:992px)" srcset="/url/webp/320x180 320w, /url/webp/640x360 640w" sizes="auto" width="640" height="360">',
             $html
         );
         self::assertStringContainsString(
-            '<source type="image/avif" media="(max-width:991px)" srcset="/url/avif/320x320 320w, /url/avif/640x640 640w" sizes="auto">',
+            '<source type="image/avif" media="(max-width:991px)" srcset="/url/avif/320x320 320w, /url/avif/640x640 640w" sizes="auto" width="640" height="640">',
             $html
         );
         self::assertStringContainsString(
-            '<source type="image/webp" media="(max-width:991px)" srcset="/url/webp/320x320 320w, /url/webp/640x640 640w" sizes="auto">',
+            '<source type="image/webp" media="(max-width:991px)" srcset="/url/webp/320x320 320w, /url/webp/640x640 640w" sizes="auto" width="640" height="640">',
             $html
         );
         // Fallback <img> uses the original format and the default (last) breakpoint's ratio.

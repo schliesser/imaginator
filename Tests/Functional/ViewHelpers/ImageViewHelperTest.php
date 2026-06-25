@@ -164,6 +164,9 @@ final class ImageViewHelperTest extends FunctionalTestCase
         // The alias is never leaked verbatim as a media string.
         self::assertStringNotContainsString('media="lg"', $output);
         self::assertStringNotContainsString('media="md"', $output);
+        // Each <source> carries its own width/height so the browser sizes the box to the selected
+        // breakpoint's ratio (without it an art-directed <picture> never changes shape).
+        self::assertMatchesRegularExpression('/<source [^>]*media="\(min-width:992px\)"[^>]*width="\d+" height="\d+">/', $output);
     }
 
     public function testAspectRatioAcceptsRawJsonMapFromDatabase(): void
