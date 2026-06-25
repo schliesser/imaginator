@@ -54,9 +54,6 @@ jobs:
         with:
           path: ~/.composer/cache
           key: composer-${{ matrix.php }}-${{ matrix.typo3 }}-${{ hashFiles('composer.json') }}
-      - name: Drop TYPO3-14-only dev deps on the 13.4 leg
-        if: matrix.typo3 == '^13.4'
-        run: composer remove --dev --no-update friendsoftypo3/content-blocks
       - run: composer update --with="typo3/cms-core:${{ matrix.typo3 }}" --prefer-dist --no-progress --no-interaction
       - run: .Build/bin/phpunit -c Build/phpunit/UnitTests.xml
 
@@ -102,9 +99,6 @@ jobs:
         with:
           path: ~/.composer/cache
           key: composer-${{ matrix.php }}-${{ matrix.typo3 }}-${{ hashFiles('composer.json') }}
-      - name: Drop TYPO3-14-only dev deps on the 13.4 leg
-        if: matrix.typo3 == '^13.4'
-        run: composer remove --dev --no-update friendsoftypo3/content-blocks
       - run: composer update --with="typo3/cms-core:${{ matrix.typo3 }}" --prefer-dist --no-progress --no-interaction
       - run: .Build/bin/phpunit -c Build/phpunit/FunctionalTests.xml
 
@@ -162,13 +156,13 @@ jobs:
             curl -sf http://127.0.0.1:8080/ -o /dev/null && break || sleep 2
           done
           curl -sf http://127.0.0.1:8080/ -o /dev/null
-      - name: Run Playwright (frontend <picture>)
-        # The backend element E2E (aspect-ratios.spec.ts) needs a multi-threaded backend (php-fpm);
-        # it stays a DDEV/manual suite for now. The frontend <picture> spec is the CI gate.
+      - name: Run Playwright (frontend + backend)
+        # PHP_CLI_SERVER_WORKERS lets the single binary serve the backend's parallel requests, so
+        # both the frontend <picture> spec and the backend element spec run against php -S.
         env:
           IMAGINATOR_BASE_URL: http://127.0.0.1:8080
           PLAYWRIGHT_CHANNEL: chromium
-        run: npx playwright test frontend-picture.spec.ts
+        run: npx playwright test
       - if: failure()
         run: cat /tmp/php-server.log || true
       - if: failure()
