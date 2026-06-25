@@ -20,6 +20,10 @@ final class JavaScriptModuleResourceTest extends FunctionalTestCase
 
     public function testBackendModuleFileResolvesAsPublishedPublicResource(): void
     {
+        if (!class_exists(SystemResourceFactory::class)) {
+            self::markTestSkipped('SystemResourceFactory + published-resource resolution is TYPO3 v14+ only.');
+        }
+
         $factory = $this->get(SystemResourceFactory::class);
 
         $resource = $factory->createPublicResource(
