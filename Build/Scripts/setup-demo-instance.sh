@@ -15,17 +15,27 @@
 
 set -euo pipefail
 
-BASE_URL="https://imaginator.ddev.site/"
-ADMIN_USER="admin"
-ADMIN_PASS="Password.1"
+# Environment-parameterised so the same script seeds the DDEV demo (defaults below) and the CI
+# instance (Build/Scripts/setup-ci-instance.sh exports native MariaDB creds + a localhost BASE_URL).
+BASE_URL="${BASE_URL:-https://imaginator.ddev.site/}"
+ADMIN_USER="${ADMIN_USER:-admin}"
+ADMIN_PASS="${ADMIN_PASS:-Password.1}"
+DB_HOST="${DB_HOST:-db}"
+DB_PORT="${DB_PORT:-3306}"
+DB_NAME="${DB_NAME:-db}"
+DB_USER="${DB_USER:-db}"
+DB_PASS="${DB_PASS:-db}"
+DB_ROOT_USER="${DB_ROOT_USER:-root}"
+DB_ROOT_PASS="${DB_ROOT_PASS:-root}"
 SITE_CONFIG="config/sites/main/config.yaml"
 
 echo "› resetting the database for a clean install"
-mysql -h db -u root -proot -e "DROP DATABASE IF EXISTS db; CREATE DATABASE db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null
+mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_ROOT_USER}" -p"${DB_ROOT_PASS}" \
+    -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null
 
 echo "› TYPO3 setup (database + admin user + site)"
 .Build/bin/typo3 setup \
-    --driver=mysqli --host=db --port=3306 --dbname=db --username=db --password=db \
+    --driver=mysqli --host="${DB_HOST}" --port="${DB_PORT}" --dbname="${DB_NAME}" --username="${DB_USER}" --password="${DB_PASS}" \
     --admin-username="${ADMIN_USER}" --admin-user-password="${ADMIN_PASS}" --admin-email=admin@example.com \
     --project-name=Imaginator --create-site="${BASE_URL}" --server-type=other --no-interaction --force
 
@@ -51,13 +61,13 @@ echo "› finalising extensions and caches"
 .Build/bin/typo3 asset:publish
 .Build/bin/typo3 cache:flush
 # A fresh install can leave a stale empty page in the page cache; clear it directly.
-mysql -h db -u db -pdb db -e "TRUNCATE cache_pages;" 2>/dev/null || true
+mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" -e "TRUNCATE cache_pages;" 2>/dev/null || true
 
 echo "› indexing demo images in FAL (warm-up request)"
 curl -sk -o /dev/null "${BASE_URL}" || true
 
 echo "› creating cropped FileReference demo content elements"
-mysql -h db -u db -pdb db <<'SQL' || true
+mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" <<'SQL' || true
 SET @hero   = (SELECT uid FROM sys_file WHERE identifier = '/demo/hero.jpg'   LIMIT 1);
 SET @banner = (SELECT uid FROM sys_file WHERE identifier = '/demo/banner.jpg' LIMIT 1);
 SET @single = (SELECT uid FROM sys_file WHERE identifier = '/demo/single.jpg' LIMIT 1);
@@ -82,7 +92,7 @@ VALUES (1, @single, LAST_INSERT_ID(), 'tt_content', 'assets', 1,
 SQL
 
 .Build/bin/typo3 cache:flush
-mysql -h db -u db -pdb db -e "TRUNCATE cache_pages;" 2>/dev/null || true
+mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" -e "TRUNCATE cache_pages;" 2>/dev/null || true
 
 cat <<EOF
 
