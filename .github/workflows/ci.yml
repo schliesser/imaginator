@@ -192,12 +192,15 @@ jobs:
       - name: Build the demo instance
         run: ddev exec bash Build/Scripts/setup-demo-instance.sh
       - name: Point imaginator at imgproxy
+        # The project dir is mounted into the DDEV web container, so write the config on the host
+        # (a nested heredoc inside `ddev exec "…"` breaks the outer shell parse) and flush in-container.
         run: |
-          ddev exec "mkdir -p config/system && cat > config/system/additional.php <<'PHP'
+          mkdir -p config/system
+          cat > config/system/additional.php <<'PHP'
           <?php
-          \$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processor'] = 'imgproxy';
-          \$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processorBaseUrl'] = 'https://imaginator.ddev.site:8081';
-          PHP"
+          $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processor'] = 'imgproxy';
+          $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processorBaseUrl'] = 'https://imaginator.ddev.site:8081';
+          PHP
           ddev exec .Build/bin/typo3 cache:flush
       - uses: actions/setup-node@v4
         with:
