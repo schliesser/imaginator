@@ -1,5 +1,5 @@
 name: schliesser/imaginator-demo
 label: 'Imaginator Demo (manual testing)'
 dependencies:
-  - schliesser/imaginator
   - typo3/fluid-styled-content
+  - typo3/fluid-styled-content-css

@@ -1,5 +1,0 @@
-# Imaginator Site Set.
-#
-# The renderer is driven entirely by the <i:image> ViewHelper and the signed image endpoint;
-# there is no page-level TypoScript output here. Frontend CSS/JS assets (LQIP background,
-# Safari sizes fallback) are added by the formats-lqip and js-enhancement follow-on plans.
