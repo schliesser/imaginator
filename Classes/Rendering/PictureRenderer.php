@@ -17,6 +17,10 @@ use Schliesser\Imaginator\Ladder\Rung;
  * produces the pixels — it only asks the processor for each candidate URL. A single breakpoint
  * yields an `<img>` with a width ladder + sizes="auto"; width/height come from the largest rung
  * so there is zero CLS. priority images drop lazy-loading for fetchpriority + an explicit sizes.
+ *
+ * A single output format is applied uniformly to the `<img>` and every `<source>` — there is no
+ * format stacking. `<picture>` is emitted only for art-direction (per-breakpoint ratios / DPR-gated
+ * heroes), never as a format-fallback shell.
  */
 final readonly class PictureRenderer
 {
@@ -37,9 +41,9 @@ final readonly class PictureRenderer
         if (!$request->priority) {
             return [];
         }
-        $format = $request->formats[0] ?? $request->format;
-        // When the tier set is resolution-gated, the media-null base is the default-format <img>
-        // (preload-scanned anyway); a preferred-format preload for it would mismatch and double-fetch.
+        $format = $request->format;
+        // When the tier set is resolution-gated, the media-null base is the <img> (preload-scanned
+        // anyway), so a media-null preload for it would just duplicate that fetch.
         $hasGated = array_filter($request->breakpoints, static fn(BreakpointRatio $b): bool => $b->resolutionGated) !== [];
         $links = [];
         foreach ($request->breakpoints as $breakpoint) {
@@ -50,7 +54,7 @@ final readonly class PictureRenderer
             $attrs = [
                 'rel' => 'preload',
                 'as' => 'image',
-                'imagesrcset' => $this->srcset($request, $rungs, $processor, $format),
+                'imagesrcset' => $this->srcset($request, $rungs, $processor),
                 'imagesizes' => '100vw',
                 'type' => 'image/' . $format,
                 'fetchpriority' => 'high',
@@ -91,71 +95,11 @@ final readonly class PictureRenderer
 
     public function render(ImageRenderRequest $request, ImageProcessorInterface $processor): string
     {
-        if ($request->formats !== []) {
-            return $this->renderPictureWithFormats($request, $processor);
-        }
         if (count($request->breakpoints) > 1) {
             return $this->renderPicture($request, $processor);
         }
 
         return $this->renderImg($request, $this->defaultBreakpoint($request), $processor);
-    }
-
-    /**
-     * Emit a `<picture>` with one `<source type="image/{format}">` per negotiated format (in order),
-     * ending with an `<img>` in the default format. Browser picks the first it supports.
-     */
-    private function renderPictureWithFormats(ImageRenderRequest $request, ImageProcessorInterface $processor): string
-    {
-        $sources = '';
-        foreach ($request->breakpoints as $breakpoint) {
-            if ($breakpoint->media === null) {
-                continue;
-            }
-            $rungs = $this->rungs($breakpoint, $request);
-            foreach ($request->formats as $format) {
-                if ($format === $request->format && !$breakpoint->resolutionGated) {
-                    // Normally the default format is the <img>; but a resolution-gated tier needs it
-                    // as a <source> too — the 1x <img> cannot serve a high-DPR non-avif request.
-                    continue;
-                }
-                $sources .= $this->formatSource($request, $rungs, $format, $breakpoint->media, $processor);
-            }
-        }
-        if ($sources === '') {
-            // Single tier: one source per format, no media.
-            $rungs = $this->rungs($this->defaultBreakpoint($request), $request);
-            foreach ($request->formats as $format) {
-                if ($format === $request->format) {
-                    continue; // already the <img> default; a <source> for it would be redundant
-                }
-                $sources .= $this->formatSource($request, $rungs, $format, null, $processor);
-            }
-        }
-        $img = $this->renderImg($request, $this->defaultBreakpoint($request), $processor);
-
-        return '<picture>' . $sources . $img . '</picture>';
-    }
-
-    /** @param Rung[] $rungs */
-    private function formatSource(
-        ImageRenderRequest $request,
-        array $rungs,
-        string $format,
-        ?string $media,
-        ImageProcessorInterface $processor,
-    ): string {
-        $attrs = ['type' => 'image/' . $format];
-        if ($media !== null) {
-            $attrs['media'] = htmlspecialchars($media, ENT_QUOTES);
-        }
-        $attrs['srcset'] = $this->srcset($request, $rungs, $processor, $format);
-        $attrs['sizes'] = $request->priority ? '100vw' : 'auto';
-        $largest = $rungs[array_key_last($rungs)];
-        $attrs['width'] = (string) $largest->width;
-        $attrs['height'] = (string) $largest->height;
-
-        return '<source' . $this->attrs($attrs) . '>';
     }
 
     private function renderPicture(ImageRenderRequest $request, ImageProcessorInterface $processor): string
@@ -217,11 +161,11 @@ final readonly class PictureRenderer
     }
 
     /** @param Rung[] $rungs */
-    private function srcset(ImageRenderRequest $request, array $rungs, ImageProcessorInterface $processor, ?string $format = null): string
+    private function srcset(ImageRenderRequest $request, array $rungs, ImageProcessorInterface $processor): string
     {
         $candidates = [];
         foreach ($rungs as $rung) {
-            $candidates[] = $processor->buildUrl($this->variant($request, $rung, $format)) . ' ' . $rung->width . 'w';
+            $candidates[] = $processor->buildUrl($this->variant($request, $rung)) . ' ' . $rung->width . 'w';
         }
 
         return implode(', ', $candidates);
@@ -231,7 +175,7 @@ final readonly class PictureRenderer
      * Build one tier's width ladder, passing the tier's fixed height (if any) so a hero pins its
      * height while the ratio tiers derive it. Processor-agnostic: only widths/heights vary here.
      *
-     * @return Rung[]
+     * @return non-empty-list<Rung>
      */
     private function rungs(BreakpointRatio $breakpoint, ImageRenderRequest $request): array
     {
@@ -243,7 +187,7 @@ final readonly class PictureRenderer
         );
     }
 
-    private function variant(ImageRenderRequest $request, Rung $rung, ?string $format = null): ImageVariant
+    private function variant(ImageRenderRequest $request, Rung $rung): ImageVariant
     {
         return new ImageVariant(
             $request->isReference,
@@ -251,7 +195,7 @@ final readonly class PictureRenderer
             $request->cropVariant,
             $rung->width,
             $rung->height,
-            $format ?? $request->format,
+            $request->format,
             $request->quality,
         );
     }

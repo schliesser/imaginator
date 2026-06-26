@@ -31,9 +31,6 @@ final class ImageViewHelper extends AbstractViewHelper
     /** Shared identifier so every LQIP rule lands in one merged `<style>`. */
     private const LQIP_STYLE_IDENTIFIER = 'imaginator-lqip';
 
-    /** Universal `<img>` default format. WebP carries alpha + animation and decodes everywhere modern. */
-    private const DEFAULT_FORMAT = 'webp';
-
     protected $escapeOutput = false;
 
     public function __construct(
@@ -111,12 +108,11 @@ final class ImageViewHelper extends AbstractViewHelper
             sourceHeight: $sourceHeight,
             cropVariant: $cropVariant,
             breakpoints: $breakpoints,
-            format: self::DEFAULT_FORMAT,
-            quality: $settings->qualities[self::DEFAULT_FORMAT] ?? 80,
+            format: $settings->format,
+            quality: $settings->qualities[$settings->format] ?? 80,
             alt: (string) $this->arguments['alt'],
             class: $this->arguments['class'] !== null ? (string) $this->arguments['class'] : null,
             priority: (bool) $this->arguments['priority'],
-            formats: $settings->formats,
             lqipClass: $this->registerLqip($this->lqipFactory->get($settings->lqip)->generate($original)),
         );
 

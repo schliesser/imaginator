@@ -17,7 +17,7 @@ final class SettingsFactoryTest extends TestCase
         $extensionConfiguration->method('get')->with('imaginator')->willReturn([
             'ladder' => '200,400,800',
             'maxDimension' => '1600',
-            'formats' => 'webp',
+            'format' => 'webp',
             'quality' => ['avif' => 40, 'webp' => 70],
             'processor' => 'local',
             'lqip' => 'dominant-color',
@@ -28,7 +28,7 @@ final class SettingsFactoryTest extends TestCase
 
         self::assertSame([200, 400, 800], $settings->ladder);
         self::assertSame(1600, $settings->maxDimension);
-        self::assertSame(['webp'], $settings->formats);
+        self::assertSame('webp', $settings->format);
         self::assertSame(['avif' => 40, 'webp' => 70], $settings->qualities);
         self::assertSame('dominant-color', $settings->lqip);
         self::assertContains('old1', $settings->secrets);

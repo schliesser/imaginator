@@ -166,10 +166,11 @@ final class PictureRendererTest extends TestCase
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
 
-    public function testResolutionGatedFixedHeightTiersEmitBothFormatsAsSources(): void
+    public function testResolutionGatedFixedHeightTiersEmitMediaScopedSourcesInTheSingleFormat(): void
     {
-        // Pre-expanded DPR tiers: the gated 2x source must carry BOTH formats (the 1x <img> cannot
-        // satisfy a high-DPR non-avif request). The 1x base remains the webp <img>.
+        // Pre-expanded DPR tiers: the gated 2x tier becomes a media-scoped <source> (the 1x <img>
+        // cannot satisfy a high-DPR request), the 1x base stays the <img>. Single format throughout —
+        // no <source type=…> stacking, the source carries no `type` attribute.
         $request = new ImageRenderRequest(
             isReference: false,
             uid: 9,
@@ -180,19 +181,16 @@ final class PictureRendererTest extends TestCase
                 new BreakpointRatio(media: '(min-resolution:1.5dppx)', fixedHeight: 1200, resolutionGated: true),
                 new BreakpointRatio(media: null, fixedHeight: 600),
             ],
-            format: 'webp',
-            quality: 72,
+            format: 'avif',
+            quality: 50,
             alt: 'A hero',
-            formats: ['avif', 'webp'],
         );
 
         $expected = '<picture>'
-            . '<source type="image/avif" media="(min-resolution:1.5dppx)"'
+            . '<source media="(min-resolution:1.5dppx)"'
             . ' srcset="/img/9/320x1200.avif 320w, /img/9/640x1200.avif 640w" sizes="auto" width="640" height="1200">'
-            . '<source type="image/webp" media="(min-resolution:1.5dppx)"'
-            . ' srcset="/img/9/320x1200.webp 320w, /img/9/640x1200.webp 640w" sizes="auto" width="640" height="1200">'
-            . '<img src="/img/9/640x600.webp"'
-            . ' srcset="/img/9/320x600.webp 320w, /img/9/640x600.webp 640w"'
+            . '<img src="/img/9/640x600.avif"'
+            . ' srcset="/img/9/320x600.avif 320w, /img/9/640x600.avif 640w"'
             . ' sizes="auto" width="640" height="600" alt="A hero" loading="lazy" decoding="async">'
             . '</picture>';
 
@@ -211,15 +209,15 @@ final class PictureRendererTest extends TestCase
             sourceHeight: 4000,
             cropVariant: 'default',
             breakpoints: [],
-            format: 'webp',
-            quality: 72,
+            format: 'avif',
+            quality: 50,
             alt: 'A hero',
-            formats: ['webp'],
         );
 
-        $expected = '<picture><img src="/img/9/640x640.webp"'
-            . ' srcset="/img/9/320x320.webp 320w, /img/9/640x640.webp 640w"'
-            . ' sizes="auto" width="640" height="640" alt="A hero" loading="lazy" decoding="async"></picture>';
+        // No art-direction (a single synthesised tier) -> a bare <img>, no <picture> shell.
+        $expected = '<img src="/img/9/640x640.avif"'
+            . ' srcset="/img/9/320x320.avif 320w, /img/9/640x640.avif 640w"'
+            . ' sizes="auto" width="640" height="640" alt="A hero" loading="lazy" decoding="async">';
 
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }

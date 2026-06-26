@@ -76,7 +76,7 @@ final class LadderFactoryTest extends TestCase
         // A source whose width FAL could not determine (0) must not yield an empty ladder — the
         // renderer reads the largest rung and would fatal on an empty set (broken image).
         $rungs = $this->factory()->build(new AspectRatio(16, 9), 0, 0);
-        self::assertNotEmpty($rungs);
+        self::assertGreaterThanOrEqual(1, count($rungs));
         self::assertGreaterThanOrEqual(1, $rungs[array_key_last($rungs)]->width);
     }
 
@@ -85,7 +85,7 @@ final class LadderFactoryTest extends TestCase
         // Source far too short for the target ratio: the height-bound width floors below 1. Must
         // still yield at least one rung instead of an empty ladder.
         $rungs = $this->factory()->build(new AspectRatio(1, 20), 1000, 4);
-        self::assertNotEmpty($rungs);
+        self::assertGreaterThanOrEqual(1, count($rungs));
         self::assertGreaterThanOrEqual(1, $rungs[array_key_last($rungs)]->width);
     }
 

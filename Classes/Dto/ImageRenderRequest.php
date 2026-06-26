@@ -12,9 +12,9 @@ final readonly class ImageRenderRequest
 {
     /**
      * @param BreakpointRatio[] $breakpoints ordered; entries with media => <source>, the one with null media => <img>
-     * @param string[]          $formats     negotiated formats (most-preferred first) emitted as stacked
-     *                                        `<source type>` tiers; empty => bare <img>/<picture>. The
-     *                                        `format` field is the default format for the `<img>`.
+     * @param string             $format      the single output format (avif|webp) applied uniformly to the
+     *                                         `<img>` and every `<source>`. No format stacking — `<picture>`
+     *                                         is used only for art-direction (per-breakpoint ratios).
      */
     public function __construct(
         public bool $isReference,
@@ -28,7 +28,6 @@ final readonly class ImageRenderRequest
         public string $alt,
         public ?string $class = null,
         public bool $priority = false,
-        public array $formats = [],
         public ?string $lqipClass = null,
     ) {}
 }

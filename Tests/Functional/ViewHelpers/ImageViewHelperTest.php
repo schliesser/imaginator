@@ -93,13 +93,13 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringContainsString('srcset="', $output);
         self::assertStringContainsString('sizes="auto"', $output);
         self::assertStringContainsString('/_imaginator/', $output);
-        self::assertStringContainsString('.webp', $output);
+        self::assertStringContainsString('.avif', $output);
         self::assertStringContainsString('alt="A hero"', $output);
     }
 
-    public function testImgFallbackIsWebpRegardlessOfSourceFormat(): void
+    public function testImgIsAvifByDefaultRegardlessOfSourceFormat(): void
     {
-        // Source is a JPEG, yet the <img> fallback must be a universal webp, not the source format.
+        // Source is a JPEG, yet the <img> must be the configured output format (AVIF default).
         $fileUid = $this->importFixture();
 
         $output = $this->render(
@@ -108,7 +108,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
             . ' aspectRatio="16:9" alt="A hero"/></html>'
         );
 
-        self::assertMatchesRegularExpression('/<img [^>]*src="[^"]*\.webp"/', $output);
+        self::assertMatchesRegularExpression('/<img [^>]*src="[^"]*\.avif"/', $output);
         self::assertDoesNotMatchRegularExpression('/<img [^>]*src="[^"]*\.(jpe?g)"/', $output);
     }
 
@@ -226,7 +226,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
     public function testScalarPxHeightEmitsPerDprResolutionSources(): void
     {
         // A full-bleed hero: aspectRatio="600px" pins the height by real DPR. The 1x <img> is 600px
-        // tall; min-resolution <source>s serve 2x (1200) and 3x (1800), each in BOTH formats.
+        // tall; min-resolution <source>s serve 2x (1200) and 3x (1800), all in the single output format.
         $fileUid = $this->importFixture();
 
         $output = $this->render(
@@ -237,13 +237,12 @@ final class ImageViewHelperTest extends FunctionalTestCase
 
         // 1x base <img> keeps the flat 600px height.
         self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="600"/', $output);
-        // DPR-gated sources for 2x and 3x, in avif AND webp.
+        // DPR-gated sources for 2x and 3x. Single format -> no <source type=…> stacking.
         self::assertStringContainsString('media="(min-resolution:1.5dppx)"', $output);
         self::assertStringContainsString('media="(min-resolution:2.5dppx)"', $output);
-        self::assertMatchesRegularExpression('#type="image/webp" media="\(min-resolution:1\.5dppx\)"#', $output);
-        self::assertMatchesRegularExpression('#type="image/avif" media="\(min-resolution:2\.5dppx\)"#', $output);
-        // Heights are flat per tier: 600 / 1200 / 1800.
-        self::assertStringContainsString('x600.webp', $output);
+        self::assertStringNotContainsString('type="image/', $output);
+        // Heights are flat per tier: 600 / 1200 / 1800, all AVIF.
+        self::assertStringContainsString('x600.avif', $output);
         self::assertStringContainsString('x1200.avif', $output);
         self::assertStringContainsString('x1800.avif', $output);
     }
@@ -267,7 +266,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringContainsString('x600.avif', $output);
     }
 
-    public function testEmitsFormatTiersAndCspFriendlyLqip(): void
+    public function testSingleRatioRendersBareAvifImgWithCspFriendlyLqip(): void
     {
         $fileUid = $this->importFixture();
 
@@ -277,12 +276,11 @@ final class ImageViewHelperTest extends FunctionalTestCase
             . ' aspectRatio="16:9" alt="A hero"/></html>'
         );
 
-        // AVIF <source> tier above the webp <img> default. webp is NOT repeated as a <source>:
-        // it is already the <img> fallback, so a webp <source> would be redundant.
-        self::assertStringContainsString('<picture>', $output);
-        self::assertStringContainsString('type="image/avif"', $output);
-        self::assertStringNotContainsString('type="image/webp"', $output);
-        self::assertMatchesRegularExpression('/<img [^>]*src="[^"]*\.webp"/', $output);
+        // A single ratio is a bare <img> in the single output format — no <picture> shell, no format
+        // stacking (<picture> is only used for art-direction).
+        self::assertStringNotContainsString('<picture>', $output);
+        self::assertStringNotContainsString('type="image/', $output);
+        self::assertMatchesRegularExpression('/<img [^>]*src="[^"]*\.avif"/', $output);
 
         // The <img> carries an LQIP class, never an inline style attribute (CSP-friendly).
         self::assertMatchesRegularExpression('/<img [^>]*class="imaginator-lqip-[0-9a-f]{12}"/', $output);

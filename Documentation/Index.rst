@@ -55,10 +55,11 @@ JavaScript is never required for sharpness.
         Candidate URLs are HMAC-signed and only ladder-quantized widths are
         ever processed, so the endpoint cannot be abused to exhaust the server.
 
-    ..  card:: Modern formats + LQIP
+    ..  card:: Modern format + LQIP
 
-        Stacked AVIF + WebP :html:`<picture>` tiers and low-quality
-        placeholders (ThumbHash, dominant colour, or none).
+        A single configurable output format (AVIF by default, or WebP) applied
+        uniformly, plus low-quality placeholders (ThumbHash, dominant colour, or
+        none).
 
     ..  card:: LCP-friendly
 

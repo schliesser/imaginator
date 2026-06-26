@@ -69,13 +69,13 @@ Settings
     Design-system breakpoints (``alias:min-width`` px) used to resolve a
     per-breakpoint aspect-ratio map. ``xs:0`` is the base ratio.
 
-..  confval:: formats
-    :name: conf-formats
+..  confval:: format
+    :name: conf-format
     :type: string
-    :default: ``avif,webp``
+    :default: ``avif``
 
-    Negotiated output formats, most-preferred first. Emitted as stacked
-    :html:`<source type="image/…">` tiers.
+    The single output format — ``avif`` or ``webp`` — applied uniformly to the
+    :html:`<img>` and every :html:`<source>`.
 
 ..  confval:: quality.avif
     :name: conf-quality-avif

@@ -17,7 +17,10 @@ final readonly class Settings
     public const DEFAULT_MAX_DIMENSION = 2000;
     /** Highest device-pixel-ratio a fixed-height hero ships a `min-resolution` source for (1x..cap). */
     public const DEFAULT_FIXED_HEIGHT_DPR_CAP = 3;
-    public const DEFAULT_FORMATS = ['avif', 'webp'];
+    /** Single output format. AVIF is the universal default — broad modern-browser support, best ratio. */
+    public const DEFAULT_FORMAT = 'avif';
+    /** The only output formats imaginator emits; anything else falls back to {@see DEFAULT_FORMAT}. */
+    public const ALLOWED_FORMATS = ['avif', 'webp'];
     public const DEFAULT_QUALITIES = ['avif' => 50, 'webp' => 72];
     public const DEFAULT_LQIP = 'thumbhash';
     public const DEFAULT_BREAKPOINTS = ['xs' => 0, 'sm' => 576, 'md' => 768, 'lg' => 992, 'xl' => 1200];
@@ -27,7 +30,7 @@ final readonly class Settings
     /**
      * @param int[]               $ladder
      * @param list<string>        $secrets index 0 signs, all verify (key rotation)
-     * @param string[]            $formats
+     * @param string              $format    single output format (avif|webp), applied uniformly
      * @param array<string, int>  $qualities
      * @param Breakpoint[]        $breakpoints ordered by minWidth ascending; the min-0 entry is the base
      * @param list<string>        $excludeExtensions lowercased file extensions served as-is (no processing)
@@ -37,7 +40,7 @@ final readonly class Settings
         public int $maxDimension,
         public int $fixedHeightDprCap,
         public array $secrets,
-        public array $formats,
+        public string $format,
         public array $qualities,
         public string $processor,
         public string $lqip,
@@ -55,7 +58,6 @@ final readonly class Settings
     public static function fromArray(array $raw, string $encryptionKey): self
     {
         $ladder = self::intList($raw['ladder'] ?? null);
-        $formats = self::stringList($raw['formats'] ?? null);
         $qualities = self::qualityMap($raw['qualities'] ?? null);
         $excludeExtensions = array_map(
             'strtolower',
@@ -67,7 +69,7 @@ final readonly class Settings
             (int) ($raw['maxDimension'] ?? self::DEFAULT_MAX_DIMENSION),
             (int) ($raw['fixedHeightDprCap'] ?? self::DEFAULT_FIXED_HEIGHT_DPR_CAP),
             self::deriveSecrets($encryptionKey, $raw['secretsRotation'] ?? null),
-            $formats !== [] ? $formats : self::DEFAULT_FORMATS,
+            self::format($raw),
             $qualities !== [] ? $qualities : self::DEFAULT_QUALITIES,
             (string) ($raw['processor'] ?? 'local'),
             (string) ($raw['lqip'] ?? self::DEFAULT_LQIP),
@@ -103,6 +105,23 @@ final readonly class Settings
         usort($parsed, static fn(Breakpoint $a, Breakpoint $b): int => $a->minWidth <=> $b->minWidth);
 
         return $parsed;
+    }
+
+    /**
+     * Single output format (avif|webp). Prefers the `format` key; for backward-compat with the old
+     * multi-format `formats` list, falls back to its first entry. Anything outside {@see ALLOWED_FORMATS}
+     * (or unset) resolves to {@see DEFAULT_FORMAT}.
+     *
+     * @param array<string, mixed> $raw
+     */
+    private static function format(array $raw): string
+    {
+        $value = strtolower(trim((string) ($raw['format'] ?? '')));
+        if ($value === '') {
+            $value = strtolower(self::stringList($raw['formats'] ?? null)[0] ?? '');
+        }
+
+        return in_array($value, self::ALLOWED_FORMATS, true) ? $value : self::DEFAULT_FORMAT;
     }
 
     /** @return list<string> */

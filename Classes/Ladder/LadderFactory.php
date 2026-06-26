@@ -23,7 +23,7 @@ final class LadderFactory
      * @param int      $sourceHeight when > 0, ratio mode clamps width so a cover crop never upscales
      *                               vertically; fixed-height mode clamps each rung height to it
      * @param int|null $fixedHeight  fixed CSS-px tier height; null = derive height from $ratio
-     * @return Rung[] ascending by width, deduped
+     * @return non-empty-list<Rung> ascending by width, deduped (clampedWidths never yields an empty set)
      */
     public function build(?AspectRatio $ratio, int $sourceWidth, int $sourceHeight = 0, ?int $fixedHeight = null): array
     {
@@ -48,7 +48,7 @@ final class LadderFactory
      * which keeps the middleware's reconstructed `maxByHeight >= width`, so the signed URL still
      * verifies. The per-DPR multiple (H, 2H, 3H) lives in the expanded tier's $fixedHeight, not here.
      *
-     * @return Rung[]
+     * @return non-empty-list<Rung>
      */
     private function buildFixedHeight(int $sourceWidth, int $sourceHeight, int $fixedHeight): array
     {
@@ -76,10 +76,11 @@ final class LadderFactory
             }
         }
 
-        return $widths === [] ? 0 : (int) end($widths);
+        // clampedWidths never yields an empty set; the largest rung is the ceiling for over-large requests.
+        return (int) end($widths);
     }
 
-    /** @return int[] sorted ascending, unique, >= 1 */
+    /** @return non-empty-list<int> sorted ascending, unique, >= 1 */
     private function clampedWidths(int $sourceWidth, ?AspectRatio $ratio = null, int $sourceHeight = 0): array
     {
         // Widest crop of $ratio that fits the source height without upscaling: floor(sh * w/h).
