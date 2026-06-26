@@ -30,11 +30,15 @@ final class DprTierExpander
                 $out[] = $tier;
                 continue;
             }
+            $minViewport = $this->minWidthOf($tier->media);
             for ($k = $dprCap; $k >= 2; $k--) {
                 $out[] = new BreakpointRatio(
                     media: $this->combine($tier->media, $this->resolutionClause($k)),
                     fixedHeight: $k * $tier->fixedHeight,
                     resolutionGated: true,
+                    // Floor = minViewport * minDPR; minDPR for tier k is (k - 0.5). Rungs below this
+                    // can never be selected by a device matching both gates, so the ladder prunes them.
+                    minRenderWidth: $minViewport > 0 ? (int) ceil($minViewport * ($k - 0.5)) : 0,
                 );
             }
             $out[] = new BreakpointRatio(media: $tier->media, fixedHeight: $tier->fixedHeight);
@@ -52,5 +56,15 @@ final class DprTierExpander
     private function combine(?string $media, string $clause): string
     {
         return $media === null ? $clause : $media . ' and ' . $clause;
+    }
+
+    /** The tier's breakpoint min-width in px (the gate's lower viewport bound), or 0 if ungated. */
+    private function minWidthOf(?string $media): int
+    {
+        if ($media !== null && preg_match('/min-width:\s*(\d+)px/', $media, $m) === 1) {
+            return (int) $m[1];
+        }
+
+        return 0;
     }
 }

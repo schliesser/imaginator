@@ -20,22 +20,26 @@ final class LadderFactory
      * climbs the ladder while height stays the fixed CSS px value, DPR-scaled and clamped to the
      * source — $ratio is then ignored and may be null.
      *
-     * @param int      $sourceHeight when > 0, ratio mode clamps width so a cover crop never upscales
-     *                               vertically; fixed-height mode clamps each rung height to it
-     * @param int|null $fixedHeight  fixed CSS-px tier height; null = derive height from $ratio
+     * @param int      $sourceHeight   when > 0, ratio mode clamps width so a cover crop never upscales
+     *                                  vertically; fixed-height mode clamps each rung height to it
+     * @param int|null $fixedHeight    fixed CSS-px tier height; null = derive height from $ratio
+     * @param int      $minRenderWidth tier floor: when > 0, prune rungs narrower than this (a
+     *                                 resolution-gated tier can never select below it). Only removes
+     *                                 widths, so emitted URLs stay a subset of the unpruned ladder the
+     *                                 verify path validates against.
      * @return non-empty-list<Rung> ascending by width, deduped (clampedWidths never yields an empty set)
      */
-    public function build(?AspectRatio $ratio, int $sourceWidth, int $sourceHeight = 0, ?int $fixedHeight = null): array
+    public function build(?AspectRatio $ratio, int $sourceWidth, int $sourceHeight = 0, ?int $fixedHeight = null, int $minRenderWidth = 0): array
     {
         if ($fixedHeight !== null) {
-            return $this->buildFixedHeight($sourceWidth, $sourceHeight, $fixedHeight);
+            return $this->buildFixedHeight($sourceWidth, $sourceHeight, $fixedHeight, $minRenderWidth);
         }
         if ($ratio === null) {
             throw new \InvalidArgumentException('LadderFactory::build needs a ratio or a fixedHeight.', 1719223300);
         }
 
         $rungs = [];
-        foreach ($this->clampedWidths($sourceWidth, $ratio, $sourceHeight) as $w) {
+        foreach ($this->clampedWidths($sourceWidth, $ratio, $sourceHeight, $minRenderWidth) as $w) {
             $rungs[] = new Rung($w, $ratio->heightFor($w));
         }
 
@@ -50,13 +54,13 @@ final class LadderFactory
      *
      * @return non-empty-list<Rung>
      */
-    private function buildFixedHeight(int $sourceWidth, int $sourceHeight, int $fixedHeight): array
+    private function buildFixedHeight(int $sourceWidth, int $sourceHeight, int $fixedHeight, int $minRenderWidth = 0): array
     {
         $height = $sourceHeight > 0 ? min($fixedHeight, $sourceHeight) : $fixedHeight;
         $height = max(1, $height);
 
         $rungs = [];
-        foreach ($this->clampedWidths($sourceWidth) as $w) {
+        foreach ($this->clampedWidths($sourceWidth, minRenderWidth: $minRenderWidth) as $w) {
             $rungs[] = new Rung($w, $height);
         }
 
@@ -81,7 +85,7 @@ final class LadderFactory
     }
 
     /** @return non-empty-list<int> sorted ascending, unique, >= 1 */
-    private function clampedWidths(int $sourceWidth, ?AspectRatio $ratio = null, int $sourceHeight = 0): array
+    private function clampedWidths(int $sourceWidth, ?AspectRatio $ratio = null, int $sourceHeight = 0, int $minRenderWidth = 0): array
     {
         // Widest crop of $ratio that fits the source height without upscaling: floor(sh * w/h).
         $maxByHeight = ($sourceHeight > 0 && $ratio !== null)
@@ -104,7 +108,16 @@ final class LadderFactory
             $widths[max(1, (int) min($sourceWidth, $maxByHeight, $this->maxDimension))] = true;
         }
         ksort($widths);
+        $list = array_keys($widths);
 
-        return array_keys($widths);
+        // Prune rungs below the tier floor: quantize-UP means the smallest reachable file is the
+        // first rung >= floor, so everything under it is dead weight. If the floor is above every
+        // rung (source-limited), keep the largest — the ladder must never be empty.
+        if ($minRenderWidth > 1) {
+            $kept = array_values(array_filter($list, static fn(int $w): bool => $w >= $minRenderWidth));
+            $list = $kept !== [] ? $kept : [(int) end($list)];
+        }
+
+        return $list;
     }
 }

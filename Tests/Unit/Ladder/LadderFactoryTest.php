@@ -127,4 +127,31 @@ final class LadderFactoryTest extends TestCase
 
         self::assertEquals([new Rung(300, 600)], $rungs);
     }
+
+    public function testMinRenderWidthPrunesUnreachableLowRungs(): void
+    {
+        // Resolution-gated tier floor: a min-width 960 / 2.5dppx source can never select below
+        // 960*2.5=2400, so every rung under the floor is dead weight. Keep rungs >= floor.
+        $rungs = $this->factory()->build(null, 9999, 9999, 1600, 1500);
+        $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
+
+        self::assertSame([1920, 2000], $widths);
+    }
+
+    public function testMinRenderWidthKeepsLargestWhenFloorExceedsAllRungs(): void
+    {
+        // Floor above the largest available rung (source-limited): never empty — keep the largest.
+        $rungs = $this->factory()->build(null, 9999, 9999, 1600, 5000);
+        $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
+
+        self::assertSame([2000], $widths);
+    }
+
+    public function testMinRenderWidthZeroDoesNotPrune(): void
+    {
+        $rungs = $this->factory()->build(null, 9999, 9999, 600, 0);
+        $widths = array_map(static fn(Rung $r) => $r->width, $rungs);
+
+        self::assertSame([320, 640, 1280, 1920, 2000], $widths);
+    }
 }

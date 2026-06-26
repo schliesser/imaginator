@@ -184,6 +184,7 @@ final readonly class PictureRenderer
             $request->sourceWidth,
             $request->sourceHeight,
             $breakpoint->fixedHeight,
+            $breakpoint->minRenderWidth,
         );
     }
 
