@@ -19,18 +19,31 @@ use Schliesser\Imaginator\Dto\BreakpointRatio;
 final class DprTierExpander
 {
     /**
+     * Smallest viewport width (CSS px) we assume for a priority hero. A priority image emits
+     * `sizes="100vw"` on every tier, so layout width == viewport; below this we don't optimise (no
+     * real device renders a full-bleed hero narrower than this), which lets the gated tiers floor at
+     * `assumedViewport * minDPR` even without an explicit min-width gate.
+     */
+    private const PRIORITY_MIN_VIEWPORT = 320;
+
+    /**
      * @param BreakpointRatio[] $tiers
+     * @param bool              $priority when true the tier set renders `sizes="100vw"`, so an
+     *                                    assumed minimum viewport floors the gated ladders
      * @return BreakpointRatio[]
      */
-    public function expand(array $tiers, int $dprCap): array
+    public function expand(array $tiers, int $dprCap, bool $priority = false): array
     {
+        $assumedViewport = $priority ? self::PRIORITY_MIN_VIEWPORT : 0;
         $out = [];
         foreach ($tiers as $tier) {
             if ($tier->fixedHeight === null || $dprCap <= 1) {
                 $out[] = $tier;
                 continue;
             }
-            $minViewport = $this->minWidthOf($tier->media);
+            // A real min-width gate wins over the assumed viewport (max), so priority never weakens
+            // an explicit breakpoint floor; an ungated/media-null priority hero gets the assumed one.
+            $minViewport = max($this->minWidthOf($tier->media), $assumedViewport);
             for ($k = $dprCap; $k >= 2; $k--) {
                 $out[] = new BreakpointRatio(
                     media: $this->combine($tier->media, $this->resolutionClause($k)),

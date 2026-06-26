@@ -86,6 +86,42 @@ final class DprTierExpanderTest extends TestCase
         }
     }
 
+    public function testPriorityAppliesAssumedViewportFloorToUngatedHero(): void
+    {
+        // A priority hero emits sizes="100vw" on every tier, so layout width = viewport. Assuming a
+        // 320px smallest viewport, the gated tiers floor at 320 * minDPR; the 1x base stays unfloored.
+        $result = (new DprTierExpander())->expand(
+            [new BreakpointRatio(media: null, fixedHeight: 600)],
+            3,
+            true,
+        );
+
+        self::assertSame(
+            [
+                ['(min-resolution:2.5dppx)', 800], // ceil(320 * 2.5)
+                ['(min-resolution:1.5dppx)', 480], // ceil(320 * 1.5)
+                [null, 0],                          // base 1x tier: not floored
+            ],
+            array_map(static fn(BreakpointRatio $b): array => [$b->media, $b->minRenderWidth], $result),
+        );
+    }
+
+    public function testPriorityDoesNotLowerExistingMinWidthGate(): void
+    {
+        // A real min-width gate (992) is larger than the assumed 320 viewport, so it wins — the
+        // priority floor never weakens an explicit breakpoint gate.
+        $result = (new DprTierExpander())->expand(
+            [new BreakpointRatio(media: '(min-width:992px)', fixedHeight: 600)],
+            3,
+            true,
+        );
+
+        self::assertSame(
+            [2480, 1488, 0], // ceil(992*2.5), ceil(992*1.5), base
+            array_map(static fn(BreakpointRatio $b): int => $b->minRenderWidth, $result),
+        );
+    }
+
     public function testCapOfOneDoesNotExpand(): void
     {
         $tiers = [new BreakpointRatio(media: null, fixedHeight: 600)];

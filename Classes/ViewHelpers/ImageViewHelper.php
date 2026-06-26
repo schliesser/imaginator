@@ -99,6 +99,7 @@ final class ImageViewHelper extends AbstractViewHelper
         $breakpoints = $this->dprTierExpander->expand(
             $this->breakpoints($this->arguments['aspectRatio'], $settings->breakpoints, $sourceWidth, $sourceHeight),
             $settings->fixedHeightDprCap,
+            (bool) $this->arguments['priority'],
         );
 
         $request = new ImageRenderRequest(
