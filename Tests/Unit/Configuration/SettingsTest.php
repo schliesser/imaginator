@@ -17,7 +17,7 @@ final class SettingsTest extends TestCase
             'maxDimension' => '1800',
             'format' => 'webp',
             'qualities' => ['webp' => 70],
-            'processor' => 'local',
+            'processor' => 'local:async',
             'lqip' => 'dominant-color',
             'secretsRotation' => ['old-secret'],
             'fixedHeightDprCap' => '2',
@@ -28,7 +28,7 @@ final class SettingsTest extends TestCase
         self::assertSame(2, $settings->fixedHeightDprCap);
         self::assertSame('webp', $settings->format);
         self::assertSame(['webp' => 70], $settings->qualities);
-        self::assertSame('local', $settings->processor);
+        self::assertSame('local:async', $settings->processor);
         self::assertSame('dominant-color', $settings->lqip);
         self::assertSame(hash_hmac('sha256', 'imaginator-url-signing', 'enc-key'), $settings->secrets[0]);
         self::assertSame('old-secret', $settings->secrets[1]);
@@ -43,7 +43,7 @@ final class SettingsTest extends TestCase
         self::assertSame(Settings::DEFAULT_FIXED_HEIGHT_DPR_CAP, $settings->fixedHeightDprCap);
         self::assertSame(Settings::DEFAULT_FORMAT, $settings->format);
         self::assertSame('avif', $settings->format);
-        self::assertSame('local', $settings->processor);
+        self::assertSame('local:async', $settings->processor);
         self::assertSame('thumbhash', $settings->lqip);
         self::assertCount(1, $settings->secrets); // derived key only, no rotation
     }

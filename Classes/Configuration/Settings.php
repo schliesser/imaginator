@@ -71,7 +71,7 @@ final readonly class Settings
             self::deriveSecrets($encryptionKey, $raw['secretsRotation'] ?? null),
             self::format($raw),
             $qualities !== [] ? $qualities : self::DEFAULT_QUALITIES,
-            (string) ($raw['processor'] ?? 'local'),
+            (string) ($raw['processor'] ?? 'local:async'),
             (string) ($raw['lqip'] ?? self::DEFAULT_LQIP),
             self::breakpoints($raw['breakpoints'] ?? null),
             $excludeExtensions !== [] ? $excludeExtensions : self::DEFAULT_EXCLUDE_EXTENSIONS,
