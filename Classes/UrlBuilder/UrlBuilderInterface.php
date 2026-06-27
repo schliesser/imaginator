@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Schliesser\Imaginator\Imaging\External\UrlBuilder;
+namespace Schliesser\Imaginator\UrlBuilder;
 
 use Schliesser\Imaginator\Dto\ImageVariant;
 

@@ -10,7 +10,7 @@ use Schliesser\Imaginator\Dto\ProcessedImage;
 use Schliesser\Imaginator\Imaging\CropCalculator;
 use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
-use Schliesser\Imaginator\Url\SignedUrlBuilder;
+use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileInterface;
@@ -35,7 +35,7 @@ use TYPO3\CMS\Extbase\Service\ImageService;
 final readonly class LocalImageProcessor implements ImageProcessorInterface
 {
     public function __construct(
-        private SignedUrlBuilder $signedUrlBuilder,
+        private LocalAsyncUrlBuilder $localAsyncUrlBuilder,
         private ImageService $imageService,
         private CropCalculator $cropCalculator,
         private CropResolver $cropResolver,
@@ -45,7 +45,7 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
     public function buildUrl(ImageVariant $variant): string
     {
         return $this->existingPublicUrl($variant)
-            ?? $this->signedUrlBuilder->build($variant->toCanonicalParams());
+            ?? $this->localAsyncUrlBuilder->build($variant->toCanonicalParams());
     }
 
     public function isOffloaded(): bool

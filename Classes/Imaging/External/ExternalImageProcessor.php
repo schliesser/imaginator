@@ -6,7 +6,7 @@ namespace Schliesser\Imaginator\Imaging\External;
 
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Dto\ProcessedImage;
-use Schliesser\Imaginator\Imaging\External\UrlBuilder\UrlBuilderInterface;
+use Schliesser\Imaginator\UrlBuilder\UrlBuilderInterface;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 

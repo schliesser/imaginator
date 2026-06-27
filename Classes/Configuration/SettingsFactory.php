@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Schliesser\Imaginator\Configuration;
 
 use Schliesser\Imaginator\Ladder\LadderFactory;
-use Schliesser\Imaginator\Url\SignedUrlBuilder;
+use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 
 /**
@@ -30,9 +30,9 @@ final class SettingsFactory
         return Settings::fromArray($this->rawConfiguration(), $encryptionKey);
     }
 
-    public function createSignedUrlBuilder(): SignedUrlBuilder
+    public function createLocalAsyncUrlBuilder(): LocalAsyncUrlBuilder
     {
-        return new SignedUrlBuilder($this->create()->secrets);
+        return new LocalAsyncUrlBuilder($this->create()->secrets);
     }
 
     public function createLadderFactory(): LadderFactory

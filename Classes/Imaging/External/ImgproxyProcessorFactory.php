@@ -6,7 +6,7 @@ namespace Schliesser\Imaginator\Imaging\External;
 
 use Schliesser\Imaginator\Configuration\SettingsFactory;
 use Schliesser\Imaginator\Dto\ExternalConfig;
-use Schliesser\Imaginator\Imaging\External\UrlBuilder\ImgproxyUrlBuilder;
+use Schliesser\Imaginator\UrlBuilder\ImgproxyUrlBuilder;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 
 /**

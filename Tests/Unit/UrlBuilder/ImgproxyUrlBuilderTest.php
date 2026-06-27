@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Schliesser\Imaginator\Tests\Unit\Imaging\External;
+namespace Schliesser\Imaginator\Tests\Unit\UrlBuilder;
 
 use PHPUnit\Framework\TestCase;
 use Schliesser\Imaginator\Dto\ExternalConfig;
 use Schliesser\Imaginator\Dto\ImageVariant;
-use Schliesser\Imaginator\Imaging\External\UrlBuilder\ImgproxyUrlBuilder;
+use Schliesser\Imaginator\UrlBuilder\ImgproxyUrlBuilder;
 
 final class ImgproxyUrlBuilderTest extends TestCase
 {

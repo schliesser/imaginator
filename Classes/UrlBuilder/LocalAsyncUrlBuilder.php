@@ -2,9 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Schliesser\Imaginator\Url;
+namespace Schliesser\Imaginator\UrlBuilder;
 
-final class SignedUrlBuilder
+use Schliesser\Imaginator\Url\CanonicalParams;
+
+/**
+ * Builds and verifies the HMAC-signed `/_imaginator/…` endpoint URL used by the `local:async`
+ * processor (the only path that signs). The name mirrors that processor so the relation is obvious.
+ */
+final class LocalAsyncUrlBuilder
 {
     private const PREFIX = '/_imaginator';
     private const SIG_LEN = 16;

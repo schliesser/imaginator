@@ -9,7 +9,7 @@ use Schliesser\Imaginator\Imaging\CropCalculator;
 use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Tests\Functional\UsesImageProcessing;
-use Schliesser\Imaginator\Url\SignedUrlBuilder;
+use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
@@ -36,7 +36,7 @@ final class LocalImageProcessorTest extends FunctionalTestCase
     private function processor(): LocalImageProcessor
     {
         return new LocalImageProcessor(
-            new SignedUrlBuilder(['test-secret']),
+            new LocalAsyncUrlBuilder(['test-secret']),
             GeneralUtility::makeInstance(ImageService::class),
             new CropCalculator(),
             new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),
@@ -118,7 +118,7 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         $imageService->method('applyProcessingInstructions')->willReturn($processedFile);
 
         $processor = new LocalImageProcessor(
-            new SignedUrlBuilder(['test-secret']),
+            new LocalAsyncUrlBuilder(['test-secret']),
             $imageService,
             new CropCalculator(),
             new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),

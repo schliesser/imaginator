@@ -33,7 +33,7 @@ into `.Build/` (a Composer `vendor-dir`, not the default `vendor/`):
 ```bash
 composer update                                          # installs into .Build/
 .Build/bin/phpunit -c Build/phpunit/UnitTests.xml        # all unit tests (pure PHP, fast)
-.Build/bin/phpunit -c Build/phpunit/UnitTests.xml Tests/Unit/Url/SignedUrlBuilderTest.php   # one test file
+.Build/bin/phpunit -c Build/phpunit/UnitTests.xml Tests/Unit/UrlBuilder/LocalAsyncUrlBuilderTest.php   # one test file
 .Build/bin/phpunit -c Build/phpunit/FunctionalTests.xml  # functional tests (boot TYPO3 + DB)
 ```
 
@@ -48,7 +48,7 @@ Dev tooling pinned in `require-dev`: `phpstan/phpstan ^2.1`, `friendsofphp/php-c
 
 Tests split into two suites by what they need to boot:
 - **`Tests/Unit/`** — pure PHPUnit `TestCase`, no TYPO3 bootstrap. The signing + ladder core
-  (`Dto/AspectRatio`, `Ladder/*`, `Url/CanonicalParams`, `Url/SignedUrlBuilder`, `Dto/ImageVariant`)
+  (`Dto/AspectRatio`, `Ladder/*`, `Url/CanonicalParams`, `UrlBuilder/LocalAsyncUrlBuilder`, `Dto/ImageVariant`)
   is deliberately framework-free so it runs fast here. Keep new pure logic unit-testable.
 - **`Tests/Functional/`** — `typo3/testing-framework`, boots TYPO3 + DB. Used for anything touching FAL,
   the middleware, ViewHelpers, or `ImageService` processing. Renderer output is verified with
@@ -68,7 +68,7 @@ Data flow and the seams that hold it together:
    width UP to a rung. Quantization is what bounds the set of processed files **and** what makes signed
    URLs DoS-safe (only rung sizes ever verify).
 
-2. **Signed URLs** (`Url/CanonicalParams` + `Url/SignedUrlBuilder`) — the candidate URL *is* the image:
+2. **Signed URLs** (`Url/CanonicalParams` + `UrlBuilder/LocalAsyncUrlBuilder`) — the candidate URL *is* the image:
    `/_imaginator/{16-hex-sig}/{storage}-{fileUid}/{cropVariant}/{w}x{h}.{ext}`. The signature is an
    **HMAC** (not encryption) over the deterministic `CanonicalParams::canonicalString()`. The builder
    takes a **list of secrets** — index 0 signs, all verify — to support key rotation without
@@ -113,7 +113,7 @@ Data flow and the seams that hold it together:
 - The render layer is **processor-agnostic**: the same HTML is emitted regardless of who does the pixels.
   Don't leak local-vs-external assumptions into `PictureRenderer`/`ImageViewHelper`.
 - `CanonicalParams`' field set and order must stay identical everywhere it's constructed
-  (`SignedUrlBuilder`, `ImageVariant::toCanonicalParams()`, the middleware's verify path) — the signature
+  (`LocalAsyncUrlBuilder`, `ImageVariant::toCanonicalParams()`, the middleware's verify path) — the signature
   depends on it byte-for-byte.
 - Only rung-quantized widths may be signed/served; never let an arbitrary requested `w×h` reach the
   processor (DoS surface).
