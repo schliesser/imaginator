@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\ResponseFactory;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
@@ -55,6 +56,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
                 $imageService,
                 new CropCalculator(),
                 $cropResolver,
+                GeneralUtility::makeInstance(ProcessedFileRepository::class),
             ),
             new ResponseFactory(),
         );

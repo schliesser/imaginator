@@ -81,9 +81,13 @@ Data flow and the seams that hold it together:
    `imaginator.image_processor` with a `key`). **Integrators add their own** purely by tagging a service
    with a new `key` and selecting it via `processor` — no core change. Built-ins:
    - **Local — `local:async`** (`Imaging/Local/LocalImageProcessor`) — `buildUrl()` returns the signed
-     `/_imaginator/…` URL; a PSR-15 middleware (`Middleware/ProcessImageRequest`) verifies the sig,
-     re-checks the width against the ladder, calls `materialize()`, and **302-redirects to the processed
-     FAL file** with immutable cache headers. Bad/forged signature → **403**. No JSON anywhere.
+     `/_imaginator/…` URL **only while the derivative is cold**; once it exists, a read-only
+     `sys_file_processedfile` probe (sharing `materialize()`'s exact instructions, so the checksum
+     matches) makes `buildUrl()` emit the **static `_processed_/…` URL directly**, so a warm image skips
+     the middleware + 302 altogether. For cold URLs a PSR-15 middleware (`Middleware/ProcessImageRequest`)
+     verifies the sig, re-checks the width against the ladder, calls `materialize()`, and **302-redirects
+     to the processed FAL file** with immutable cache headers. Bad/forged signature → **403**. No JSON anywhere.
+     (Signing is used on this path only — `local:sync` and external processors never sign.)
    - **Local — `local:sync`** (`Imaging/Local/LocalSyncImageProcessor`) — `buildUrl()` materializes the
      variant synchronously at render time and writes the **static `_processed_/…` file URL straight into
      `srcset`**; the signed endpoint + middleware are never involved, so requests are plain static-file

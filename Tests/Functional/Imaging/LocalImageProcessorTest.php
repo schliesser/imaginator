@@ -13,6 +13,7 @@ use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
+use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
@@ -39,6 +40,7 @@ final class LocalImageProcessorTest extends FunctionalTestCase
             GeneralUtility::makeInstance(ImageService::class),
             new CropCalculator(),
             new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),
+            GeneralUtility::makeInstance(ProcessedFileRepository::class),
         );
     }
 
@@ -72,6 +74,24 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         );
     }
 
+    public function testBuildUrlShortCircuitsToStaticUrlOnceTheDerivativeExists(): void
+    {
+        $variant = $this->variant();
+
+        // Cold cache: no derivative yet, so srcset points at the signed middleware endpoint and
+        // processing is deferred to the first request.
+        self::assertStringContainsString('/_imaginator/', $this->processor()->buildUrl($variant));
+
+        $this->processor()->materialize($variant);
+
+        // Warm cache: the derivative now exists, so buildUrl returns the static _processed_ file URL
+        // directly — the browser skips the /_imaginator/ middleware (and its 302) entirely.
+        $warm = $this->processor()->buildUrl($variant);
+        self::assertStringNotContainsString('/_imaginator/', $warm);
+        self::assertStringContainsString('_processed_', $warm);
+        self::assertStringStartsWith('/', $warm);
+    }
+
     public function testMaterializeProducesProcessedImageAt1280Webp(): void
     {
         $processed = $this->processor()->materialize($this->variant());
@@ -102,6 +122,7 @@ final class LocalImageProcessorTest extends FunctionalTestCase
             $imageService,
             new CropCalculator(),
             new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),
+            GeneralUtility::makeInstance(ProcessedFileRepository::class),
         );
 
         $this->expectException(\RuntimeException::class);

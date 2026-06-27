@@ -12,13 +12,22 @@ use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
+use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
+use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
 use TYPO3\CMS\Extbase\Service\ImageService;
 
 /**
- * Default processor: srcset URLs point at the signed local endpoint, and the actual pixels
- * are produced on demand through TYPO3's {@see ImageService} (which drives the configured
- * image processor — no direct GraphicsMagick/ImageMagick/GD calls).
+ * Default processor: the actual pixels are produced on demand through TYPO3's {@see ImageService}
+ * (which drives the configured image processor — no direct GraphicsMagick/ImageMagick/GD calls).
+ *
+ * `buildUrl()` short-circuits when the derivative already exists: a warm variant gets its **static
+ * `_processed_/…` file URL** straight into `srcset` (the browser then skips the `/_imaginator/`
+ * middleware and its 302 entirely), while a cold variant gets the signed endpoint URL so processing
+ * stays deferred to the first request. The existence probe is read-only — it never triggers
+ * processing — and reuses the exact same processing instructions as {@see materialize()}, so the
+ * lookup checksum matches byte-for-byte.
  *
  * For reference variants the editor's crop variant (cropArea + focusArea) is resolved here and the
  * target ratio is fitted inside it ({@see CropCalculator}); plain file variants are centre-cropped.
@@ -30,11 +39,13 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
         private ImageService $imageService,
         private CropCalculator $cropCalculator,
         private CropResolver $cropResolver,
+        private ProcessedFileRepository $processedFileRepository,
     ) {}
 
     public function buildUrl(ImageVariant $variant): string
     {
-        return $this->signedUrlBuilder->build($variant->toCanonicalParams());
+        return $this->existingPublicUrl($variant)
+            ?? $this->signedUrlBuilder->build($variant->toCanonicalParams());
     }
 
     public function isOffloaded(): bool
@@ -44,6 +55,46 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
 
     public function materialize(ImageVariant $variant): ProcessedImage
     {
+        [$original, $instructions] = $this->processingPlan($variant);
+        $processed = $this->imageService->applyProcessingInstructions($original, $instructions);
+
+        return $this->toProcessedImage($processed, $variant);
+    }
+
+    /**
+     * Read-only: returns the static processed-file URL when the derivative already exists, else null.
+     * Never triggers processing — {@see ProcessedFileRepository::findOneByOriginalFileAndTaskTypeAndConfiguration()}
+     * only queries `sys_file_processedfile` (by the configuration checksum), so a cold variant falls
+     * back to the signed endpoint.
+     */
+    private function existingPublicUrl(ImageVariant $variant): ?string
+    {
+        [$original, $instructions] = $this->processingPlan($variant);
+        if (!$original instanceof File) {
+            return null;
+        }
+
+        $processed = $this->processedFileRepository->findOneByOriginalFileAndTaskTypeAndConfiguration(
+            $original,
+            ProcessedFile::CONTEXT_IMAGECROPSCALEMASK,
+            $instructions,
+        );
+        if (!$processed->isProcessed() || !$processed->exists()) {
+            return null;
+        }
+
+        return $this->toRootRelativeUrl($this->imageService->getImageUri($processed));
+    }
+
+    /**
+     * The original file + TYPO3 processing instructions for a variant. Single source of truth shared
+     * by {@see materialize()} (which processes) and {@see existingPublicUrl()} (which only probes), so
+     * the two can never disagree on the derivative's identity.
+     *
+     * @return array{0: FileInterface, 1: array<string, mixed>}
+     */
+    private function processingPlan(ImageVariant $variant): array
+    {
         $resolution = $this->cropResolver->resolve($variant->isReference, $variant->uid, $variant->cropVariant);
 
         if ($variant->isReference) {
@@ -52,21 +103,20 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
                 $resolution->focusArea,
                 new AspectRatio($variant->width, $variant->height),
             );
-            $processed = $this->imageService->applyProcessingInstructions($resolution->original, [
+
+            return [$resolution->original, [
                 'width' => $variant->width,
                 'height' => $variant->height,
                 'fileExtension' => $variant->format,
                 'crop' => new Area($rect->x, $rect->y, $rect->width, $rect->height),
-            ]);
-        } else {
-            $processed = $this->imageService->applyProcessingInstructions($resolution->original, [
-                'width' => $variant->width . 'c',
-                'height' => $variant->height . 'c',
-                'fileExtension' => $variant->format,
-            ]);
+            ]];
         }
 
-        return $this->toProcessedImage($processed, $variant);
+        return [$resolution->original, [
+            'width' => $variant->width . 'c',
+            'height' => $variant->height . 'c',
+            'fileExtension' => $variant->format,
+        ]];
     }
 
     private function toProcessedImage(ProcessedFile $processed, ImageVariant $variant): ProcessedImage
