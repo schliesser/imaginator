@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Schliesser\Imaginator\Tests\Unit\Url;
+namespace Schliesser\Imaginator\Tests\Unit\Dto;
 
 use PHPUnit\Framework\TestCase;
-use Schliesser\Imaginator\Url\CanonicalParams;
+use Schliesser\Imaginator\Dto\CanonicalParams;
 
 final class CanonicalParamsTest extends TestCase
 {

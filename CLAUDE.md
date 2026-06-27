@@ -48,7 +48,7 @@ Dev tooling pinned in `require-dev`: `phpstan/phpstan ^2.1`, `friendsofphp/php-c
 
 Tests split into two suites by what they need to boot:
 - **`Tests/Unit/`** — pure PHPUnit `TestCase`, no TYPO3 bootstrap. The signing + ladder core
-  (`Dto/AspectRatio`, `Ladder/*`, `Url/CanonicalParams`, `UrlBuilder/LocalAsyncUrlBuilder`, `Dto/ImageVariant`)
+  (`Dto/AspectRatio`, `Ladder/*`, `Dto/CanonicalParams`, `UrlBuilder/LocalAsyncUrlBuilder`, `Dto/ImageVariant`)
   is deliberately framework-free so it runs fast here. Keep new pure logic unit-testable.
 - **`Tests/Functional/`** — `typo3/testing-framework`, boots TYPO3 + DB. Used for anything touching FAL,
   the middleware, ViewHelpers, or `ImageService` processing. Renderer output is verified with
@@ -68,7 +68,7 @@ Data flow and the seams that hold it together:
    width UP to a rung. Quantization is what bounds the set of processed files **and** what makes signed
    URLs DoS-safe (only rung sizes ever verify).
 
-2. **Signed URLs** (`Url/CanonicalParams` + `UrlBuilder/LocalAsyncUrlBuilder`) — the candidate URL *is* the image:
+2. **Signed URLs** (`Dto/CanonicalParams` + `UrlBuilder/LocalAsyncUrlBuilder`) — the candidate URL *is* the image:
    `/_imaginator/{16-hex-sig}/{storage}-{fileUid}/{cropVariant}/{w}x{h}.{ext}`. The signature is an
    **HMAC** (not encryption) over the deterministic `CanonicalParams::canonicalString()`. The builder
    takes a **list of secrets** — index 0 signs, all verify — to support key rotation without

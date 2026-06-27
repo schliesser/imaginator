@@ -13,7 +13,7 @@ use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Ladder\LadderFactory;
 use Schliesser\Imaginator\Middleware\ProcessImageRequest;
 use Schliesser\Imaginator\Tests\Functional\UsesImageProcessing;
-use Schliesser\Imaginator\Url\CanonicalParams;
+use Schliesser\Imaginator\Dto\CanonicalParams;
 use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\ResponseFactory;

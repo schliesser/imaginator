@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\Dto;
 
-use Schliesser\Imaginator\Url\CanonicalParams;
+use Schliesser\Imaginator\Dto\CanonicalParams;
 
 final readonly class ImageVariant
 {

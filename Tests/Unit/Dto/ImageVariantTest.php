@@ -6,7 +6,7 @@ namespace Schliesser\Imaginator\Tests\Unit\Dto;
 
 use PHPUnit\Framework\TestCase;
 use Schliesser\Imaginator\Dto\ImageVariant;
-use Schliesser\Imaginator\Url\CanonicalParams;
+use Schliesser\Imaginator\Dto\CanonicalParams;
 
 final class ImageVariantTest extends TestCase
 {
