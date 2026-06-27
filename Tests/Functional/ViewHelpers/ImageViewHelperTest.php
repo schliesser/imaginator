@@ -12,21 +12,20 @@ use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\View\ViewFactoryData;
 use TYPO3\CMS\Core\View\ViewFactoryInterface;
+use Schliesser\Imaginator\Tests\Functional\UsesImageProcessing;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class ImageViewHelperTest extends FunctionalTestCase
 {
+    use UsesImageProcessing;
+
     protected array $testExtensionsToLoad = ['schliesser/imaginator'];
 
-    protected array $configurationToUseInTestInstance = [
-        'GFX' => [
-            'processor_enabled' => true,
-            'processor' => 'GraphicsMagick',
-            'processor_path' => '/usr/bin/',
-            'processor_effects' => false,
-            'imagefile_ext' => 'gif,jpg,jpeg,png,webp,tif,bmp,svg',
-        ],
-    ];
+    protected function setUp(): void
+    {
+        $this->configurationToUseInTestInstance['GFX'] = $this->imageProcessingGfxConfiguration();
+        parent::setUp();
+    }
 
     private function importFixture(): int
     {

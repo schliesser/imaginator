@@ -85,8 +85,8 @@ jobs:
       typo3DatabasePassword: root
     steps:
       - uses: actions/checkout@v4
-      - name: Install GraphicsMagick
-        run: sudo apt-get update && sudo apt-get install -y graphicsmagick
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -129,8 +129,8 @@ jobs:
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
-      - name: Install GraphicsMagick
-        run: sudo apt-get update && sudo apt-get install -y graphicsmagick
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'

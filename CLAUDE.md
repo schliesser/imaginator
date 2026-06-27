@@ -37,6 +37,11 @@ composer update                                          # installs into .Build/
 .Build/bin/phpunit -c Build/phpunit/FunctionalTests.xml  # functional tests (boot TYPO3 + DB)
 ```
 
+Functional tests that exercise real image processing use **ImageMagick** via TYPO3's `ImageService`
+(shared GFX config in the `UsesImageProcessing` trait). The binary path defaults to `/usr/bin/` (CI);
+point it elsewhere locally, e.g. `typo3ProcessorPath=/opt/homebrew/bin/`. Booting TYPO3 can exceed the
+default CLI `memory_limit` — run with `php -d memory_limit=1G` if a bootstrap OOM appears.
+
 Dev tooling pinned in `require-dev`: `phpstan/phpstan ^2.1`, `friendsofphp/php-cs-fixer ^3.51`.
 
 ## Test layering (important for speed)
