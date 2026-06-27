@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\Tests\Functional\ViewHelpers;
 
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Page\AssetCollector;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -131,6 +132,43 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringNotContainsString('<picture>', $output);
         self::assertStringNotContainsString('srcset', $output);
         self::assertStringNotContainsString('/_imaginator/', $output);
+    }
+
+    public function testProcessedImageRegistersSizesAutoPolyfill(): void
+    {
+        // A processed image emits sizes="auto"; Safari has no native support, so the autosizes
+        // polyfill must be queued via the AssetCollector — head-priority + async (never blocking).
+        $fileUid = $this->importFixture();
+
+        $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="16:9" alt="A hero"/></html>'
+        );
+
+        $scripts = GeneralUtility::makeInstance(AssetCollector::class)->getJavaScripts();
+        self::assertArrayHasKey('imaginator-autosizes', $scripts);
+        $entry = $scripts['imaginator-autosizes'];
+        self::assertStringContainsString('Resources/Public/JavaScript/frontend/autosizes.js', $entry['source']);
+        self::assertSame('async', $entry['attributes']['async'] ?? null);
+        self::assertTrue($entry['options']['priority'] ?? false);
+        // Nonce-tagged for a strict CSP: v14 uses `csp`, v13 the (deprecated) `useNonce`.
+        $cspKey = (new Typo3Version())->getMajorVersion() >= 14 ? 'csp' : 'useNonce';
+        self::assertTrue($entry['options'][$cspKey] ?? false);
+    }
+
+    public function testPassthroughImageDoesNotRegisterPolyfill(): void
+    {
+        // A passthrough (SVG) image has no sizes="auto" srcset, so the polyfill is pointless here.
+        $fileUid = $this->importSvgFixture();
+
+        $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '" alt="Vector"/></html>'
+        );
+
+        $scripts = GeneralUtility::makeInstance(AssetCollector::class)->getJavaScripts();
+        self::assertArrayNotHasKey('imaginator-autosizes', $scripts);
     }
 
     public function testWithoutAspectRatioUsesTheOriginalImageRatio(): void

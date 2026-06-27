@@ -87,6 +87,26 @@ double-download), and its `imagesrcset`/`imagesizes` mirror the rendered tier ex
 browser reuses the preload. This satisfies Lighthouse's "LCP request is discoverable",
 "not lazily loaded" and "fetchpriority should be applied" audits. Use it on **one** image per page.
 
+### `sizes="auto"` and the Safari polyfill
+
+Zero-config sizing relies on `sizes="auto"`, which lets the browser pick the right `srcset`
+candidate from the laid-out width — no hand-written `sizes`, no per-image breakpoints. Chrome/Edge
+(126+) and Firefox (150+) support it natively; **Safari and iOS Safari only from version 27**
+(WebKit landed it in March 2026; Safari 27 ships in the 2026 cycle). On older Safari/iOS an
+unsupported `sizes="auto"` falls back to `100vw`, so they fetch an oversized (but still sharp)
+candidate. (`sizes="auto"` is spec-valid only on `loading="lazy"` images, which is exactly where
+Imaginator emits it — priority/eager images get an explicit `sizes="100vw"` instead.)
+
+To close that gap, whenever a processed `<i:image>` renders, Imaginator queues a tiny
+progressive-enhancement script via the `AssetCollector` (head, `async`, registered once per page):
+the vendored [Shopify/autosizes](https://github.com/Shopify/autosizes) polyfill (MIT,
+`Resources/Public/JavaScript/frontend/autosizes.js`). It self-detects native support and backs off;
+on Safari it measures the rendered width and writes a concrete pixel `sizes`, so the browser picks a
+right-sized candidate. It is **never load-bearing** — sharpness comes from the server-rendered
+ladder, so the page works fully with JavaScript disabled — and it only touches
+`<img loading="lazy" sizes="auto">`, so **priority/LCP images are untouched** (they carry an explicit
+`sizes="100vw"` and `loading="eager"`). Pages without any `<i:image>` ship no extra JS.
+
 ## The image endpoint & signing
 
 Each candidate URL has one of these forms:
