@@ -7,13 +7,10 @@ namespace Schliesser\Imaginator\Tests\Functional\Imaging;
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Imaging\CropCalculator;
 use Schliesser\Imaginator\Imaging\CropResolver;
-use Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend;
-use Schliesser\Imaginator\Imaging\Local\Backend\LocalBackendInterface;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\File;
-use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -40,7 +37,6 @@ final class LocalImageProcessorTest extends FunctionalTestCase
     {
         return new LocalImageProcessor(
             new SignedUrlBuilder(['test-secret']),
-            new GraphicsMagickBackend(GeneralUtility::makeInstance(ImageService::class)),
             GeneralUtility::makeInstance(ImageService::class),
             new CropCalculator(),
             new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),
@@ -98,19 +94,13 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         $processedFile->method('getForLocalProcessing')->willReturn($emptyFile);
         $processedFile->method('getMimeType')->willReturn('image/avif');
 
-        $backend = new class ($processedFile) implements LocalBackendInterface {
-            public function __construct(private readonly ProcessedFile $processed) {}
-
-            public function process(FileInterface $file, array $instructions): ProcessedFile
-            {
-                return $this->processed;
-            }
-        };
+        // Fake the ImageService so it returns the 0-byte derivative without invoking a real processor.
+        $imageService = $this->createMock(ImageService::class);
+        $imageService->method('applyProcessingInstructions')->willReturn($processedFile);
 
         $processor = new LocalImageProcessor(
             new SignedUrlBuilder(['test-secret']),
-            $backend,
-            GeneralUtility::makeInstance(ImageService::class),
+            $imageService,
             new CropCalculator(),
             new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),
         );

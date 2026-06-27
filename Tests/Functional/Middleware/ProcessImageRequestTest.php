@@ -9,7 +9,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Schliesser\Imaginator\Imaging\CropCalculator;
 use Schliesser\Imaginator\Imaging\CropResolver;
-use Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Ladder\LadderFactory;
 use Schliesser\Imaginator\Middleware\ProcessImageRequest;
@@ -59,7 +58,6 @@ final class ProcessImageRequestTest extends FunctionalTestCase
             $cropResolver,
             new LocalImageProcessor(
                 $this->signedUrlBuilder,
-                new GraphicsMagickBackend($imageService),
                 $imageService,
                 new CropCalculator(),
                 $cropResolver,
