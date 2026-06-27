@@ -12,6 +12,7 @@ use Schliesser\Imaginator\Imaging\Local\LocalSyncImageProcessor;
 use Schliesser\Imaginator\Tests\Functional\UsesImageProcessing;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
@@ -42,6 +43,7 @@ final class LocalSyncImageProcessorTest extends FunctionalTestCase
                 $imageService,
                 new CropCalculator(),
                 $cropResolver,
+                GeneralUtility::makeInstance(ProcessedFileRepository::class),
             ),
         );
     }

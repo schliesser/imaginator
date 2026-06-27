@@ -37,9 +37,11 @@ Settings
     (the binary is whatever your ``GFX`` config selects — GraphicsMagick or
     ImageMagick); no direct GraphicsMagick/ImageMagick/GD calls.
 
-    *   ``local:async`` — ``srcset`` points at the signed ``/_imaginator/`` endpoint;
-        a middleware materializes the derivative on first request and 302-redirects
-        to the processed file. Processing is deferred to the first hit per variant.
+    *   ``local:async`` — processing is deferred to the first request per variant: a
+        cold ``srcset`` candidate points at the signed ``/_imaginator/`` endpoint and a
+        middleware materializes the derivative, then 302-redirects to the processed
+        file. Once a derivative exists, ``srcset`` points at the static
+        ``_processed_/…`` file directly, so warm images skip the middleware entirely.
     *   ``local:sync`` — derivatives are materialized synchronously at render time and
         the static ``_processed_/…`` file URL is written straight into ``srcset``, so
         the middleware is never involved and requests are plain static-file serves.
