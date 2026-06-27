@@ -22,7 +22,15 @@ export default defineConfig({
     {
       name: 'chromium',
       // Use the system Chrome (set PLAYWRIGHT_CHANNEL=chromium to use a bundled browser instead).
+      // The sizes="auto" polyfill spec is WebKit-only (Chrome has native support, nothing to assert).
+      testIgnore: /sizes-auto-polyfill\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], channel: process.env.PLAYWRIGHT_CHANNEL ?? 'chrome' },
+    },
+    {
+      // WebKit has no native sizes="auto" yet (Safari/iOS), so it exercises the autosizes polyfill.
+      name: 'webkit',
+      testMatch: /sizes-auto-polyfill\.spec\.ts/,
+      use: { ...devices['Desktop Safari'] },
     },
   ],
 });

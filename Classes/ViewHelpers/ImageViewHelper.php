@@ -31,6 +31,9 @@ final class ImageViewHelper extends AbstractViewHelper
     /** Shared identifier so every LQIP rule lands in one merged `<style>`. */
     private const LQIP_STYLE_IDENTIFIER = 'imaginator-lqip';
 
+    /** Shared identifier so the sizes="auto" polyfill is queued at most once per page. */
+    private const AUTOSIZES_IDENTIFIER = 'imaginator-autosizes';
+
     protected $escapeOutput = false;
 
     public function __construct(
@@ -122,6 +125,10 @@ final class ImageViewHelper extends AbstractViewHelper
             $this->pageRenderer->addHeaderData($link);
         }
 
+        // Every processed image emits sizes="auto"; queue the Safari/iOS polyfill so non-supporting
+        // browsers pick a right-sized candidate instead of the 100vw fallback.
+        $this->registerAutoSizesPolyfill();
+
         return $this->renderer->render($request, $this->processor);
     }
 
@@ -158,6 +165,32 @@ final class ImageViewHelper extends AbstractViewHelper
         }
 
         return $class;
+    }
+
+    /**
+     * Queue the vendored `sizes="auto"` polyfill (Shopify/autosizes) — only when a processed image
+     * is actually rendered, so a page without `<i:image>` ships no extra JS. The script self-detects
+     * native support and backs off; it only touches `<img loading="lazy" sizes="auto">`, so it never
+     * affects priority/LCP images (those carry `sizes="100vw"` + `loading="eager"`).
+     *
+     * head-priority + `async`: discovered early enough to intercept image loads, never render-blocking
+     * (sharpness is server-side, so deferring this enhancement is safe). The AssetCollector dedups by
+     * identifier, so repeated images on one page register it exactly once.
+     *
+     * The `<script>` is nonce-tagged for a strict Content-Security-Policy: v14 takes `csp`, v13 the
+     * (now-deprecated) `useNonce` — same split the LQIP `<style>` uses above.
+     */
+    private function registerAutoSizesPolyfill(): void
+    {
+        $cspOption = (new Typo3Version())->getMajorVersion() >= 14
+            ? ['csp' => true]
+            : ['useNonce' => true];
+        $this->assetCollector->addJavaScript(
+            self::AUTOSIZES_IDENTIFIER,
+            'EXT:imaginator/Resources/Public/JavaScript/frontend/autosizes.js',
+            ['async' => 'async'],
+            ['priority' => true] + $cspOption,
+        );
     }
 
     /**
