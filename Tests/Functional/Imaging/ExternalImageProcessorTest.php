@@ -7,7 +7,7 @@ namespace Schliesser\Imaginator\Tests\Functional\Imaging;
 use Schliesser\Imaginator\Dto\ExternalConfig;
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Imaging\External\ExternalImageProcessor;
-use Schliesser\Imaginator\Imaging\External\UrlBuilder\ImgproxyUrlBuilder;
+use Schliesser\Imaginator\UrlBuilder\ImgproxyUrlBuilder;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;

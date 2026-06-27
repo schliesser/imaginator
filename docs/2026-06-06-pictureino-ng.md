@@ -329,10 +329,11 @@ Classes/
     Local/LocalSyncImageProcessor.php      # local:sync — static _processed_ URL in srcset
     External/ExternalImageProcessor.php
     External/ImgproxyProcessorFactory.php
-    External/UrlBuilder/UrlBuilderInterface.php
-    External/UrlBuilder/{Imgix,Cloudinary,Cloudflare,Thumbor}UrlBuilder.php
+  UrlBuilder/UrlBuilderInterface.php       # external provider URL grammar
+  UrlBuilder/{Imgproxy,Imgix,Cloudinary,Cloudflare,Thumbor}UrlBuilder.php
+  UrlBuilder/LocalAsyncUrlBuilder.php      # HMAC sign/verify for local:async, key rotation
   Ladder/LadderFactory.php                 # rungs, quantization, height-from-ratio
-  Url/SignedUrlBuilder.php                 # HMAC sign/verify, key rotation
+  Url/CanonicalParams.php                  # signed param set + deterministic canonical string
   Lqip/LqipGeneratorInterface.php
   Lqip/{ThumbHash,DominantColor}Generator.php
   Rendering/PictureRenderer.php            # builds <picture>/<img> from variants

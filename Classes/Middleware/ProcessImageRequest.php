@@ -15,7 +15,7 @@ use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Ladder\LadderFactory;
 use Schliesser\Imaginator\Url\CanonicalParams;
-use Schliesser\Imaginator\Url\SignedUrlBuilder;
+use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
 
 /**
  * Serves the signed image endpoint. The candidate URL *is* the image: verify the HMAC
@@ -28,7 +28,7 @@ final readonly class ProcessImageRequest implements MiddlewareInterface
     private const PREFIX = '/_imaginator/';
 
     public function __construct(
-        private SignedUrlBuilder $signedUrlBuilder,
+        private LocalAsyncUrlBuilder $localAsyncUrlBuilder,
         private LadderFactory $ladderFactory,
         private CropResolver $cropResolver,
         private ImageProcessorInterface $processor,
@@ -42,7 +42,7 @@ final readonly class ProcessImageRequest implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $params = $this->signedUrlBuilder->verify($path);
+        $params = $this->localAsyncUrlBuilder->verify($path);
         if ($params === null) {
             return $this->responseFactory->createResponse(403);
         }

@@ -14,7 +14,7 @@ use Schliesser\Imaginator\Ladder\LadderFactory;
 use Schliesser\Imaginator\Middleware\ProcessImageRequest;
 use Schliesser\Imaginator\Tests\Functional\UsesImageProcessing;
 use Schliesser\Imaginator\Url\CanonicalParams;
-use Schliesser\Imaginator\Url\SignedUrlBuilder;
+use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Http\ResponseFactory;
 use TYPO3\CMS\Core\Http\ServerRequest;
@@ -33,13 +33,13 @@ final class ProcessImageRequestTest extends FunctionalTestCase
 
     protected array $testExtensionsToLoad = ['schliesser/imaginator'];
 
-    private SignedUrlBuilder $signedUrlBuilder;
+    private LocalAsyncUrlBuilder $localAsyncUrlBuilder;
 
     protected function setUp(): void
     {
         $this->configurationToUseInTestInstance['GFX'] = $this->imageProcessingGfxConfiguration();
         parent::setUp();
-        $this->signedUrlBuilder = new SignedUrlBuilder(['test-secret']);
+        $this->localAsyncUrlBuilder = new LocalAsyncUrlBuilder(['test-secret']);
     }
 
     private function middleware(): ProcessImageRequest
@@ -48,11 +48,11 @@ final class ProcessImageRequestTest extends FunctionalTestCase
         $cropResolver = new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class));
 
         return new ProcessImageRequest(
-            $this->signedUrlBuilder,
+            $this->localAsyncUrlBuilder,
             new LadderFactory([320, 640, 1280, 1920, 2560], 2000),
             $cropResolver,
             new LocalImageProcessor(
-                $this->signedUrlBuilder,
+                $this->localAsyncUrlBuilder,
                 $imageService,
                 new CropCalculator(),
                 $cropResolver,
@@ -106,7 +106,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
 
     public function testValidSignedUrlRedirectsToProcessedFile(): void
     {
-        $path = $this->signedUrlBuilder->build($this->importFixture());
+        $path = $this->localAsyncUrlBuilder->build($this->importFixture());
         $request = new ServerRequest('https://example.com' . $path);
 
         $response = $this->middleware()->process($request, $this->passthroughHandler());
@@ -131,7 +131,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
             600,
             $params->format,
         );
-        $request = new ServerRequest('https://example.com' . $this->signedUrlBuilder->build($fixedHeight));
+        $request = new ServerRequest('https://example.com' . $this->localAsyncUrlBuilder->build($fixedHeight));
 
         $response = $this->middleware()->process($request, $this->passthroughHandler());
 
@@ -153,7 +153,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
             1800,
             $params->format,
         );
-        $request = new ServerRequest('https://example.com' . $this->signedUrlBuilder->build($threeX));
+        $request = new ServerRequest('https://example.com' . $this->localAsyncUrlBuilder->build($threeX));
 
         $response = $this->middleware()->process($request, $this->passthroughHandler());
 
@@ -172,7 +172,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
             721,
             $params->format,
         );
-        $request = new ServerRequest('https://example.com' . $this->signedUrlBuilder->build($offLadder));
+        $request = new ServerRequest('https://example.com' . $this->localAsyncUrlBuilder->build($offLadder));
 
         $response = $this->middleware()->process($request, $this->passthroughHandler());
 
