@@ -7,6 +7,7 @@ namespace Schliesser\Imaginator\Tests\Functional\Imaging;
 use Schliesser\Imaginator\Imaging\External\ExternalImageProcessor;
 use Schliesser\Imaginator\Imaging\ImageProcessorFactory;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
+use Schliesser\Imaginator\Imaging\Local\LocalSyncImageProcessor;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class ImageProcessorFactoryTest extends FunctionalTestCase
@@ -32,6 +33,11 @@ final class ImageProcessorFactoryTest extends FunctionalTestCase
     public function testLocalAsyncSelectsTheLocalProcessor(): void
     {
         self::assertInstanceOf(LocalImageProcessor::class, $this->createWith(['processor' => 'local:async']));
+    }
+
+    public function testLocalSyncSelectsTheSyncProcessor(): void
+    {
+        self::assertInstanceOf(LocalSyncImageProcessor::class, $this->createWith(['processor' => 'local:sync']));
     }
 
     public function testImgproxySelectsTheOffloadedProcessor(): void

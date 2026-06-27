@@ -1,4 +1,4 @@
-# cat=Processing; type=options[Local async (middleware + 302)=local:async,imgproxy (offloaded)=imgproxy]; label=Image processor
+# cat=Processing; type=options[Local async (middleware + 302)=local:async,Local sync (classic rendering on first page load)=local:sync,imgproxy (offloaded)=imgproxy]; label=Image processor
 processor = local:async
 
 # cat=External; type=string; label=imgproxy: base URL of the imgproxy endpoint (e.g. https://imgproxy.example)

@@ -32,6 +32,10 @@ services:
     tags:
       - { name: 'imaginator.image_processor', key: 'local:async' }
 
+  Schliesser\Imaginator\Imaging\Local\LocalSyncImageProcessor:
+    tags:
+      - { name: 'imaginator.image_processor', key: 'local:sync' }
+
   # imgproxy needs scalar provider settings; its dedicated factory builds it only when selected.
   imaginator.processor.imgproxy:
     class: Schliesser\Imaginator\Imaging\External\ExternalImageProcessor
