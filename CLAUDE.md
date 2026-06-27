@@ -46,7 +46,7 @@ Tests split into two suites by what they need to boot:
   (`Dto/AspectRatio`, `Ladder/*`, `Url/CanonicalParams`, `Url/SignedUrlBuilder`, `Dto/ImageVariant`)
   is deliberately framework-free so it runs fast here. Keep new pure logic unit-testable.
 - **`Tests/Functional/`** — `typo3/testing-framework`, boots TYPO3 + DB. Used for anything touching FAL,
-  the middleware, ViewHelpers, or GraphicsMagick processing. Renderer output is verified with
+  the middleware, ViewHelpers, or `ImageService` processing. Renderer output is verified with
   **golden-file** tests (inject a fake processor returning predictable URLs, assert exact HTML).
 
 ## Architecture (the big picture)
@@ -70,15 +70,26 @@ Data flow and the seams that hold it together:
    cold-caching the site. Readable params + a real file extension keep it CDN/devtools-friendly.
 
 3. **Pluggable processing** (`Imaging/ImageProcessorInterface`: `buildUrl` / `isOffloaded` / `materialize`).
-   `buildUrl()` is what goes in `srcset`. Two families share this interface:
-   - **Local** (`Imaging/Local/LocalImageProcessor`) — `buildUrl()` returns the signed `/_imaginator/…`
-     URL; a PSR-15 middleware (`Middleware/ProcessImageRequest`) verifies the sig, re-checks the width
-     against the ladder, calls `materialize()`, and **302-redirects to the processed FAL file** with
-     immutable cache headers. Bad/forged signature → **403**. No JSON anywhere. v1 local backend is
-     **GraphicsMagick only**, behind `Local/Backend/LocalBackendInterface` so libvips can drop in for v2.
-   - **External** (follow-on plan) — `isOffloaded() === true`; `buildUrl()` maps the variant onto a
-     provider's URL grammar (Thumbor, imgproxy, imgix, Cloudflare Images, Cloudinary) and points
-     `srcset` straight at the provider. The webserver never touches pixels.
+   `buildUrl()` is what goes in `srcset`. **One shared interface** — every processor implements it and
+   the render layer only ever sees it. Processors are selected by the `processor` setting through the
+   `Imaging/ImageProcessorRegistry` (a lazy DI service locator over services tagged
+   `imaginator.image_processor` with a `key`). **Integrators add their own** purely by tagging a service
+   with a new `key` and selecting it via `processor` — no core change. Built-ins:
+   - **Local — `local:async`** (`Imaging/Local/LocalImageProcessor`) — `buildUrl()` returns the signed
+     `/_imaginator/…` URL; a PSR-15 middleware (`Middleware/ProcessImageRequest`) verifies the sig,
+     re-checks the width against the ladder, calls `materialize()`, and **302-redirects to the processed
+     FAL file** with immutable cache headers. Bad/forged signature → **403**. No JSON anywhere.
+   - **Local — `local:sync`** (`Imaging/Local/LocalSyncImageProcessor`) — `buildUrl()` materializes the
+     variant synchronously at render time and writes the **static `_processed_/…` file URL straight into
+     `srcset`**; the signed endpoint + middleware are never involved, so requests are plain static-file
+     serves with no PHP hop. Trade-off: higher cold-render cost (one processing op per rung per
+     breakpoint), warm renders reuse existing derivatives.
+   - Both local modes drive **TYPO3's `ImageService` exclusively** — no direct GraphicsMagick/ImageMagick/GD
+     calls. The actual binary is whatever TYPO3's GFX config selects (GraphicsMagick by default).
+   - **External — `imgproxy`** (`Imaging/External/ExternalImageProcessor`, built by `ImgproxyProcessorFactory`)
+     — `isOffloaded() === true`; `buildUrl()` maps the variant onto the provider's URL grammar and points
+     `srcset` straight at the provider. The webserver never touches pixels. More providers (Thumbor, imgix,
+     Cloudflare Images, Cloudinary) plug in as additional URL builders.
 
 4. **Rendering** (`Rendering/PictureRenderer` ← `ViewHelpers/ImageViewHelper`) — single ratio → `<img>`
    with the ladder; multiple per-breakpoint ratios → `<picture>` with one `<source media>` per breakpoint,
