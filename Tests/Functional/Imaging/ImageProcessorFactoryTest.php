@@ -23,9 +23,15 @@ final class ImageProcessorFactoryTest extends FunctionalTestCase
         return $this->get(ImageProcessorFactory::class)->create();
     }
 
-    public function testLocalProcessorIsTheDefault(): void
+    public function testLocalAsyncProcessorIsTheDefault(): void
     {
-        self::assertInstanceOf(LocalImageProcessor::class, $this->createWith(['processor' => 'local']));
+        // No explicit processor setting falls back to the async (middleware + 302) local mode.
+        self::assertInstanceOf(LocalImageProcessor::class, $this->createWith([]));
+    }
+
+    public function testLocalAsyncSelectsTheLocalProcessor(): void
+    {
+        self::assertInstanceOf(LocalImageProcessor::class, $this->createWith(['processor' => 'local:async']));
     }
 
     public function testImgproxySelectsTheOffloadedProcessor(): void

@@ -1,5 +1,5 @@
-# cat=Processing; type=options[Local (GraphicsMagick)=local,imgproxy (offloaded)=imgproxy]; label=Image processor
-processor = local
+# cat=Processing; type=options[Local async (middleware + 302)=local:async,imgproxy (offloaded)=imgproxy]; label=Image processor
+processor = local:async
 
 # cat=External; type=string; label=imgproxy: base URL of the imgproxy endpoint (e.g. https://imgproxy.example)
 processorBaseUrl =

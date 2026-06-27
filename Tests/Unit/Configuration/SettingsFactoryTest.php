@@ -19,7 +19,7 @@ final class SettingsFactoryTest extends TestCase
             'maxDimension' => '1600',
             'format' => 'webp',
             'quality' => ['avif' => 40, 'webp' => 70],
-            'processor' => 'local',
+            'processor' => 'local:async',
             'lqip' => 'dominant-color',
             'secretsRotation' => 'old1,old2',
         ]);
