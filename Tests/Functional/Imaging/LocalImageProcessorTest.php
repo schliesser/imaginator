@@ -8,6 +8,7 @@ use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Imaging\CropCalculator;
 use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
+use Schliesser\Imaginator\Tests\Functional\UsesImageProcessing;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\File;
@@ -21,17 +22,15 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class LocalImageProcessorTest extends FunctionalTestCase
 {
+    use UsesImageProcessing;
+
     protected array $testExtensionsToLoad = ['schliesser/imaginator'];
 
-    protected array $configurationToUseInTestInstance = [
-        'GFX' => [
-            'processor_enabled' => true,
-            'processor' => 'GraphicsMagick',
-            'processor_path' => '/usr/bin/',
-            'processor_effects' => false,
-            'imagefile_ext' => 'gif,jpg,jpeg,png,webp,tif,bmp,svg',
-        ],
-    ];
+    protected function setUp(): void
+    {
+        $this->configurationToUseInTestInstance['GFX'] = $this->imageProcessingGfxConfiguration();
+        parent::setUp();
+    }
 
     private function processor(): LocalImageProcessor
     {

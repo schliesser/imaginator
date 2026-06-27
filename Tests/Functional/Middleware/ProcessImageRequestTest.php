@@ -12,6 +12,7 @@ use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\Local\LocalImageProcessor;
 use Schliesser\Imaginator\Ladder\LadderFactory;
 use Schliesser\Imaginator\Middleware\ProcessImageRequest;
+use Schliesser\Imaginator\Tests\Functional\UsesImageProcessing;
 use Schliesser\Imaginator\Url\CanonicalParams;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Http\Response;
@@ -27,22 +28,15 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class ProcessImageRequestTest extends FunctionalTestCase
 {
-    protected array $testExtensionsToLoad = ['schliesser/imaginator'];
+    use UsesImageProcessing;
 
-    protected array $configurationToUseInTestInstance = [
-        'GFX' => [
-            'processor_enabled' => true,
-            'processor' => 'GraphicsMagick',
-            'processor_path' => '/usr/bin/',
-            'processor_effects' => false,
-            'imagefile_ext' => 'gif,jpg,jpeg,png,webp,tif,bmp,svg',
-        ],
-    ];
+    protected array $testExtensionsToLoad = ['schliesser/imaginator'];
 
     private SignedUrlBuilder $signedUrlBuilder;
 
     protected function setUp(): void
     {
+        $this->configurationToUseInTestInstance['GFX'] = $this->imageProcessingGfxConfiguration();
         parent::setUp();
         $this->signedUrlBuilder = new SignedUrlBuilder(['test-secret']);
     }
