@@ -177,8 +177,10 @@ final class ImageVariant   // immutable value object
 - A PSR-15 middleware (or route) verifies the signature, calls `materialize()`, and **streams the
   bytes / 302-redirects to the processed FAL file** (no JSON). Result is written to a configured
   storage (`_processed_` or a dedicated FAL storage) so repeat hits are static-served.
-- **v1 backend: GraphicsMagick only** (TYPO3 `GraphicalFunctions`, zero new infra). Still behind a
-  thin `LocalBackendInterface` so **libvips** can drop in as a **v2** backend without touching callers.
+- **Local processing drives TYPO3's `ImageService` exclusively** — no direct GraphicsMagick/ImageMagick/GD
+  calls; the actual binary is whatever the TYPO3 GFX config selects. Two local modes, selected by the
+  `processor` setting: `local:async` (signed endpoint + middleware 302) and `local:sync` (synchronous
+  materialize at render time, static `_processed_/…` URL straight into `srcset`, no middleware hop).
 
 **B. Offloaded — `ExternalImageProcessor` + per-provider `UrlBuilder` (v1 set LOCKED)**
 - `isOffloaded() === true`; `buildUrl()` maps `ImageVariant` → the provider's URL grammar and points
@@ -321,10 +323,12 @@ Classes/
   Dto/ImageVariant.php                     # immutable value object
   Imaging/
     ImageProcessorInterface.php
-    Local/LocalImageProcessor.php
-    Local/Backend/GraphicsMagickBackend.php
-    Local/Backend/VipsBackend.php          # [DECIDE v1?]
+    ImageProcessorRegistry.php             # open tagged registry: integrators plug in their own
+    ImageProcessorFactory.php              # picks the processor by the `processor` setting
+    Local/LocalImageProcessor.php          # local:async — signed endpoint + middleware 302
+    Local/LocalSyncImageProcessor.php      # local:sync — static _processed_ URL in srcset
     External/ExternalImageProcessor.php
+    External/ImgproxyProcessorFactory.php
     External/UrlBuilder/UrlBuilderInterface.php
     External/UrlBuilder/{Imgix,Cloudinary,Cloudflare,Thumbor}UrlBuilder.php
   Ladder/LadderFactory.php                 # rungs, quantization, height-from-ratio
@@ -362,7 +366,7 @@ Once the **[DECIDE]** items are settled, each phase becomes a bite-sized TDD tas
 6. **External processors:** `UrlBuilderInterface` + first provider(s) from §4 decision.
 7. **Aspect-ratio element:** web component, per-breakpoint ratios, live preview, v13/v14 adapter.
 8. **Polish (v1):** warmup/telemetry **seams** (no-op interfaces + events), docs.
-9. **v2 (separate plan):** Messenger/Scheduler warmup worker, libvips backend, per-breakpoint crop in
+9. **v2 (separate plan):** Messenger/Scheduler warmup worker, per-breakpoint crop in
    the element, private-image URL mode, telemetry collection.
 
 ---
@@ -373,7 +377,9 @@ Once the **[DECIDE]** items are settled, each phase becomes a bite-sized TDD tas
 - [x] **URL scheme:** HMAC-signed, readable, path-segment params, real extension. Key-rotation via
   secret array. Private-image mode → v2.
 - [x] **External providers (v1):** Thumbor, imgproxy, imgix, Cloudflare Images, Cloudinary.
-- [x] **Local backend (v1):** GraphicsMagick only; libvips → v2 (interface in place).
+- [x] **Local processing (v1):** TYPO3 `ImageService` exclusively (no direct GraphicsMagick/ImageMagick/GD);
+  two modes `local:async` (middleware + 302) and `local:sync` (static `srcset`). Processor selection is an
+  open tagged registry, so integrators plug in their own without a core change.
 - [x] **Aspect-ratio element:** per-breakpoint ratio at **content-element level** (applies to all
   media in the CE), no live preview; per-breakpoint distinct crop → v2.
 

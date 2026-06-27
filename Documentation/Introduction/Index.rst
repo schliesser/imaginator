@@ -21,12 +21,14 @@ How it works
 
 #.  The :ref:`\<i:image\> ViewHelper <usage>` turns one ratio (or a
     per-breakpoint ratio map) into a width ladder and renders the markup.
-#.  Each candidate is a **signed URL** pointing at the
-    :ref:`image endpoint <image-endpoint>`.
+#.  In the default ``local:async`` mode each candidate is a **signed URL**
+    pointing at the :ref:`image endpoint <image-endpoint>`.
 #.  A PSR-15 middleware verifies the signature, re-checks the width against the
-    ladder, processes the image with the local backend
-    (GraphicsMagick / ImageMagick) and 302-redirects to the processed file
-    with immutable cache headers.
+    ladder, processes the image through TYPO3's ``ImageService`` (GraphicsMagick
+    or ImageMagick, per your ``GFX`` config) and 302-redirects to the processed
+    file with immutable cache headers. (In ``local:sync`` mode the processed-file
+    URL is written straight into ``srcset`` and the middleware is skipped — see
+    :ref:`processor <conf-processor>`.)
 
 Quantizing every requested width up to a fixed ladder rung is what bounds the
 set of processed files **and** makes the signed URLs safe: only rung sizes ever
@@ -37,9 +39,10 @@ verify, so an attacker cannot request arbitrary dimensions.
 Status
 ======
 
-Local (GraphicsMagick / ImageMagick) processing, the :html:`<i:image>`
-ViewHelper, stacked AVIF + WebP :html:`<picture>` tiers, low-quality
-placeholders and the content-element aspect-ratio field work end-to-end.
+Local processing (async + sync modes, via TYPO3's ``ImageService``), the
+:html:`<i:image>` ViewHelper, stacked AVIF + WebP :html:`<picture>` tiers,
+low-quality placeholders and the content-element aspect-ratio field work
+end-to-end.
 
 ..  note::
     The JavaScript enhancement layer, external CDN providers

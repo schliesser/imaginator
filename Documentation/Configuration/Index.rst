@@ -31,10 +31,24 @@ Settings
 ..  confval:: processor
     :name: conf-processor
     :type: string
-    :default: ``local``
+    :default: ``local:async``
 
-    Processing backend: ``local`` (GraphicsMagick / ImageMagick behind the signed
-    endpoint) or ``imgproxy`` (offloaded — see :ref:`configuration-imgproxy`).
+    Image processor. Both local modes drive TYPO3's ``ImageService`` exclusively
+    (the binary is whatever your ``GFX`` config selects — GraphicsMagick or
+    ImageMagick); no direct GraphicsMagick/ImageMagick/GD calls.
+
+    *   ``local:async`` — ``srcset`` points at the signed ``/_imaginator/`` endpoint;
+        a middleware materializes the derivative on first request and 302-redirects
+        to the processed file. Processing is deferred to the first hit per variant.
+    *   ``local:sync`` — derivatives are materialized synchronously at render time and
+        the static ``_processed_/…`` file URL is written straight into ``srcset``, so
+        the middleware is never involved and requests are plain static-file serves.
+        Trade-off: higher cold-render cost, then no PHP hop per image.
+    *   ``imgproxy`` — offloaded; ``srcset`` points straight at the provider (see
+        :ref:`configuration-imgproxy`).
+
+    Integrators can register a custom processor by tagging a service with
+    ``imaginator.image_processor`` (attribute ``key``) and selecting it here.
 
 ..  confval:: maxDimension
     :name: conf-maxdimension

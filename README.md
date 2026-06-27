@@ -6,7 +6,7 @@ width-ladder `srcset` and `sizes="auto"`, so the browser's preload scanner fetch
 correctly-sized image in a single request. Candidate URLs are HMAC-signed and served as real
 image bytes by a local processing endpoint. JavaScript is never required for sharpness.
 
-> **Status.** Local (GraphicsMagick/ImageMagick) processing, the `<i:image>` ViewHelper, stacked
+> **Status.** Local processing (async + sync modes, via TYPO3's `ImageService`), the `<i:image>` ViewHelper, stacked
 > **AVIF + WebP `<picture>` tiers**, **low-quality placeholders** (ThumbHash by default,
 > dominant-colour and none as options) and the **content-element aspect-ratio field** work
 > end-to-end. The JS enhancement layer, external CDN providers
@@ -151,7 +151,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator'] = [
 
 | Setting | Default | Description |
 |---|---|---|
-| `processor` | `local` | Processing backend (v1: `local` only) |
+| `processor` | `local:async` | Image processor: `local:async` (signed endpoint + 302), `local:sync` (static `srcset`, no middleware) or `imgproxy` (offloaded) |
 | `maxDimension` | `2000` | Largest image dimension in px; the ladder is capped to it |
 | `ladder` | `320,420,560,740,980,1300,1720,2000` | Width-ladder rungs (comma-separated) |
 | `formats` | `avif,webp` | Negotiated formats, most-preferred first |
