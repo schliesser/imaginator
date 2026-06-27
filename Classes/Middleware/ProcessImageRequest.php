@@ -14,7 +14,7 @@ use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
 use Schliesser\Imaginator\Ladder\LadderFactory;
-use Schliesser\Imaginator\Url\CanonicalParams;
+use Schliesser\Imaginator\Dto\CanonicalParams;
 use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
 
 /**

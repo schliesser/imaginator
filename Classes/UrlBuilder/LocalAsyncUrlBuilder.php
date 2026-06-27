@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\UrlBuilder;
 
-use Schliesser\Imaginator\Url\CanonicalParams;
+use Schliesser\Imaginator\Dto\CanonicalParams;
 
 /**
  * Builds and verifies the HMAC-signed `/_imaginator/…` endpoint URL used by the `local:async`

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Schliesser\Imaginator\Url;
+namespace Schliesser\Imaginator\Dto;
 
 final readonly class CanonicalParams
 {

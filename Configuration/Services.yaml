@@ -9,7 +9,6 @@ services:
     exclude:
       - '../Classes/Dto/'
       - '../Classes/Ladder/Rung.php'
-      - '../Classes/Url/CanonicalParams.php'
 
   # Services whose constructors take scalar configuration are built via the factory.
   Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder:

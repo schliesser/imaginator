@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Schliesser\Imaginator\Tests\Unit\UrlBuilder;
 
 use PHPUnit\Framework\TestCase;
-use Schliesser\Imaginator\Url\CanonicalParams;
+use Schliesser\Imaginator\Dto\CanonicalParams;
 use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
 
 final class LocalAsyncUrlBuilderTest extends TestCase
