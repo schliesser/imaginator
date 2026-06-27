@@ -215,10 +215,13 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Run Playwright (frontend + backend + imgproxy)
+        # chromium project only: it covers the backend + imgproxy + <picture> specs. The WebKit-only
+        # sizes="auto" polyfill spec runs in the e2e-local job (which installs webkit); --project here
+        # keeps this job from trying to launch a browser it does not install.
         env:
           IMAGINATOR_BASE_URL: https://imaginator.ddev.site
           PLAYWRIGHT_CHANNEL: chromium
-        run: npx playwright test
+        run: npx playwright test --project=chromium
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
