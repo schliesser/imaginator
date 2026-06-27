@@ -10,7 +10,6 @@ use Schliesser\Imaginator\Dto\ProcessedImage;
 use Schliesser\Imaginator\Imaging\CropCalculator;
 use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
-use Schliesser\Imaginator\Imaging\Local\Backend\LocalBackendInterface;
 use Schliesser\Imaginator\Url\SignedUrlBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
@@ -18,7 +17,8 @@ use TYPO3\CMS\Extbase\Service\ImageService;
 
 /**
  * Default processor: srcset URLs point at the signed local endpoint, and the actual pixels
- * are produced on demand by the configured local backend (GraphicsMagick in v1).
+ * are produced on demand through TYPO3's {@see ImageService} (which drives the configured
+ * image processor — no direct GraphicsMagick/ImageMagick/GD calls).
  *
  * For reference variants the editor's crop variant (cropArea + focusArea) is resolved here and the
  * target ratio is fitted inside it ({@see CropCalculator}); plain file variants are centre-cropped.
@@ -27,7 +27,6 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
 {
     public function __construct(
         private SignedUrlBuilder $signedUrlBuilder,
-        private LocalBackendInterface $backend,
         private ImageService $imageService,
         private CropCalculator $cropCalculator,
         private CropResolver $cropResolver,
@@ -53,14 +52,14 @@ final readonly class LocalImageProcessor implements ImageProcessorInterface
                 $resolution->focusArea,
                 new AspectRatio($variant->width, $variant->height),
             );
-            $processed = $this->backend->process($resolution->original, [
+            $processed = $this->imageService->applyProcessingInstructions($resolution->original, [
                 'width' => $variant->width,
                 'height' => $variant->height,
                 'fileExtension' => $variant->format,
                 'crop' => new Area($rect->x, $rect->y, $rect->width, $rect->height),
             ]);
         } else {
-            $processed = $this->backend->process($resolution->original, [
+            $processed = $this->imageService->applyProcessingInstructions($resolution->original, [
                 'width' => $variant->width . 'c',
                 'height' => $variant->height . 'c',
                 'fileExtension' => $variant->format,

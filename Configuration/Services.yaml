@@ -18,13 +18,10 @@ services:
   Schliesser\Imaginator\Ladder\LadderFactory:
     factory: ['@Schliesser\Imaginator\Configuration\SettingsFactory', 'createLadderFactory']
 
-  # The active processor (local GraphicsMagick vs offloaded imgproxy) is chosen from settings by the
+  # The active processor (local ImageService vs offloaded imgproxy) is chosen from settings by the
   # factory; the render layer + middleware stay processor-agnostic behind the interface.
   Schliesser\Imaginator\Imaging\ImageProcessorInterface:
     factory: ['@Schliesser\Imaginator\Imaging\ImageProcessorFactory', 'create']
-
-  Schliesser\Imaginator\Imaging\Local\Backend\LocalBackendInterface:
-    alias: Schliesser\Imaginator\Imaging\Local\Backend\GraphicsMagickBackend
 
   Schliesser\Imaginator\Middleware\ProcessImageRequest:
     public: true
