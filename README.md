@@ -180,26 +180,14 @@ CSP directives you may need:
   (no `img-src data:`); the leanest and strictest-CSP-friendly option.
 - **`none`**: no placeholder, no extra directive.
 
-## Local development & manual testing
+## Contributing
 
-A reproducible DDEV demo instance is included:
-
-```bash
-ddev start
-ddev composer install
-ddev exec bash Build/Scripts/setup-demo-instance.sh
-```
-
-- Frontend (demo page): `https://imaginator.ddev.site/`
-- Backend: `https://imaginator.ddev.site/typo3/` — `admin` / `Password.1`
-
-### Tests
+A reproducible DDEV demo instance, the full test workflow, and the coding/PR conventions are
+documented in [CONTRIBUTING.md](CONTRIBUTING.md). In short:
 
 ```bash
-ddev exec .Build/bin/phpunit -c Build/phpunit/UnitTests.xml
-ddev exec "typo3DatabaseDriver=mysqli typo3DatabaseHost=db typo3DatabaseName=db \
-  typo3DatabaseUsername=root typo3DatabasePassword=root \
-  .Build/bin/phpunit -c Build/phpunit/FunctionalTests.xml"
+ddev start && ddev setup && ddev demo   # demo at https://imaginator.ddev.site/ (admin / Password.1)
+ddev test all && ddev lint
 ```
 
 ## License
