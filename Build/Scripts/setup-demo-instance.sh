@@ -48,22 +48,16 @@ echo "› TYPO3 setup (database + admin user + site)"
     --admin-username="${ADMIN_USER}" --admin-user-password="${ADMIN_PASS}" --admin-email=admin@example.com \
     --project-name=Imaginator --create-site="${BASE_URL}" --server-type=other --no-interaction --force
 
-# Standalone volume installs (ddev install-v13 / install-v14) are not covered by
-# DDEV's settings management, so they get none of the dev conveniences or the GFX
-# binary path the default .Build docroot inherits. Without trustedHostsPattern the
-# custom v13./v14. host is rejected (#1396795884); without GFX, image processing
-# fails. Write a real additional.php (note the mandatory <?php opener).
-if [ "${WRITE_INSTANCE_CONFIG:-0}" = "1" ]; then
-    echo "› writing instance dev + GFX configuration"
-    cat > config/system/additional.php <<'PHP'
-<?php
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['trustedHostsPattern'] = '.*';
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['displayErrors'] = 1;
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['devIPmask'] = '*';
-$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor'] = 'ImageMagick';
-$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor_path'] = '/usr/bin/';
-PHP
-fi
+# Persist trusted hosts + the GFX binary path into settings.php (not additional.php,
+# which DDEV manages for the default docroot). DDEV only writes its additional.php once
+# the docroot exists at `ddev start`, so a first-run or volume install would otherwise
+# reject the host (#1396795884) or have no image processor. Writing settings.php makes
+# every instance self-sufficient with no restart and survives DDEV regeneration.
+# (TYPO3_CONTEXT=Development from web_environment already gives the debug error page.)
+echo "› configuring trusted hosts + GFX in settings.php"
+"${TYPO3_BIN}" configuration:set SYS/trustedHostsPattern '.*'
+"${TYPO3_BIN}" configuration:set GFX/processor 'ImageMagick'
+"${TYPO3_BIN}" configuration:set GFX/processor_path '/usr/bin/'
 
 echo "› wiring the demo Site Set into the site configuration"
 # v14's `typo3 setup` emits a `dependencies:` block, but v13's does not, so handle

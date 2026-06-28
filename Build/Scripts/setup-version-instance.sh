@@ -73,7 +73,6 @@ DEMO_SRC="${REPO_ROOT}/Build/demo" \
 DB_NAME="${DB_NAME}" \
 DB_USER="db" DB_PASS="db" \
 BASE_URL="${BASE_URL}" \
-WRITE_INSTANCE_CONFIG="1" \
     bash "${REPO_ROOT}/Build/Scripts/setup-demo-instance.sh"
 
 echo ""
