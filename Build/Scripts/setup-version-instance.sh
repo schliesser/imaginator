@@ -25,7 +25,9 @@ esac
 REPO_ROOT="/var/www/html"
 INSTALL_DIR="${REPO_ROOT}/v${MAJOR}"
 DB_NAME="db_v${MAJOR}"
-BASE_URL="https://v${MAJOR}.imaginator.ddev.site/"
+# Derive the host from the DDEV project name so worktrees with a custom name (set
+# via .ddev/config.local.yaml) get the matching v<major>.<name>.ddev.site base.
+BASE_URL="https://v${MAJOR}.${DDEV_SITENAME:-imaginator}.ddev.site/"
 
 # Docker volumes mount as root; take ownership so Composer can write.
 sudo chown "$(id -u):$(id -g)" "${INSTALL_DIR}"

@@ -17,7 +17,7 @@ set -euo pipefail
 
 # Environment-parameterised so the same script seeds the DDEV demo (defaults below) and the CI
 # instance (Build/Scripts/setup-ci-instance.sh exports native MariaDB creds + a localhost BASE_URL).
-BASE_URL="${BASE_URL:-https://imaginator.ddev.site/}"
+BASE_URL="${BASE_URL:-https://${DDEV_SITENAME:-imaginator}.ddev.site/}"
 ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASS="${ADMIN_PASS:-Password.1}"
 DB_HOST="${DB_HOST:-db}"
