@@ -3,15 +3,27 @@
 Zero-config responsive images for TYPO3. The integrator writes **no `sizes` and no per-image
 breakpoints**: at render time the extension emits a real `<picture>`/`<img>` with a quantized
 width-ladder `srcset` and `sizes="auto"`, so the browser's preload scanner fetches the
-correctly-sized image in a single request. Candidate URLs are HMAC-signed and served as real
-image bytes by a local processing endpoint. JavaScript is never required for sharpness.
+correctly-sized image in a single request.
 
-> **Status.** Local processing (async + sync modes, via TYPO3's `ImageService`), the `<i:image>` ViewHelper, stacked
-> **AVIF + WebP `<picture>` tiers**, **low-quality placeholders** (ThumbHash by default,
-> dominant-colour and none as options) and the **content-element aspect-ratio field** work
-> end-to-end. The JS enhancement layer, external CDN providers
-> (Thumbor/imgproxy/imgix/Cloudflare/Cloudinary) and per-site overrides of the settings below are
-> planned follow-ups (see `docs/`). Rendered reST documentation lives in `Documentation/`.
+**For editors.** A backend **aspect-ratio field** per content element lets editors pick the framing
+once — **per breakpoint** — and get **uniform, consistent images** across every element of that type,
+no more ragged grids from mismatched upload dimensions. Crop and focus area are honored, so the
+chosen subject stays in frame at every size.
+
+![Aspect-ratio field in the backend](Documentation/Images/AspectRatioField.png)
+
+**For developers.** Drop one `<i:image>` and get sharp, perfectly-sized images on every device — no
+hand-tuned `sizes`, no breakpoint lists, no layout shift (CLS). Stop shipping oversized images:
+the width ladder bounds processing to a fixed set of sizes, so you serve fewer, smaller bytes and
+score better Core Web Vitals (LCP/CLS) out of the box.
+
+**Features.** Quantized width-ladder `srcset` + `sizes="auto"` · stacked **AVIF + WebP** `<picture>`
+tiers · per-breakpoint **art direction** (crop variants + focus area honored) · **low-quality
+placeholders** (ThumbHash, dominant-color, or none) · `priority` images get `fetchpriority="high"`
+and skip lazy-loading · pluggable processing — classic **sync** on first request, **async** via a
+signed middleware endpoint (default), or an **external processor** (e.g. imgproxy).
+
+JavaScript is never required for sharpness — it's only a polyfill for Safari < 27.
 
 ## Requirements
 
@@ -44,12 +56,14 @@ Declare the ViewHelper namespace once per template and call `<i:image>`:
     {# By file UID or path #}
     <i:image src="{file.uid}" treatIdAsReference="0" aspectRatio="4:3" alt="A product"/>
 
-    {# Art direction: per-breakpoint ratios render a <picture> with one <source> each.
-       The map is {mediaQuery: ratio}; the entry whose media is empty (or the last entry)
-       becomes the <img> fallback. #}
-    <i:image image="{hero}"
-             aspectRatio="{'(min-width:992px)': '16:9', '(max-width:991px)': '1:1'}"
-             alt="Hero"/>
+    {# Art direction: per-breakpoint ratios render a <picture> with one <source media> each.
+       The map is {breakpoint: ratio}; keys are preconfigured breakpoint aliases (see extension
+       config) or a px min-width, with 0 / xs as the base. Tiers are mobile-first (min-width
+       only); the base (min-width 0) tier becomes the <img> fallback, larger tiers become
+       <source>s. #}
+    <i:image image="{image}"
+             aspectRatio="{0: '1:1', 'lg': '16:9'}"
+             alt="This is an image"/>
 
     {# LCP / above-the-fold image: drops lazy-loading, adds fetchpriority="high"
        and an explicit sizes="100vw" #}
@@ -64,7 +78,7 @@ Declare the ViewHelper namespace once per template and call `<i:image>`:
 | `image` | `File`/`FileReference` | – | FAL object (use this *or* `src`) |
 | `src` | string | `''` | File **UID** or path (e.g. `fileadmin/img/x.jpg`) |
 | `treatIdAsReference` | bool | `false` | Treat `src` as a `sys_file_reference` UID |
-| `aspectRatio` | string \| map | `16:9` | `"W:H"`, or a `{mediaQuery: "W:H"}` map for art direction |
+| `aspectRatio` | string \| map | `16:9` | `"W:H"`, or a `{breakpoint: "W:H"}` map for art direction |
 | `cropVariant` | string | `default` | FAL crop variant to use |
 | `alt` | string | `''` | Alternative text |
 | `class` | string | – | CSS class on the `<img>` |
@@ -107,35 +121,13 @@ ladder, so the page works fully with JavaScript disabled — and it only touches
 `<img loading="lazy" sizes="auto">`, so **priority/LCP images are untouched** (they carry an explicit
 `sizes="100vw"` and `loading="eager"`). Pages without any `<i:image>` ship no extra JS.
 
-## The image endpoint & signing
-
-Each candidate URL has one of these forms:
-
-```
-reference: /_imaginator/{16-hex-signature}/r{referenceUid}/{cropVariant}/{width}x{height}.{ext}
-file:      /_imaginator/{16-hex-signature}/f{fileUid}/{cropVariant}/{width}x{height}.{ext}
-```
-
-The uid is site-unique, so no storage segment is needed. A PSR-15 middleware verifies the signature,
-re-checks the width against the ladder, processes the image and **302-redirects to the processed
-file** with `Cache-Control: public, max-age=31536000, immutable`. A forged or tampered URL returns
-**403**, and only ladder-quantized widths are ever processed — so the endpoint cannot be abused to
-exhaust the server with arbitrary sizes.
-
 ### Crop & focus areas
 
-When an `image` (a FAL `FileReference`) is rendered, the URL keys on the **reference uid** (`r…`) and
-the middleware resolves the editor's **crop variant** server-side: it reads the reference's crop JSON
-and fits the requested ratio inside the **crop area**, centered on the **focus area** — so the framing
-the editor chose is honoured and **no crop geometry is exposed in the URL**. The ladder is bounded by
-the crop area, so a tightly-cropped region is never upscaled. A `src` given as a path or plain file
-uid (`f…`) has no crop data and is centre-cropped to the ratio.
-
-The signing secret is derived automatically from
-`$GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey']`. No configuration is needed, but note that
-**changing `encryptionKey` invalidates previously generated URLs** (they will re-sign on the next
-render). Key rotation (keeping old secrets valid during a change) is supported in the signing core
-and will be exposed as a setting in a later release.
+When an `image` (a FAL `FileReference`) is rendered, the editor's **crop variant** is resolved server-side:
+it reads the reference's crop JSON and fits the requested ratio inside the **crop area**, centered on the
+**focus area** — so the framing the editor chose is honored and **no crop geometry is exposed in the URL**.
+The ladder is bounded by the crop area, so a tightly-cropped region is never upscaled. A `src` given as
+a path or plain file uid (`f…`) has no crop data and is center-cropped to the ratio.
 
 ## Configuration
 
@@ -176,9 +168,31 @@ CSP directives you may need:
 
 - **`thumbhash`** (default): the blurred preview is a `data:` background-image, so allow
   `img-src data:` (TYPO3's default frontend CSP already does).
-- **`dominant-color`**: a plain background colour — needs nothing beyond the nonced `<style>`
-  (no `img-src data:`); the leanest and strictest-CSP-friendly option.
+- **`dominant-color`**: a plain background color — needs nothing beyond the nonced `<style>`.
 - **`none`**: no placeholder, no extra directive.
+
+## The local:async image endpoint
+
+Each async candidate URL has one of these forms:
+
+```
+reference: /_imaginator/{16-hex-signature}/r{referenceUid}/{cropVariant}/{width}x{height}.{ext}
+file:      /_imaginator/{16-hex-signature}/f{fileUid}/{cropVariant}/{width}x{height}.{ext}
+```
+
+The uid is site-unique, so no storage segment is needed. A PSR-15 middleware verifies the signature,
+re-checks the width against the ladder, processes the image and **302-redirects to the processed
+file** with `Cache-Control: public, max-age=31536000, immutable`. A forged or tampered URL returns
+**403**, and only ladder-quantized widths are ever processed — so the endpoint cannot be abused to
+exhaust the server with arbitrary sizes.
+
+If the derivative already exists at render time, the static processed-file URL is written straight
+into the markup — so the web server serves it directly, with no middleware/PHP roundtrip.
+
+The signing secret is derived automatically from
+`$GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey']`. No configuration is needed, but note that
+**changing `encryptionKey` invalidates previously generated URLs** (they will re-sign on the next
+render).
 
 ## Contributing
 
