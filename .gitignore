@@ -1,10 +1,14 @@
 /.Build/
+# Per-version DDEV demo installs (Docker volumes mounted at /var/www/html/v13|v14
+# inside the web container). Listed here so php-cs-fixer's ignoreVCSIgnored() skips
+# them and they can never be committed.
+/v13/
+/v14/
 /node_modules/
 /composer.lock
 /.playwright-mcp/
 /test-results/
 /playwright-report/
-/.ddev/
 /.idea/
 /var/
 /config/
