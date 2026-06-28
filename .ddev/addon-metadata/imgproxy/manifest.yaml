@@ -1,0 +1,8 @@
+name: imgproxy
+repository: barbieswimcrew/ddev-imgproxy
+version: v1.0.1
+install_date: "2026-06-14T09:29:43+02:00"
+project_files:
+    - docker-compose.imgproxy.yaml
+global_files: []
+removal_actions: []

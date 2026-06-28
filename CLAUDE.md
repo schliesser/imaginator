@@ -4,18 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-This repo is **pre-code**: it currently contains only design docs in `docs/` and has no
-commits yet. The work is a TYPO3 extension, **`schliesser/imaginator`** (TER key `imaginator`,
-PHP namespace `Schliesser\Imaginator\`, new major `^2.0`, successor to the old `pictureino`).
+This is a TYPO3 extension, **`schliesser/imaginator`** (TER key `imaginator`, PHP namespace
+`Schliesser\Imaginator\`, new major `^2.0`, successor to the old `pictureino`). The foundation
+(signing + ladder core, processors, renderer, ViewHelper, middleware) is implemented; work now
+proceeds on the follow-on plans.
 
-The implementation is meant to be built by following the plans in `docs/` task-by-task with TDD.
-Before writing any code, read:
+The design docs in `docs/` remain the source of truth for intent:
 - `docs/2026-06-06-pictureino-ng.md` — the architecture/design RFC. **§12 holds the locked decisions**;
   everything else flows from them. Treat the locked decisions as binding constraints.
-- `docs/2026-06-06-imaginator-v1-foundation.md` — the first implementation plan (Tasks 0–10). It contains
-  the exact `composer.json`, file layout, and full code/tests for the foundation. **Start here.**
+- `docs/2026-06-06-imaginator-v1-foundation.md` — the first implementation plan (Tasks 0–10), with the
+  `composer.json`, file layout, and code/tests for the foundation.
 - The remaining `docs/2026-06-06-imaginator-v1-*.md` are independent follow-on plans (formats+LQIP,
-  JS enhancement, external providers, aspect-ratio element, polish) — build only after the foundation.
+  JS enhancement, external providers, aspect-ratio element, polish).
 
 ## How to work in this repo
 
@@ -27,8 +27,7 @@ together or skip the failing-test step. Use the `superpowers:subagent-driven-dev
 
 ## Commands
 
-Once Task 0 has scaffolded the extension (`composer.json`, `Build/phpunit/*.xml`), dependencies install
-into `.Build/` (a Composer `vendor-dir`, not the default `vendor/`):
+Dependencies install into `.Build/` (a Composer `vendor-dir`, not the default `vendor/`):
 
 ```bash
 composer update                                          # installs into .Build/
@@ -43,6 +42,28 @@ point it elsewhere locally, e.g. `typo3ProcessorPath=/opt/homebrew/bin/`. Bootin
 default CLI `memory_limit` — run with `php -d memory_limit=1G` if a bootstrap OOM appears.
 
 Dev tooling pinned in `require-dev`: `phpstan/phpstan ^2.1`, `friendsofphp/php-cs-fixer ^3.51`.
+
+### DDEV testbed
+
+The committed `.ddev/` config (nginx-fpm, PHP 8.3, MariaDB, imgproxy addon) provides a clickable
+sandbox. Custom commands wrap the workflows — after a fresh clone, `ddev start` then:
+
+```bash
+ddev setup              # composer install into .Build/
+ddev demo               # (re)build the default demo at https://imaginator.ddev.site/ (.Build/, current version)
+ddev install-v13        # clickable TYPO3 v13 demo at https://v13.imaginator.ddev.site/  (--fresh to rebuild)
+ddev install-v14        # clickable TYPO3 v14 demo at https://v14.imaginator.ddev.site/
+ddev install-all        # both side-by-side
+ddev test [unit|functional|all]   # PHPUnit suites
+ddev lint               # PHPStan + php-cs-fixer (dry-run); `ddev cgl-fix` auto-fixes
+```
+
+Backend login on every instance: `admin` / `Password.1`. The `v13`/`v14` instances live in Docker
+volumes (`/var/www/html/v13|v14`, served by `.ddev/nginx_full/v13.conf|v14.conf`), each a full TYPO3
+base-distribution with EXT:imaginator wired via a Composer path repository to the working tree — edits
+to `Classes/` reflect live. The shared seeder is `Build/Scripts/setup-demo-instance.sh` (path/version
+parameterised); `setup-version-instance.sh` drives the per-version scaffold. The demo content + the
+`schliesser/imaginator-demo` Site Set render `Resources/Private/Demo/Templates/Home.html`.
 
 ## Test layering (important for speed)
 

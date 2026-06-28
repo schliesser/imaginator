@@ -27,39 +27,81 @@ DB_USER="${DB_USER:-db}"
 DB_PASS="${DB_PASS:-db}"
 DB_ROOT_USER="${DB_ROOT_USER:-root}"
 DB_ROOT_PASS="${DB_ROOT_PASS:-root}"
-SITE_CONFIG="config/sites/main/config.yaml"
+
+# Path-parameterised so the same script seeds the default .Build/ install (defaults
+# below) and the per-version DDEV volume installs (ddev install-v13 / install-v14
+# export TYPO3_BIN=vendor/bin/typo3, WEB_DIR=public, DEMO_SRC=<repo>/Build/demo and
+# run it from inside /var/www/html/v13|v14).
+TYPO3_BIN="${TYPO3_BIN:-.Build/bin/typo3}"
+WEB_DIR="${WEB_DIR:-.Build/public}"
+DEMO_SRC="${DEMO_SRC:-Build/demo}"
+SITE_ID="${SITE_ID:-main}"
+SITE_CONFIG="config/sites/${SITE_ID}/config.yaml"
 
 echo "› resetting the database for a clean install"
 mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_ROOT_USER}" -p"${DB_ROOT_PASS}" \
     -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null
 
 echo "› TYPO3 setup (database + admin user + site)"
-.Build/bin/typo3 setup \
+"${TYPO3_BIN}" setup \
     --driver=mysqli --host="${DB_HOST}" --port="${DB_PORT}" --dbname="${DB_NAME}" --username="${DB_USER}" --password="${DB_PASS}" \
     --admin-username="${ADMIN_USER}" --admin-user-password="${ADMIN_PASS}" --admin-email=admin@example.com \
     --project-name=Imaginator --create-site="${BASE_URL}" --server-type=other --no-interaction --force
 
+# Standalone volume installs (ddev install-v13 / install-v14) are not covered by
+# DDEV's settings management, so they get none of the dev conveniences or the GFX
+# binary path the default .Build docroot inherits. Without trustedHostsPattern the
+# custom v13./v14. host is rejected (#1396795884); without GFX, image processing
+# fails. Write a real additional.php (note the mandatory <?php opener).
+if [ "${WRITE_INSTANCE_CONFIG:-0}" = "1" ]; then
+    echo "› writing instance dev + GFX configuration"
+    cat > config/system/additional.php <<'PHP'
+<?php
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['trustedHostsPattern'] = '.*';
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['displayErrors'] = 1;
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['devIPmask'] = '*';
+$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor'] = 'ImageMagick';
+$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor_path'] = '/usr/bin/';
+PHP
+fi
+
 echo "› wiring the demo Site Set into the site configuration"
+# v14's `typo3 setup` emits a `dependencies:` block, but v13's does not, so handle
+# both: extend an existing block, otherwise append a fresh one.
 if ! grep -q 'schliesser/imaginator-demo' "${SITE_CONFIG}"; then
-    sed -i 's#^dependencies:#dependencies:\n  - schliesser/imaginator-demo#' "${SITE_CONFIG}"
+    if grep -qE '^dependencies:' "${SITE_CONFIG}"; then
+        sed -i 's#^dependencies:#dependencies:\n  - schliesser/imaginator-demo#' "${SITE_CONFIG}"
+    else
+        printf '\ndependencies:\n  - schliesser/imaginator-demo\n' >> "${SITE_CONFIG}"
+    fi
 fi
 
 echo "› neutralising the installer's welcome-page TypoScript (the demo Set renders the page)"
 printf '# Page rendering is provided by the schliesser/imaginator-demo Site Set.\n' \
     > config/sites/main/setup.typoscript
 
+# v13's `typo3 setup` seeds a root sys_template (clear=3 + its own fluid_styled_content
+# PAGE) that wipes the Site Set TypoScript, so the demo Home template never renders.
+# v14 seeds no sys_template and lets the set drive rendering. Drop it so both behave the
+# same; fluid_styled_content rendering still comes via the demo set's dependency.
+echo "› removing the default root TypoScript template so the demo Site Set drives rendering"
+mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" \
+    -e "DELETE FROM sys_template;" 2>/dev/null || true
+
 echo "› placing the demo images into fileadmin"
-mkdir -p .Build/public/fileadmin/demo
-cp Build/demo/*.jpg Build/demo/*.png .Build/public/fileadmin/demo/
+mkdir -p "${WEB_DIR}/fileadmin/demo"
+cp "${DEMO_SRC}"/*.jpg "${DEMO_SRC}"/*.png "${WEB_DIR}/fileadmin/demo/"
 
 echo "› finalising extensions and caches"
-.Build/bin/typo3 extension:setup
+"${TYPO3_BIN}" extension:setup
 # Publish public assets to _assets/. In this demo the extension IS the root package, so its
 # Resources/Public (e.g. the backend aspect-ratios web component) is not auto-published by
 # extension:setup the way vendor-installed extensions are; publish it explicitly so v14's
 # importmap can resolve EXT:imaginator/Resources/Public/JavaScript/ in the backend.
-.Build/bin/typo3 asset:publish
-.Build/bin/typo3 cache:flush
+# asset:publish exists from v13.3+; on a vendor-installed extension extension:setup
+# already published the assets, so a missing command here is harmless.
+"${TYPO3_BIN}" asset:publish || true
+"${TYPO3_BIN}" cache:flush
 # A fresh install can leave a stale empty page in the page cache; clear it directly.
 mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" -e "TRUNCATE cache_pages;" 2>/dev/null || true
 
@@ -91,7 +133,7 @@ VALUES (1, @single, LAST_INSERT_ID(), 'tt_content', 'assets', 1,
   '{"default":{"cropArea":{"x":0.45,"y":0.3,"width":0.55,"height":0.7},"selectedRatio":"NaN","focusArea":{"x":0,"y":0,"width":0,"height":0}}}');
 SQL
 
-.Build/bin/typo3 cache:flush
+"${TYPO3_BIN}" cache:flush
 mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" -e "TRUNCATE cache_pages;" 2>/dev/null || true
 
 cat <<EOF
