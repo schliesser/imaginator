@@ -202,7 +202,7 @@ final class ImageViewHelper extends AbstractViewHelper
      */
     private function breakpoints(mixed $aspectRatio, array $configuredBreakpoints, int $sourceWidth, int $sourceHeight): array
     {
-        // A {breakpoint: ratio} map (pictureino-compat) arrives either as a Fluid array (inline
+        // A {breakpoint: ratio} map arrives either as a Fluid array (inline
         // {md: '4:3'}) or as the raw `aspect_ratio` DB column's JSON string bound straight into the
         // tag — no DataProcessor step in between. Keys are configured breakpoint aliases (md, lg, …)
         // or literal min-widths in px (768, key 0 = base); the resolver turns them into largest-first

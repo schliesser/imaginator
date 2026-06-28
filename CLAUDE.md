@@ -5,25 +5,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project status
 
 This is a TYPO3 extension, **`schliesser/imaginator`** (TER key `imaginator`, PHP namespace
-`Schliesser\Imaginator\`, new major `^2.0`, successor to the old `pictureino`). The foundation
-(signing + ladder core, processors, renderer, ViewHelper, middleware) is implemented; work now
-proceeds on the follow-on plans.
+`Schliesser\Imaginator\`, first release targeting `1.0`). The foundation (signing + ladder core,
+processors, renderer, ViewHelper, middleware) is implemented; work now proceeds on the follow-on items.
 
-The design docs in `docs/` remain the source of truth for intent:
-- `docs/2026-06-06-pictureino-ng.md` — the architecture/design RFC. **§12 holds the locked decisions**;
-  everything else flows from them. Treat the locked decisions as binding constraints.
-- `docs/2026-06-06-imaginator-v1-foundation.md` — the first implementation plan (Tasks 0–10), with the
-  `composer.json`, file layout, and code/tests for the foundation.
-- The remaining `docs/2026-06-06-imaginator-v1-*.md` are independent follow-on plans (formats+LQIP,
-  JS enhancement, external providers, aspect-ratio element, polish).
+`docs/DESIGN.md` is the source of truth for *intent* — architecture, data flow, and the **locked
+decisions** (treat those as binding constraints). The code is the source of truth for *behavior*.
 
 ## How to work in this repo
 
-The plans are written for **strict TDD** and are not optional process: each task is
-write-failing-test → run (verify FAIL) → minimal implementation → run (verify PASS) → commit.
-Follow the steps in order and commit at the boundaries the plan specifies — do not batch tasks
-together or skip the failing-test step. Use the `superpowers:subagent-driven-development` or
-`superpowers:executing-plans` skill to drive execution (the foundation plan names these explicitly).
+Work **TDD**: write-failing-test → run (verify FAIL) → minimal implementation → run (verify PASS) →
+commit. Don't batch unrelated changes or skip the failing-test step; commit at logical boundaries.
 
 ## Commands
 
