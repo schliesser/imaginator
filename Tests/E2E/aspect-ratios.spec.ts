@@ -3,8 +3,12 @@ import { expect, FrameLocator, Page, test } from '@playwright/test';
 const BE_USER = process.env.IMAGINATOR_BE_USER ?? 'admin';
 const BE_PASS = process.env.IMAGINATOR_BE_PASS ?? 'Password.1';
 
-/** The hero demo content element seeded with xs 1:1 -> md 4:3 -> lg 16:9 (uid varies by instance). */
-const CE_LABEL = /Per-breakpoint: xs 1:1/;
+/**
+ * The hero demo content element seeded with xs 1:1 -> md 4:3 -> lg 16:9 (uid varies by instance).
+ * Match the full ratio chain: the single.jpg CE also starts "Per-breakpoint: xs 1:1" (-> sm 3:2 -> lg 4:3),
+ * so a looser regex resolves to two Edit buttons and trips Playwright's strict mode.
+ */
+const CE_LABEL = /Per-breakpoint: xs 1:1 -> md 4:3 -> lg 16:9/;
 
 async function login(page: Page): Promise<void> {
   await page.goto('/typo3/');
