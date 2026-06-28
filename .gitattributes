@@ -11,6 +11,8 @@
 /.idea/                 export-ignore
 /.playwright-mcp/       export-ignore
 /Build/                 export-ignore
+/Configuration/Sets/ImaginatorDemo/  export-ignore
+/Resources/Private/Demo/  export-ignore
 /Tests/                 export-ignore
 /docs/                  export-ignore
 /node_modules/          export-ignore
