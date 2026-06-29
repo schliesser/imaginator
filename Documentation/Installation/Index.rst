@@ -6,29 +6,30 @@
 Installation
 ============
 
-Composer
-========
-
-..  code-block:: bash
-    :caption: Install via Composer
-
-    composer require schliesser/imaginator
-
-Then activate the extension:
-
-..  code-block:: bash
-    :caption: Activate the extension
-
-    vendor/bin/typo3 extension:setup
-
-You can also activate it through the :guilabel:`Admin Tools > Extensions`
-backend module.
+Imaginator can be installed with Composer or from the TYPO3 Extension Repository
+(TER) via the Extension Manager.
 
 ..  tip::
     Installing the extension is enough to use the :html:`<i:image>` ViewHelper.
     No Site Set or TypoScript is required. Configure the extension under
     :guilabel:`Settings > Extension Configuration > imaginator`
     (see :ref:`configuration`).
+
+Installation with Composer
+==========================
+
+..  code-block:: bash
+    :caption: Install via Composer
+
+    composer require schliesser/imaginator
+
+Installation from TER
+=====================
+
+In a non-Composer (legacy) installation, fetch the extension from the
+`TYPO3 Extension Repository
+<https://extensions.typo3.org/extension/imaginator>`__ through
+:guilabel:`Admin Tools > Extensions` in the backend, then activate it there.
 
 Signing key
 ===========
@@ -42,3 +43,21 @@ every standard TYPO3 install. No configuration is needed.
     They re-sign on the next render, but already-cached HTML pointing at the old
     signatures will return :ref:`403 <image-endpoint>` until re-rendered. See
     :ref:`configuration-signing` for key rotation.
+
+..  _installation-versioning:
+
+Versioning
+==========
+
+This project uses `semantic versioning <https://semver.org/>`__, which means
+that
+
+*   **bugfix updates** (e.g. 1.0.0 => 1.0.1) just include small bugfixes or
+    security-relevant stuff without breaking changes,
+*   **minor updates** (e.g. 1.0.0 => 1.1.0) include new features and smaller
+    tasks without breaking changes, and
+*   **major updates** (e.g. 1.0.0 => 2.0.0) contain breaking changes, which can
+    be refactorings, features or bugfixes.
+
+..  note::
+    There is no change log yet.

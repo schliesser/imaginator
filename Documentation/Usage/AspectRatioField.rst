@@ -2,14 +2,13 @@
 
 ..  _editor:
 
-================================
-Content-element aspect ratios
-================================
+==================
+Aspect Ratio Field
+==================
 
 Imaginator adds an :guilabel:`Aspect ratios` field to the content element's
-:guilabel:`mediaAdjustments` palette (next to :guilabel:`Image width`,
-:guilabel:`Image height` and :guilabel:`Border`). It appears only on content
-types that render images.
+:guilabel:`mediaAdjustments` palette. It appears only on content types that
+render images.
 
 ..  figure:: /Images/AspectRatioField.png
     :alt: The Aspect ratios field in a content element's Media Adjustments palette

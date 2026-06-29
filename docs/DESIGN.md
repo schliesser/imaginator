@@ -91,8 +91,8 @@ Implemented: signing + ladder core, local `async`/`sync` + imgproxy processors, 
 `PictureRenderer` + `ImageViewHelper`, LQIP (ThumbHash/dominant/null), `ProcessImageRequest` middleware,
 aspect-ratio element + ContentBlocks field, Site-Set settings, backend TypeScript.
 
-Follow-on: remaining external providers (Thumbor, imgix, Cloudflare Images, Cloudinary), JS enhancement
-(Safari `sizes` fallback, optional pixel-perfect refine), queue/warmup worker (v1 ships only the seams —
+Follow-on: remaining external providers (Thumbor, imgix, Cloudflare Images, Cloudinary),
+queue/warmup worker (v1 ships only the seams —
 event + `WarmupInterface` no-op), per-breakpoint distinct crop in the element, private-image URL mode,
 opt-in telemetry to auto-tune the ladder.
 

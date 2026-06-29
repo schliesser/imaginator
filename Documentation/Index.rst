@@ -38,6 +38,28 @@ fetches the correctly-sized image in a single request. Candidate URLs are
 HMAC-signed and served as real image bytes by a local processing endpoint.
 JavaScript is never required for sharpness.
 
+For editors
+===========
+
+A backend **aspect-ratio field** per content element lets editors pick the
+framing once — **per breakpoint** — and get **uniform, consistent images**
+across every element of that type, with no ragged grids from mismatched upload
+dimensions. Crop and focus area are honored, so the chosen subject stays in
+frame at every size.
+
+For developers
+==============
+
+Drop one :html:`<i:image>` and get sharp, perfectly-sized images on every device
+— no hand-tuned :html:`sizes`, no breakpoint lists, no layout shift (CLS). The
+width ladder bounds processing to a fixed set of sizes, so you serve fewer,
+smaller bytes and score better Core Web Vitals (LCP/CLS) out of the box.
+Processing is pluggable: classic **sync** on first request, **async** via a
+signed middleware endpoint (default), or an **external processor** such as
+imgproxy.
+
+----
+
 ..  card-grid::
     :columns: 1
     :columns-md: 2
@@ -45,33 +67,41 @@ JavaScript is never required for sharpness.
     :class: pb-4
     :card-height: 100
 
-    ..  card:: Zero configuration
+    ..  card:: :ref:`Introduction <introduction>`
 
-        Install, drop in :html:`<i:image>`, done. No :html:`sizes`, no
-        breakpoint lists, no measuring JavaScript.
+        What the extension does, how it works, where to get support and how to
+        contribute.
 
-    ..  card:: Signed image endpoint
+    ..  card:: :ref:`Installation <installation>`
 
-        Candidate URLs are HMAC-signed and only ladder-quantized widths are
-        ever processed, so the endpoint cannot be abused to exhaust the server.
+        Install via Composer, activate the extension and derive the signing key.
 
-    ..  card:: Modern format + LQIP
+    ..  card:: :ref:`Configuration <configuration>`
 
-        A single configurable output format (AVIF by default, or WebP) applied
-        uniformly, plus low-quality placeholders (ThumbHash, dominant colour, or
-        none).
+        Extension Configuration settings, the focus-area feature toggle,
+        processors and Content Security Policy.
 
-    ..  card:: LCP-friendly
+    ..  card:: :ref:`Usage <usage>`
 
-        :html:`priority` images drop lazy loading, gain
-        :html:`fetchpriority="high"` and a :html:`<head>` preload link.
+        The :html:`<i:image>` Fluid ViewHelper, the aspect-ratio field and
+        crop / focus-area handling.
+
+    ..  card:: :ref:`Extend <extend>`
+
+        Register your own image processor by tagging a service.
+
+    ..  card:: :ref:`Migrations <migrations>`
+
+        Move an existing site from EXT:pictureino to Imaginator.
 
 ..  toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :titlesonly:
+    :hidden:
 
     Introduction/Index
     Installation/Index
     Configuration/Index
     Usage/Index
-    Editor/Index
+    Extend/Index
+    Migrations/Index

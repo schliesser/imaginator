@@ -17,8 +17,8 @@ hand-tuned `sizes`, no breakpoint lists, no layout shift (CLS). Stop shipping ov
 the width ladder bounds processing to a fixed set of sizes, so you serve fewer, smaller bytes and
 score better Core Web Vitals (LCP/CLS) out of the box.
 
-**Features.** Quantized width-ladder `srcset` + `sizes="auto"` · stacked **AVIF + WebP** `<picture>`
-tiers · per-breakpoint **art direction** (crop variants + focus area honored) · **low-quality
+**Features.** Quantized width-ladder `srcset` + `sizes="auto"` · a single uniform output format
+(**AVIF** by default, or **WebP**) · per-breakpoint **art direction** (crop variants + focus area honored) · **low-quality
 placeholders** (ThumbHash, dominant-color, or none) · `priority` images get `fetchpriority="high"`
 and skip lazy-loading · pluggable processing — classic **sync** on first request, **async** via a
 signed middleware endpoint (default), or an **external processor** (e.g. imgproxy).
@@ -28,8 +28,9 @@ JavaScript is never required for sharpness — it's only a polyfill for Safari <
 ## Requirements
 
 - PHP **8.3+** (tested 8.3 / 8.4 / 8.5)
-- TYPO3 **13.4 LTS** or **14.x**
-- A working image processor (GraphicsMagick or ImageMagick — TYPO3's standard `GFX` settings)
+- TYPO3 **13.4 LTS** or **14.3 LTS**
+- A working image processor (GraphicsMagick or ImageMagick — TYPO3's standard `GFX` settings) for
+  local processing; alternatively an external processor (e.g. imgproxy)
 - A non-empty `encryptionKey` (standard on every TYPO3 install — see *Signing* below)
 
 ## Installation
@@ -38,9 +39,9 @@ JavaScript is never required for sharpness — it's only a polyfill for Safari <
 composer require schliesser/imaginator
 ```
 
-Activate the extension (`vendor/bin/typo3 extension:setup`, or via the Extensions module).
-Installing the extension is enough to use the `<i:image>` ViewHelper — no Site Set or TypoScript
-is required. Configure it under *Settings → Extension Configuration* (see below).
+A Composer install activates the extension automatically. Installing it is enough to use the
+`<i:image>` ViewHelper — no Site Set or TypoScript is required. Configure it under
+*Settings → Extension Configuration* (see below).
 
 ## Usage
 
@@ -146,7 +147,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator'] = [
 | `processor` | `local:async` | Image processor: `local:async` (signed endpoint + 302), `local:sync` (static `srcset`, no middleware) or `imgproxy` (offloaded) |
 | `maxDimension` | `2000` | Largest image dimension in px; the ladder is capped to it |
 | `ladder` | `320,420,560,740,980,1300,1720,2000` | Width-ladder rungs (comma-separated) |
-| `formats` | `avif,webp` | Negotiated formats, most-preferred first |
+| `format` | `avif` | Single uniform output format: `avif` or `webp` |
 | `quality.avif` | `50` | AVIF quality (AVIF's scale sits lower than JPEG/WebP for the same perceived quality) |
 | `quality.webp` | `72` | WebP quality |
 | `lqip` | `thumbhash` | Low-quality placeholder: `thumbhash`, `dominant-color` or `none` |
