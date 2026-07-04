@@ -1,16 +1,16 @@
-# cat=Processing; type=options[Local async (middleware + 302)=local:async,Local sync (classic rendering on first page load)=local:sync,imgproxy (offloaded)=imgproxy]; label=Image processor
+# cat=Processing; type=options[Local async (middleware + 302)=local:async,Local sync (classic rendering on first page load)=local:sync,imgproxy (offloaded)=imgproxy,imagor (offloaded)=imagor]; label=Image processor
 processor = local:async
 
-# cat=External; type=string; label=imgproxy: base URL of the imgproxy endpoint (e.g. https://imgproxy.example)
+# cat=External; type=string; label=Provider base URL of the external processor endpoint (e.g. https://imgproxy.example)
 processorBaseUrl =
 
-# cat=External; type=string; label=imgproxy: HMAC key (hex). Empty = insecure/unsigned URLs (dev only)
+# cat=External; type=string; label=Provider HMAC key. imgproxy: hex-encoded key. imagor: the plain IMAGOR_SECRET string. Empty = unsigned URLs (dev only)
 processorSignKey =
 
-# cat=External; type=string; label=imgproxy: HMAC salt (hex). Empty = insecure/unsigned URLs (dev only)
+# cat=External; type=string; label=Provider HMAC salt (imgproxy only, hex; imagor has no salt). Empty = unsigned URLs (dev only)
 processorSalt =
 
-# cat=External; type=string; label=imgproxy: origin prefix prepended to the source path (leave empty when imgproxy has IMGPROXY_BASE_URL set)
+# cat=External; type=string; label=Origin prefix prepended to the source path (leave empty when the provider knows the origin itself: IMGPROXY_BASE_URL / HTTP_LOADER_BASE_URL)
 processorSourceBaseUrl =
 
 # cat=Processing; type=int+; label=Maximum image dimension (px): the width ladder is capped to this

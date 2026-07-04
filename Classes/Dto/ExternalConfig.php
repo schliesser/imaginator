@@ -6,8 +6,10 @@ namespace Schliesser\Imaginator\Dto;
 
 /**
  * Configuration for an external (offloaded) image processor. `signKey`/`salt` are the provider's
- * hex-encoded HMAC credentials; when either is empty the builder emits an unsigned/insecure URL
- * (fine for local dev, e.g. the ddev-imgproxy addon which runs keyless).
+ * HMAC credentials — their encoding/meaning is provider-specific: imgproxy takes a hex-encoded
+ * key + salt pair, imagor a single plain-string secret (salt unused). When the required credential
+ * is empty the builder emits an unsigned/insecure URL (fine for local dev, e.g. the ddev-imgproxy
+ * addon which runs keyless).
  */
 final readonly class ExternalConfig
 {

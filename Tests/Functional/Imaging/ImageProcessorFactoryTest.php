@@ -51,6 +51,17 @@ final class ImageProcessorFactoryTest extends FunctionalTestCase
         self::assertTrue($processor->isOffloaded());
     }
 
+    public function testImagorSelectsTheOffloadedProcessor(): void
+    {
+        $processor = $this->createWith([
+            'processor' => 'imagor',
+            'processorBaseUrl' => 'https://imagor.example:8083',
+        ]);
+
+        self::assertInstanceOf(ExternalImageProcessor::class, $processor);
+        self::assertTrue($processor->isOffloaded());
+    }
+
     public function testUnknownProcessorThrows(): void
     {
         $this->expectException(\InvalidArgumentException::class);
