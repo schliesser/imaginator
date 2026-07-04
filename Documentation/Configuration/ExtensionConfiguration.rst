@@ -7,8 +7,8 @@ Extension Configuration
 =======================
 
 All settings below are read from the instance-wide Extension Configuration. The
-imgproxy-only keys are documented with the :ref:`processors
-<configuration-processors>`.
+external-provider keys (``processor*``) are shared by every offloaded processor
+and documented with the :ref:`processors <configuration-processors>`.
 
 Settings
 ========
@@ -19,8 +19,8 @@ Settings
     :default: ``local:async``
 
     Image processor: ``local:async`` (signed endpoint + 302), ``local:sync``
-    (static ``srcset``, no middleware) or ``imgproxy`` (offloaded). See
-    :ref:`configuration-processors`.
+    (static ``srcset``, no middleware), ``imgproxy`` or ``imagor`` (offloaded).
+    See :ref:`configuration-processors`.
 
 ..  confval:: maxDimension
     :name: conf-maxdimension
@@ -107,32 +107,36 @@ Settings
     :type: string
     :default: (empty)
 
-    imgproxy only: base URL of the imgproxy endpoint (e.g.
-    ``https://imgproxy.example``). See :ref:`configuration-imgproxy`.
+    External providers only: base URL of the provider endpoint (e.g.
+    ``https://imgproxy.example``). See :ref:`configuration-imgproxy` and
+    :ref:`configuration-imagor`.
 
 ..  confval:: processorSignKey
     :name: conf-processorsignkey
     :type: string
     :default: (empty)
 
-    imgproxy only: HMAC **key** (hex). Empty key or salt → unsigned ``insecure``
-    URLs (dev only).
+    External providers only: HMAC **key**. Encoding is provider-specific —
+    imgproxy expects a hex-encoded key, imagor the plain ``IMAGOR_SECRET``
+    string. Empty → unsigned URLs (``insecure`` / ``unsafe``, dev only).
 
 ..  confval:: processorSalt
     :name: conf-processorsalt
     :type: string
     :default: (empty)
 
-    imgproxy only: HMAC **salt** (hex).
+    imgproxy only: HMAC **salt** (hex). imagor's scheme has no salt — leave
+    empty there.
 
 ..  confval:: processorSourceBaseUrl
     :name: conf-processorsourcebaseurl
     :type: string
     :default: (empty)
 
-    imgproxy only: origin prefix prepended to the source path. Leave empty when
-    imgproxy has ``IMGPROXY_BASE_URL`` set (it then resolves the relative path
-    itself).
+    External providers only: origin prefix prepended to the source path. Leave
+    empty when the provider resolves relative paths itself (imgproxy:
+    ``IMGPROXY_BASE_URL``; imagor: ``HTTP_LOADER_BASE_URL`` /
+    ``HTTP_LOADER_DEFAULT_SCHEME`` + allowed sources).
 
 ..  _configuration-signing:
 

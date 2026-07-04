@@ -44,7 +44,7 @@ final readonly class ImagorUrlBuilder implements UrlBuilderInterface
             $crop === null ? '/smart' : '',
             $variant->quality,
             $variant->format,
-            $sourceUrl,
+            $this->encodeSource($sourceUrl),
         );
         $base = rtrim($this->config->baseUrl, '/');
 
@@ -60,5 +60,16 @@ final readonly class ImagorUrlBuilder implements UrlBuilderInterface
         )), '+/', '-_');
 
         return $base . '/' . $signature . '/' . $path;
+    }
+
+    /**
+     * An absolute source URL is percent-encoded wholesale: its literal `//` would be merged to `/`
+     * by reverse proxies in front of imagor (Traefik sanitizePath, nginx merge_slashes) *before*
+     * signature verification, breaking the HMAC. imagor decodes the escaped URI; relative paths
+     * carry no double slash and stay readable.
+     */
+    private function encodeSource(string $sourceUrl): string
+    {
+        return str_contains($sourceUrl, '://') ? rawurlencode($sourceUrl) : $sourceUrl;
     }
 }

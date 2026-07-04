@@ -69,6 +69,33 @@ final class ImagorUrlBuilderTest extends TestCase
         );
     }
 
+    public function testAbsoluteSourceUrlIsPercentEncoded(): void
+    {
+        // A literal `https://` inside the path gets its double slash merged by reverse proxies
+        // (Traefik sanitizePath, nginx merge_slashes) BEFORE imagor verifies the signature → 403.
+        // Percent-encoding the source survives any proxy; imagor decodes it.
+        $secret = 'imaginator-dev-secret';
+        $builder = new ImagorUrlBuilder(new ExternalConfig('https://imagor.example', $secret));
+
+        $path = '2000x1125/smart/filters:quality(72):format(webp)/https%3A%2F%2Forigin.example%2Ffileadmin%2Fdemo%2Fhero.jpg';
+        $sig = strtr(base64_encode(hash_hmac('sha256', $path, $secret, true)), '+/', '-_');
+
+        self::assertSame(
+            'https://imagor.example/' . $sig . '/' . $path,
+            $builder->build($this->variant(), 'https://origin.example/fileadmin/demo/hero.jpg'),
+        );
+    }
+
+    public function testRelativeSourceStaysPlain(): void
+    {
+        $builder = new ImagorUrlBuilder(new ExternalConfig('https://imagor.example'));
+
+        self::assertStringEndsWith(
+            '/fileadmin/demo/hero.jpg',
+            $builder->build($this->variant(), 'fileadmin/demo/hero.jpg'),
+        );
+    }
+
     public function testSaltIsIgnored(): void
     {
         // Unified settings expose a salt field; imagor's scheme has none — same secret, same URL.
