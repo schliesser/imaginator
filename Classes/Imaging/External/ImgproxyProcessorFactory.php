@@ -6,6 +6,8 @@ namespace Schliesser\Imaginator\Imaging\External;
 
 use Schliesser\Imaginator\Configuration\SettingsFactory;
 use Schliesser\Imaginator\Dto\ExternalConfig;
+use Schliesser\Imaginator\Imaging\CropCalculator;
+use Schliesser\Imaginator\Imaging\CropResolver;
 use Schliesser\Imaginator\UrlBuilder\ImgproxyUrlBuilder;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 
@@ -19,6 +21,8 @@ final readonly class ImgproxyProcessorFactory
     public function __construct(
         private SettingsFactory $settingsFactory,
         private ResourceFactory $resourceFactory,
+        private CropResolver $cropResolver,
+        private CropCalculator $cropCalculator,
     ) {}
 
     public function create(): ExternalImageProcessor
@@ -32,6 +36,8 @@ final readonly class ImgproxyProcessorFactory
                 $settings->processorSalt,
             )),
             $this->resourceFactory,
+            $this->cropResolver,
+            $this->cropCalculator,
             $settings->processorSourceBaseUrl,
         );
     }

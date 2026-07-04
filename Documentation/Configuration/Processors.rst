@@ -27,7 +27,13 @@ GraphicsMagick/ImageMagick/GD calls.
 
 ``imgproxy``
     Offloaded; ``srcset`` points straight at the provider (see
-    :ref:`configuration-imgproxy`).
+    :ref:`configuration-imgproxy`). imgproxy has no result cache — a fronting
+    CDN / reverse-proxy cache is **mandatory** in production.
+
+``imagor``
+    Offloaded; ``srcset`` points straight at the provider (see
+    :ref:`configuration-imagor`). Enable imagor's result storage (or put a
+    fronting cache in front) so derivatives are rendered once, not per hit.
 
 ..  tip::
     Integrators can register a **custom processor** by tagging a service with
@@ -75,8 +81,12 @@ candidate is built as::
 
     {processorBaseUrl}/{signature}/rs:fill:{w}:{h}/g:sm/q:{quality}/plain/{source}@{ext}
 
-The editor's per-reference crop variant is **not** replayed externally (imgproxy
-uses smart gravity ``g:sm``); a reference resolves to its original file. Offloading
+For a **reference with a stored crop or focus area** the editor's crop variant
+is replayed externally: the same ratio-fitted, focus-positioned rect local
+processing uses goes into imgproxy's crop op (``c:{cw}:{ch}:nowe:{x}:{y}``,
+replacing ``g:sm``), so external output matches local output. The reference
+resolves to its original file — imgproxy does the cropping. Plain files and
+references without editor crop use smart gravity. Offloading
 also sidesteps local encoder limits — e.g. AVIF at large dimensions that a thin
 GraphicsMagick / libheif build fails to encode.
 
@@ -93,3 +103,37 @@ GraphicsMagick / libheif build fails to encode.
     It sets ``IMGPROXY_BASE_URL`` to the web container and runs keyless, so
     :confval:`processorBaseUrl <conf-processorbaseurl>` is the add-on URL
     (``https://<project>.ddev.site:8081``) and the sign key/salt stay empty.
+
+..  _configuration-imagor:
+
+Offloaded processing with imagor
+================================
+
+With :confval:`processor <conf-processor>` set to ``imagor``, ``srcset`` URLs
+point straight at an `imagor <https://imagor.net/>`__ service (thumbor-compatible
+URL grammar). Each candidate is built as::
+
+    {processorBaseUrl}/{signature}/{w}x{h}/smart/filters:quality({q}):format({ext})/{source}
+
+The signature is a URL-safe base64 HMAC of the path, keyed with
+:confval:`processorSignKey <conf-processorsignkey>` — imagor's plain-string
+``IMAGOR_SECRET`` (run imagor with ``IMAGOR_SIGNER_TYPE=sha256``).
+:confval:`processorSalt <conf-processorsalt>` is unused; imagor's scheme has no
+salt. An empty key emits ``unsafe`` URLs, which imagor only accepts with
+``IMAGOR_UNSAFE=1`` (dev only). As with imgproxy, a reference's stored editor
+crop is replayed externally — the crop rect becomes imagor's manual crop segment
+(``{x1}x{y1}:{x2}x{y2}``, replacing ``smart``); plain files and references
+without editor crop fall back to ``smart`` detection.
+
+Unlike the edge-cached SaaS providers, imagor caches derivatives **only when
+result storage is enabled** (``FILE_RESULT_STORAGE_BASE_DIR`` or the S3
+equivalent). Enable it — or front imagor with a CDN / reverse-proxy cache —
+otherwise every browser hit reprocesses the image.
+
+..  tip::
+    For local development this repository ships
+    ``.ddev/docker-compose.imagor.yaml``: imagor listens on
+    ``https://<project>.ddev.site:8083`` with the secret
+    ``imaginator-dev-secret`` and result storage on a volume — so
+    :confval:`processorBaseUrl <conf-processorbaseurl>` is that URL and
+    :confval:`processorSignKey <conf-processorsignkey>` the dev secret.
