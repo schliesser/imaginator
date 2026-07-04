@@ -47,7 +47,14 @@ final readonly class CropResolver
             ? new Rectangle(0, 0, 0, 0)
             : $this->toRectangle($focusAreaArea->makeAbsoluteBasedOnFile($original));
 
-        return new CropResolution($cropArea, $focusArea, (int) $cropArea->width, (int) $cropArea->height, $original);
+        return new CropResolution(
+            $cropArea,
+            $focusArea,
+            (int) $cropArea->width,
+            (int) $cropArea->height,
+            $original,
+            !$cropAreaArea->isEmpty() || !$focusAreaArea->isEmpty(),
+        );
     }
 
     private function toRectangle(Area $absolute): Rectangle

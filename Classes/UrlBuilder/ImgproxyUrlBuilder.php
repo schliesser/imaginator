@@ -6,10 +6,14 @@ namespace Schliesser\Imaginator\UrlBuilder;
 
 use Schliesser\Imaginator\Dto\ExternalConfig;
 use Schliesser\Imaginator\Dto\ImageVariant;
+use Schliesser\Imaginator\Dto\Rectangle;
 
 /**
  * Builds imgproxy URLs. Signed scheme:
  *   {base}/{signature}/rs:fill:{w}:{h}/g:sm/q:{quality}/plain/{source}@{ext}
+ * With an editor crop rect the smart gravity is replaced by a manual crop op (north-west gravity +
+ * absolute offsets) applied before the fill-resize:
+ *   {base}/{signature}/c:{cw}:{ch}:nowe:{x}:{y}/rs:fill:{w}:{h}/q:{quality}/plain/{source}@{ext}
  * where signature = urlsafe-base64( HMAC_SHA256(hex2bin(signKey), hex2bin(salt) . path) ), path being
  * everything after the signature (leading slash included). Without key+salt the literal `insecure`
  * segment is used (dev mode, e.g. the ddev-imgproxy addon).
@@ -21,14 +25,24 @@ final readonly class ImgproxyUrlBuilder implements UrlBuilderInterface
 {
     public function __construct(private ExternalConfig $config) {}
 
-    public function build(ImageVariant $variant, string $sourceUrl): string
+    public function build(ImageVariant $variant, string $sourceUrl, ?Rectangle $crop = null): string
     {
+        $gravity = $crop === null ? '/g:sm' : '';
+        $cropOp = $crop === null ? '' : sprintf(
+            '/c:%d:%d:nowe:%d:%d',
+            (int) round($crop->width),
+            (int) round($crop->height),
+            (int) round($crop->x),
+            (int) round($crop->y),
+        );
         $path = sprintf(
-            '/rs:fill:%d:%d/g:sm/q:%d/plain/%s@%s',
+            '%s/rs:fill:%d:%d%s/q:%d/plain/%s@%s',
+            $cropOp,
             $variant->width,
             $variant->height,
+            $gravity,
             $variant->quality,
-            $sourceUrl,
+            $this->encodeSource($sourceUrl),
             $variant->format,
         );
         $base = rtrim($this->config->baseUrl, '/');
@@ -45,5 +59,16 @@ final readonly class ImgproxyUrlBuilder implements UrlBuilderInterface
         )), '+/', '-_'), '=');
 
         return $base . '/' . $signature . $path;
+    }
+
+    /**
+     * An absolute source URL is percent-encoded wholesale: its literal `//` would be merged to `/`
+     * by reverse proxies in front of imgproxy (Traefik sanitizePath, nginx merge_slashes) *before*
+     * signature verification, breaking the HMAC. imgproxy decodes an escaped `plain/` source;
+     * relative paths carry no double slash and stay readable.
+     */
+    private function encodeSource(string $sourceUrl): string
+    {
+        return str_contains($sourceUrl, '://') ? rawurlencode($sourceUrl) : $sourceUrl;
     }
 }

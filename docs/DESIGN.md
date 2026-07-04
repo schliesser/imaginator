@@ -39,11 +39,51 @@ enhancement only, never load-bearing for sharpness.
      middleware are never involved. Higher cold-render cost, plain static serves thereafter.
    - Both local modes drive **TYPO3's `ImageService` exclusively** — no direct GraphicsMagick/ImageMagick/GD.
      Signing is used on the `local:async` path only.
-   - **External — `imgproxy`** (`Imaging/External/ExternalImageProcessor` via `ImgproxyProcessorFactory`,
-     URL grammar in `UrlBuilder/ImgproxyUrlBuilder`) — `isOffloaded() === true`; `buildUrl()` maps the
-     variant onto the provider's URL grammar and points `srcset` at the provider. The webserver never
-     touches pixels. More providers (Thumbor, imgix, Cloudflare Images, Cloudinary) plug in as
-     additional `UrlBuilderInterface` implementations.
+   - **External — `imgproxy`, `imagor`** (`Imaging/External/ExternalImageProcessor` via
+     `ImgproxyProcessorFactory` / `ImagorProcessorFactory`, URL grammar in `UrlBuilder/ImgproxyUrlBuilder` /
+     `UrlBuilder/ImagorUrlBuilder`) — `isOffloaded() === true`; `buildUrl()` maps the variant onto the
+     provider's URL grammar and points `srcset` at the provider. The webserver never touches pixels.
+     Providers share the unified `processor*` settings (`processorSignKey` = imgproxy hex key / imagor
+     plain `IMAGOR_SECRET`; `processorSalt` imgproxy-only). For references with a stored crop/focus
+     area the editor's crop is replayed in the provider URL: `CropCalculator::fit()`'s ratio-fitted,
+     focus-positioned rect (the same rect local mode feeds to `ImageService`) goes into the provider's
+     crop op, so external output matches local. Plain files and crop-less references fall back to the
+     provider's smart gravity. More providers (Thumbor, imgix, Cloudflare Images, Cloudinary) plug in
+     as additional `UrlBuilderInterface` implementations.
+
+     **Who owns the derivative cache depends on the processor's caching model.** External engines fall
+     into three groups:
+     - *Stateless recompute-per-hit* — **imgproxy**, **imaginary** (h2non): no result cache at all; every
+       fetch reprocesses.
+     - *Optional result storage* — **Thumbor**, **imagor**: cache derivatives to file/S3 **only when
+       result storage is enabled** (off by default).
+     - *Edge-cached SaaS* — **imgix, Cloudflare Images, Cloudinary, Fastly IO, ImageKit, Akamai, weserv,
+       …**: derivatives cached at the provider's edge automatically (cache key = the full URL). First
+       request processes, the rest serve from cache.
+
+     A **stateless** engine (or a Thumbor/imagor with storage disabled) may not point `srcset` straight at
+     the provider — every browser hit would reprocess. Two supported ways to fix this, chosen per
+     processor via `isOffloaded()`:
+
+     - **(a) Offloaded + integrator-provided fronting cache** (`isOffloaded() === true`). `srcset` points
+       at the provider; the integrator **MUST** put a CDN or reverse-proxy cache (nginx `proxy_cache`,
+       Varnish, Cloudflare/Fastly) in front. Our URLs are deterministic + ladder-quantized + immutable, so
+       a cache-forever policy is safe and gives near-100% hit rates. The cache lives *outside* TYPO3;
+       the webserver still never touches pixels. Right choice when the integrator already runs an edge/CDN
+       tier. Without that cache, cost and latency scale with traffic instead of with the (bounded)
+       derivative set.
+
+     - **(b) Remote materializer** (`isOffloaded() === false`). The processor reuses the **local-async
+       machinery**: `buildUrl()` emits the signed `/_imaginator/` URL while cold; the middleware calls
+       `materialize()`, which builds the provider URL **server-side**, GETs the bytes, and writes them into
+       the TYPO3 processed files . Warm renders serve the static `_processed_` URL via the read-only probe —
+       identical to `local:async`. Here **TYPO3 owns the cache**, so the stateless engine is hit at most once
+       per derivative and may stay private (server→engine only; never exposed to the client). Only *who
+       renders the pixels* differs from `local:async`. This is the shape planned for imgproxy
+       (see `docs/PLAN-imgproxy-remote-materializer.md`).
+
+     - *Edge-cached SaaS* processors need neither — they cache themselves; ship them as `isOffloaded()
+       === true` with **no** fronting-cache requirement.
 4. **Rendering** (`Rendering/PictureRenderer` ← `ViewHelpers/ImageViewHelper`) — single ratio → `<img>`
    with the ladder; multiple per-breakpoint ratios → `<picture>`, one `<source media>` per breakpoint,
    each its own ladder. `width`/`height` from the largest rung → zero CLS. `priority` images drop
@@ -63,8 +103,15 @@ enhancement only, never load-bearing for sharpness.
   array (sign with index 0, verify against all). Private-image (encrypted-token) mode → later.
 - **Local processing:** TYPO3 `ImageService` only; two modes `local:async` (middleware + 302) and
   `local:sync` (static `srcset`). Processor selection is an open tagged registry.
-- **External providers:** `imgproxy` shipped; Thumbor / imgix / Cloudflare Images / Cloudinary are
-  follow-on `UrlBuilder`s behind the same interface.
+- **External providers:** `imgproxy` + `imagor` shipped; Thumbor / imgix / Cloudflare Images / Cloudinary are
+  follow-on `UrlBuilder`s behind the same interface. **A no-cache engine may not be plainly offloaded.**
+  Two supported shapes, chosen per processor via `isOffloaded()`: (a) *offloaded* (`true`) — `srcset` at
+  the provider, integrator **MUST** supply a fronting CDN / reverse-proxy cache; or (b) *remote
+  materializer* (`false`) — reuse the local-async signed endpoint + middleware, fetch bytes server-side,
+  cache in `_processed_` (imaginator owns the cache; engine may stay private). Edge-cached SaaS providers
+  cache themselves → offloaded with no fronting requirement. Each processor's docs state which shape and
+  its caching requirement. imgproxy is being moved to shape (b) — see
+  `docs/PLAN-imgproxy-remote-materializer.md`.
 - **Aspect-ratio element** (`Backend/Form/Element/AspectRatiosElement` + ContentBlocks
   `AspectRatiosFieldType`): per-breakpoint ratio at **content-element level** — the chosen ratios apply
   to all media in the CE, no per-image live preview. Stored as one structured JSON field in the
@@ -87,7 +134,7 @@ enhancement only, never load-bearing for sharpness.
 
 ## Status & roadmap
 
-Implemented: signing + ladder core, local `async`/`sync` + imgproxy processors, registry/factory,
+Implemented: signing + ladder core, local `async`/`sync` + imgproxy/imagor processors, registry/factory,
 `PictureRenderer` + `ImageViewHelper`, LQIP (ThumbHash/dominant/null), `ProcessImageRequest` middleware,
 aspect-ratio element + ContentBlocks field, Site-Set settings, backend TypeScript.
 
