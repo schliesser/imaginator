@@ -1,0 +1,64 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Schliesser\Imaginator\UrlBuilder;
+
+use Schliesser\Imaginator\Dto\ExternalConfig;
+use Schliesser\Imaginator\Dto\ImageVariant;
+use Schliesser\Imaginator\Dto\Rectangle;
+
+/**
+ * Builds imagor URLs (thumbor-compatible grammar). Signed scheme:
+ *   {base}/{signature}/{w}x{h}/smart/filters:quality({q}):format({ext})/{source}
+ * With an editor crop rect the `smart` segment is replaced by a manual crop applied before the
+ * resize — left x top : right x bottom in source pixels:
+ *   {base}/{signature}/{x1}x{y1}:{x2}x{y2}/{w}x{h}/filters:quality({q}):format({ext})/{source}
+ * where signature = urlsafe-base64( HMAC_SHA256(secret, path) ), path being everything after the
+ * signature segment (no leading slash). Matches IMAGOR_SIGNER_TYPE=sha256; the secret is imagor's
+ * IMAGOR_SECRET — a plain string, unlike imgproxy's hex-encoded key/salt pair. `salt` from the
+ * unified {@see ExternalConfig} has no equivalent in imagor's scheme and is ignored. Without a
+ * secret the literal `unsafe` segment is used (dev mode, requires IMAGOR_UNSAFE=1 server-side).
+ *
+ * The source is passed as given by {@see \Schliesser\Imaginator\Imaging\External\ExternalImageProcessor}
+ * — a root-relative path when imagor has HTTP_LOADER_BASE_URL set, or an absolute URL otherwise.
+ */
+final readonly class ImagorUrlBuilder implements UrlBuilderInterface
+{
+    public function __construct(private ExternalConfig $config) {}
+
+    public function build(ImageVariant $variant, string $sourceUrl, ?Rectangle $crop = null): string
+    {
+        $cropSegment = $crop === null ? '' : sprintf(
+            '%dx%d:%dx%d/',
+            (int) round($crop->x),
+            (int) round($crop->y),
+            (int) round($crop->x + $crop->width),
+            (int) round($crop->y + $crop->height),
+        );
+        $path = sprintf(
+            '%s%dx%d%s/filters:quality(%d):format(%s)/%s',
+            $cropSegment,
+            $variant->width,
+            $variant->height,
+            $crop === null ? '/smart' : '',
+            $variant->quality,
+            $variant->format,
+            $sourceUrl,
+        );
+        $base = rtrim($this->config->baseUrl, '/');
+
+        if ($this->config->signKey === '') {
+            return $base . '/unsafe/' . $path;
+        }
+
+        $signature = strtr(base64_encode(hash_hmac(
+            'sha256',
+            $path,
+            $this->config->signKey,
+            true,
+        )), '+/', '-_');
+
+        return $base . '/' . $signature . '/' . $path;
+    }
+}

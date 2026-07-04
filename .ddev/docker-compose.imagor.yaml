@@ -1,0 +1,59 @@
+# imagor service for local testing — mirrors docs/deploy/imagor/compose.yaml (Coolify),
+# but with a fixed dev secret and DDEV networking.
+#
+# Reachable from the host at https://${DDEV_SITENAME}.ddev.site:8083 (or :8082 plain http).
+# Inside the docker network other containers reach it at http://imagor:8000.
+# imagor fetches origin images from the web container via http://web:80.
+services:
+    imagor:
+        container_name: ddev-${DDEV_SITENAME}-imagor
+        image: shumc/imagor:latest
+        restart: "no"
+        # Named volumes are created root-owned; the image's default non-root user can't mkdir in
+        # them, so result/source storage silently fails ("permission denied" warns). Dev-only: run
+        # as root. (In production chown the storage dir instead.)
+        user: "0:0"
+        # These labels ensure this service is discoverable by ddev.
+        labels:
+            com.ddev.site-name: ${DDEV_SITENAME}
+            com.ddev.approot: $DDEV_APPROOT
+        environment:
+            VIRTUAL_HOST: $DDEV_HOSTNAME
+            HTTP_EXPOSE: 8082:8000
+            HTTPS_EXPOSE: 8083:8000
+
+            PORT: "8000"
+
+            # Signed URLs only (no IMAGOR_UNSAFE) — same shape as production.
+            # Dev-only secret; the extension's imagor settings must use the same value.
+            IMAGOR_SECRET: "imaginator-dev-secret"
+            IMAGOR_SIGNER_TYPE: sha256
+
+            # Result storage = derivative cache (each size rendered once, then reused)
+            FILE_RESULT_STORAGE_BASE_DIR: /mnt/imagor/result
+            FILE_RESULT_STORAGE_MKDIR_PERMISSION: "0755"
+            FILE_RESULT_STORAGE_WRITE_PERMISSION: "0644"
+            FILE_RESULT_STORAGE_EXPIRATION: "0"
+
+            # Source-file cache
+            FILE_STORAGE_BASE_DIR: /mnt/imagor/source
+            FILE_STORAGE_MKDIR_PERMISSION: "0755"
+            FILE_STORAGE_WRITE_PERMISSION: "0644"
+
+            # HTTP loader: relative sources (imaginator's default when processorSourceBaseUrl is
+            # empty) resolve against the web container — the imagor equivalent of IMGPROXY_BASE_URL.
+            HTTP_LOADER_BASE_URL: "http://web"
+            # Only allow the DDEV web container / site hostnames as origins
+            HTTP_LOADER_ALLOWED_SOURCES: "web,web:80,*.ddev.site"
+            HTTP_LOADER_DEFAULT_SCHEME: http
+
+            IMAGOR_CACHE_HEADER_TTL: 8760h
+        volumes:
+            - ".:/mnt/ddev_config"
+            - "ddev-global-cache:/mnt/ddev-global-cache"
+            - "imagor-result:/mnt/imagor/result"
+            - "imagor-source:/mnt/imagor/source"
+
+volumes:
+    imagor-result:
+    imagor-source:
