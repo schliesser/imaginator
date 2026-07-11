@@ -32,7 +32,7 @@ final class SettingsFactory
 
     public function createLocalAsyncUrlBuilder(): LocalAsyncUrlBuilder
     {
-        return new LocalAsyncUrlBuilder($this->create()->secrets);
+        return new LocalAsyncUrlBuilder($this->create()->secret);
     }
 
     public function createLadderFactory(): LadderFactory

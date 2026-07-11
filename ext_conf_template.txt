@@ -36,6 +36,3 @@ quality.webp = 72
 
 # cat=Placeholder; type=options[ThumbHash=thumbhash,Dominant color=dominant-color,None=none]; label=Low-quality placeholder
 lqip = thumbhash
-
-# cat=Signing; type=string; label=Additional valid signing secrets for key rotation (comma-separated); the active secret is always derived from the global encryptionKey
-secretsRotation =

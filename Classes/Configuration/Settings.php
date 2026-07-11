@@ -29,7 +29,7 @@ final readonly class Settings
 
     /**
      * @param int[]               $ladder
-     * @param list<string>        $secrets index 0 signs, all verify (key rotation)
+     * @param string              $secret    HMAC signing secret derived from the global encryptionKey
      * @param string              $format    single output format (avif|webp), applied uniformly
      * @param array<string, int>  $qualities
      * @param Breakpoint[]        $breakpoints ordered by minWidth ascending; the min-0 entry is the base
@@ -39,7 +39,7 @@ final readonly class Settings
         public array $ladder,
         public int $maxDimension,
         public int $fixedHeightDprCap,
-        public array $secrets,
+        public string $secret,
         public string $format,
         public array $qualities,
         public string $processor,
@@ -68,7 +68,7 @@ final readonly class Settings
             $ladder !== [] ? $ladder : self::DEFAULT_LADDER,
             (int) ($raw['maxDimension'] ?? self::DEFAULT_MAX_DIMENSION),
             (int) ($raw['fixedHeightDprCap'] ?? self::DEFAULT_FIXED_HEIGHT_DPR_CAP),
-            self::deriveSecrets($encryptionKey, $raw['secretsRotation'] ?? null),
+            hash_hmac('sha256', 'imaginator-url-signing', $encryptionKey),
             self::format($raw),
             $qualities !== [] ? $qualities : self::DEFAULT_QUALITIES,
             (string) ($raw['processor'] ?? 'local:async'),
@@ -122,17 +122,6 @@ final readonly class Settings
         }
 
         return in_array($value, self::ALLOWED_FORMATS, true) ? $value : self::DEFAULT_FORMAT;
-    }
-
-    /** @return list<string> */
-    private static function deriveSecrets(string $encryptionKey, mixed $rotation): array
-    {
-        $secrets = [hash_hmac('sha256', 'imaginator-url-signing', $encryptionKey)];
-        foreach (self::stringList($rotation) as $old) {
-            $secrets[] = $old;
-        }
-
-        return $secrets;
     }
 
     /** @return int[] */

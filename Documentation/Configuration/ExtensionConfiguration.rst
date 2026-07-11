@@ -94,14 +94,6 @@ Settings
     File extensions served verbatim as a plain :html:`<img>`, never processed
     (vector / animated formats that carry no meaningful width ladder).
 
-..  confval:: secretsRotation
-    :name: conf-secretsrotation
-    :type: string
-    :default: (empty)
-
-    Additional valid signing secrets (comma-separated) for key rotation. See
-    :ref:`configuration-signing`.
-
 ..  confval:: processorBaseUrl
     :name: conf-processorbaseurl
     :type: string
@@ -140,10 +132,9 @@ Settings
 
 ..  _configuration-signing:
 
-Signing & key rotation
-======================
+Signing
+=======
 
-The active signing secret is always derived from the global
-:php:`encryptionKey`. :confval:`secretsRotation <conf-secretsrotation>` lets old
-secrets keep verifying while you rotate the key, so already-cached HTML
-pointing at the previous signatures keeps working until it is re-rendered.
+The signing secret is derived from the global :php:`encryptionKey`. When the
+encryption key changes, flush the frontend caches — re-rendered HTML then
+carries URLs signed with the new key.

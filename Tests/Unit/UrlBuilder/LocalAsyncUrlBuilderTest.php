@@ -19,7 +19,7 @@ final class LocalAsyncUrlBuilderTest extends TestCase
 
     public function testBuildProducesExpectedShapeForFile(): void
     {
-        $url = (new LocalAsyncUrlBuilder(['s3cr3t']))->build($this->params);
+        $url = (new LocalAsyncUrlBuilder('s3cr3t'))->build($this->params);
         self::assertMatchesRegularExpression(
             '#^/_imaginator/[0-9a-f]{16}/f4567/hero/1280x720\.webp$#',
             $url
@@ -28,7 +28,7 @@ final class LocalAsyncUrlBuilderTest extends TestCase
 
     public function testBuildProducesExpectedShapeForReference(): void
     {
-        $url = (new LocalAsyncUrlBuilder(['s3cr3t']))->build(new CanonicalParams(true, 4567, 'hero', 1280, 720, 'webp'));
+        $url = (new LocalAsyncUrlBuilder('s3cr3t'))->build(new CanonicalParams(true, 4567, 'hero', 1280, 720, 'webp'));
         self::assertMatchesRegularExpression(
             '#^/_imaginator/[0-9a-f]{16}/r4567/hero/1280x720\.webp$#',
             $url
@@ -37,40 +37,33 @@ final class LocalAsyncUrlBuilderTest extends TestCase
 
     public function testRoundTripVerifies(): void
     {
-        $b = new LocalAsyncUrlBuilder(['s3cr3t']);
+        $b = new LocalAsyncUrlBuilder('s3cr3t');
         $verified = $b->verify($b->build($this->params));
         self::assertEquals($this->params, $verified);
     }
 
     public function testTamperedSizeFailsVerification(): void
     {
-        $b = new LocalAsyncUrlBuilder(['s3cr3t']);
+        $b = new LocalAsyncUrlBuilder('s3cr3t');
         $url = $b->build($this->params);
         $tampered = str_replace('1280x720', '4000x720', $url);
         self::assertNull($b->verify($tampered));
     }
 
-    public function testKeyRotationVerifiesAgainstOldSecret(): void
-    {
-        $oldUrl = (new LocalAsyncUrlBuilder(['old-secret']))->build($this->params);
-        $rotated = new LocalAsyncUrlBuilder(['new-secret', 'old-secret']); // new active, old still valid
-        self::assertEquals($this->params, $rotated->verify($oldUrl));
-    }
-
     public function testWrongSecretFails(): void
     {
-        $url = (new LocalAsyncUrlBuilder(['old-secret']))->build($this->params);
-        self::assertNull((new LocalAsyncUrlBuilder(['new-secret']))->verify($url));
+        $url = (new LocalAsyncUrlBuilder('old-secret'))->build($this->params);
+        self::assertNull((new LocalAsyncUrlBuilder('new-secret'))->verify($url));
     }
 
     public function testGarbagePathReturnsNull(): void
     {
-        self::assertNull((new LocalAsyncUrlBuilder(['s']))->verify('/not/ours.jpg'));
+        self::assertNull((new LocalAsyncUrlBuilder('s'))->verify('/not/ours.jpg'));
     }
 
-    public function testEmptySecretsRejected(): void
+    public function testEmptySecretRejected(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        new LocalAsyncUrlBuilder([]);
+        new LocalAsyncUrlBuilder('');
     }
 }

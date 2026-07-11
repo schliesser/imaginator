@@ -39,7 +39,7 @@ final class LocalSyncImageProcessorTest extends FunctionalTestCase
 
         return new LocalSyncImageProcessor(
             new LocalImageProcessor(
-                new LocalAsyncUrlBuilder(['test-secret']),
+                new LocalAsyncUrlBuilder('test-secret'),
                 $imageService,
                 new CropCalculator(),
                 $cropResolver,

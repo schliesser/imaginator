@@ -151,10 +151,9 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator'] = [
 | `quality.avif` | `50` | AVIF quality (AVIF's scale sits lower than JPEG/WebP for the same perceived quality) |
 | `quality.webp` | `72` | WebP quality |
 | `lqip` | `thumbhash` | Low-quality placeholder: `thumbhash`, `dominant-color` or `none` |
-| `secretsRotation` | – | Additional valid signing secrets (comma-separated) for key rotation |
 
-The active signing secret is always derived from the global `encryptionKey`; `secretsRotation`
-lets old secrets keep verifying while you rotate. Settings are global by design, so the render path
+The signing secret is derived from the global `encryptionKey`; when it changes, flush the frontend
+caches so re-rendered HTML carries freshly signed URLs. Settings are global by design, so the render path
 and the signed-endpoint verify path always agree (a per-site model would risk mismatched ladders →
 spurious 403s).
 

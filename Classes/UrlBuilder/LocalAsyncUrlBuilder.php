@@ -15,11 +15,10 @@ final class LocalAsyncUrlBuilder
     private const PREFIX = '/_imaginator';
     private const SIG_LEN = 16;
 
-    /** @param list<string> $secrets index 0 is the active signing key; rest are still-valid */
-    public function __construct(private readonly array $secrets)
+    public function __construct(private readonly string $secret)
     {
-        if ($this->secrets === []) {
-            throw new \InvalidArgumentException('At least one signing secret is required', 1717600100);
+        if ($this->secret === '') {
+            throw new \InvalidArgumentException('A signing secret is required', 1717600100);
         }
     }
 
@@ -28,7 +27,7 @@ final class LocalAsyncUrlBuilder
         return sprintf(
             '%s/%s/%s%d/%s/%dx%d.%s',
             self::PREFIX,
-            $this->sign($p, $this->secrets[0]),
+            $this->sign($p),
             $p->isReference ? 'r' : 'f',
             $p->uid,
             rawurlencode($p->cropVariant),
@@ -53,17 +52,11 @@ final class LocalAsyncUrlBuilder
             (int) $m[6],
             $m[7],
         );
-        foreach ($this->secrets as $secret) {
-            if (hash_equals($this->sign($params, $secret), $m[1])) {
-                return $params;
-            }
-        }
-
-        return null;
+        return hash_equals($this->sign($params), $m[1]) ? $params : null;
     }
 
-    private function sign(CanonicalParams $p, string $secret): string
+    private function sign(CanonicalParams $p): string
     {
-        return substr(hash_hmac('sha256', $p->canonicalString(), $secret), 0, self::SIG_LEN);
+        return substr(hash_hmac('sha256', $p->canonicalString(), $this->secret), 0, self::SIG_LEN);
     }
 }

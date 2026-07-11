@@ -19,7 +19,6 @@ final class SettingsTest extends TestCase
             'qualities' => ['webp' => 70],
             'processor' => 'local:async',
             'lqip' => 'dominant-color',
-            'secretsRotation' => ['old-secret'],
             'fixedHeightDprCap' => '2',
         ], 'enc-key');
 
@@ -30,8 +29,7 @@ final class SettingsTest extends TestCase
         self::assertSame(['webp' => 70], $settings->qualities);
         self::assertSame('local:async', $settings->processor);
         self::assertSame('dominant-color', $settings->lqip);
-        self::assertSame(hash_hmac('sha256', 'imaginator-url-signing', 'enc-key'), $settings->secrets[0]);
-        self::assertSame('old-secret', $settings->secrets[1]);
+        self::assertSame(hash_hmac('sha256', 'imaginator-url-signing', 'enc-key'), $settings->secret);
     }
 
     public function testFromArrayFallsBackToDefaults(): void
@@ -45,7 +43,7 @@ final class SettingsTest extends TestCase
         self::assertSame('avif', $settings->format);
         self::assertSame('local:async', $settings->processor);
         self::assertSame('thumbhash', $settings->lqip);
-        self::assertCount(1, $settings->secrets); // derived key only, no rotation
+        self::assertSame(hash_hmac('sha256', 'imaginator-url-signing', 'key'), $settings->secret);
     }
 
     public function testFormatFallsBackToFirstEntryOfLegacyFormatsList(): void

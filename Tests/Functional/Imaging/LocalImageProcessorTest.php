@@ -36,7 +36,7 @@ final class LocalImageProcessorTest extends FunctionalTestCase
     private function processor(): LocalImageProcessor
     {
         return new LocalImageProcessor(
-            new LocalAsyncUrlBuilder(['test-secret']),
+            new LocalAsyncUrlBuilder('test-secret'),
             GeneralUtility::makeInstance(ImageService::class),
             new CropCalculator(),
             new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),
@@ -118,7 +118,7 @@ final class LocalImageProcessorTest extends FunctionalTestCase
         $imageService->method('applyProcessingInstructions')->willReturn($processedFile);
 
         $processor = new LocalImageProcessor(
-            new LocalAsyncUrlBuilder(['test-secret']),
+            new LocalAsyncUrlBuilder('test-secret'),
             $imageService,
             new CropCalculator(),
             new CropResolver(GeneralUtility::makeInstance(ResourceFactory::class)),

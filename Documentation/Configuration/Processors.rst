@@ -65,8 +65,8 @@ immutable`.
     with arbitrary sizes.
 
 The signing secret is derived automatically from the global
-:php:`encryptionKey`; no configuration is needed. See :ref:`configuration-signing`
-for key rotation, and :ref:`image-endpoint-crop` for how the editor's crop is
+:php:`encryptionKey`; no configuration is needed. See :ref:`configuration-signing`,
+and :ref:`image-endpoint-crop` for how the editor's crop is
 honoured server-side.
 
 ..  _configuration-imgproxy:

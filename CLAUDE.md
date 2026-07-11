@@ -82,9 +82,10 @@ Data flow and the seams that hold it together:
 
 2. **Signed URLs** (`Dto/CanonicalParams` + `UrlBuilder/LocalAsyncUrlBuilder`) — the candidate URL *is* the image:
    `/_imaginator/{16-hex-sig}/{storage}-{fileUid}/{cropVariant}/{w}x{h}.{ext}`. The signature is an
-   **HMAC** (not encryption) over the deterministic `CanonicalParams::canonicalString()`. The builder
-   takes a **list of secrets** — index 0 signs, all verify — to support key rotation without
-   cold-caching the site. Readable params + a real file extension keep it CDN/devtools-friendly.
+   **HMAC** (not encryption) over the deterministic `CanonicalParams::canonicalString()`. The secret
+   is derived from the global `encryptionKey`; changing the key requires a frontend-cache flush so
+   re-rendered HTML carries fresh signatures. Readable params + a real file extension keep it
+   CDN/devtools-friendly.
 
 3. **Pluggable processing** (`Imaging/ImageProcessorInterface`: `buildUrl` / `isOffloaded` / `materialize`).
    `buildUrl()` is what goes in `srcset`. **One shared interface** — every processor implements it and
@@ -118,7 +119,7 @@ Data flow and the seams that hold it together:
    drop `loading=lazy`, get `fetchpriority="high"` + explicit `sizes`, and (later) a preload `<head>` link.
 
 5. **Configuration** (`Configuration/Settings` reading **Site-Set settings** under `imaginator.*`):
-   ladder rungs, `maxDimension`, signing secrets (derived from `encryptionKey` + optional rotation list),
+   ladder rungs, `maxDimension`, the signing secret (derived from `encryptionKey`),
    formats, qualities, processor selection. Pure parsing parts stay unit-testable.
 
 ### Key invariants when changing things

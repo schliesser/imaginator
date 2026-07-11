@@ -39,7 +39,7 @@ final class ProcessImageRequestTest extends FunctionalTestCase
     {
         $this->configurationToUseInTestInstance['GFX'] = $this->imageProcessingGfxConfiguration();
         parent::setUp();
-        $this->localAsyncUrlBuilder = new LocalAsyncUrlBuilder(['test-secret']);
+        $this->localAsyncUrlBuilder = new LocalAsyncUrlBuilder('test-secret');
     }
 
     private function middleware(): ProcessImageRequest

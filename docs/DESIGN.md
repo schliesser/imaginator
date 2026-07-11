@@ -20,8 +20,8 @@ enhancement only, never load-bearing for sharpness.
 2. **Signed URLs** (`Dto/CanonicalParams` + `UrlBuilder/LocalAsyncUrlBuilder`) — the candidate URL *is*
    the image: `/_imaginator/{16-hex-sig}/{storage}-{fileUid}/{cropVariant}/{w}x{h}.{ext}`. Sig =
    first 16 hex of `HMAC-SHA256(secret, CanonicalParams::canonicalString())` — HMAC, not encryption:
-   cheaper, debuggable, DoS-safe. Builder takes a **list of secrets** (index 0 signs, all verify) for
-   key rotation without cold-caching the site. Real extension + readable params keep it CDN/devtools-friendly.
+   cheaper, debuggable, DoS-safe. The secret is derived from the global `encryptionKey`; changing the
+   key requires a frontend-cache flush. Real extension + readable params keep it CDN/devtools-friendly.
 3. **Pluggable processing** (`Imaging/ImageProcessorInterface`: `buildUrl`/`isOffloaded`/`materialize`).
    One shared interface; the render layer only ever sees it. Processors selected by the `processor`
    setting via `Imaging/ImageProcessorRegistry` (lazy DI locator over services tagged
@@ -94,13 +94,13 @@ enhancement only, never load-bearing for sharpness.
    `DominantColorGenerator` and `NullLqipGenerator`, selectable per site. Sits behind the `<img>`; the
    sharp image renders on top immediately, so the LQIP covers only the first few hundred ms of decode.
 6. **Configuration** (`Configuration/Settings` ← Site-Set settings under `imaginator.*`): ladder rungs,
-   `maxDimension`, signing secrets (derived from `encryptionKey` + optional rotation list), formats,
+   `maxDimension`, the signing secret (derived from `encryptionKey`), formats,
    qualities, processor selection. Pure parsing stays unit-testable.
 
 ## Locked decisions
 
-- **URL scheme:** HMAC-signed, readable, path-segment params, real extension. Key rotation via secret
-  array (sign with index 0, verify against all). Private-image (encrypted-token) mode → later.
+- **URL scheme:** HMAC-signed, readable, path-segment params, real extension. Single signing secret
+  derived from `encryptionKey` (key change ⇒ cache flush). Private-image (encrypted-token) mode → later.
 - **Local processing:** TYPO3 `ImageService` only; two modes `local:async` (middleware + 302) and
   `local:sync` (static `srcset`). Processor selection is an open tagged registry.
 - **External providers:** `imgproxy` + `imagor` shipped; Thumbor / imgix / Cloudflare Images / Cloudinary are

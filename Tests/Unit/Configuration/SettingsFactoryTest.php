@@ -21,7 +21,6 @@ final class SettingsFactoryTest extends TestCase
             'quality' => ['avif' => 40, 'webp' => 70],
             'processor' => 'local:async',
             'lqip' => 'dominant-color',
-            'secretsRotation' => 'old1,old2',
         ]);
 
         $settings = (new SettingsFactory($extensionConfiguration))->create();
@@ -31,8 +30,7 @@ final class SettingsFactoryTest extends TestCase
         self::assertSame('webp', $settings->format);
         self::assertSame(['avif' => 40, 'webp' => 70], $settings->qualities);
         self::assertSame('dominant-color', $settings->lqip);
-        self::assertContains('old1', $settings->secrets);
-        self::assertContains('old2', $settings->secrets);
+        self::assertNotSame('', $settings->secret);
     }
 
     public function testFallsBackToDefaultsWhenNotConfigured(): void
