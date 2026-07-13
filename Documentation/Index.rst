@@ -42,17 +42,17 @@ For editors
 ===========
 
 A backend **aspect-ratio field** per content element lets editors pick the
-framing once — **per breakpoint** — and get **uniform, consistent images**
-across every element of that type, with no ragged grids from mismatched upload
-dimensions. Crop and focus area are honored, so the chosen subject stays in
-frame at every size.
+framing once **per breakpoint** and get **uniform, consistent images** across
+every image of that content element, with no ragged grids from mismatched
+upload dimensions. Crop and focus area are honored, so the chosen subject stays
+in frame at every size.
 
 For developers
 ==============
 
-Drop one :html:`<i:image>` and get sharp, perfectly-sized images on every device
-— no hand-tuned :html:`sizes`, no breakpoint lists, no layout shift (CLS). The
-width ladder bounds processing to a fixed set of sizes, so you serve fewer,
+Drop one :html:`<i:image>` and get sharp, perfectly-sized images on every
+device. No hand-tuned :html:`sizes`, no breakpoint lists, no layout shift (CLS).
+The width ladder bounds processing to a fixed set of sizes, so you serve fewer,
 smaller bytes and score better Core Web Vitals (LCP/CLS) out of the box.
 Processing is pluggable: classic **sync** on first request, **async** via a
 signed middleware endpoint (default), or an **external processor** such as

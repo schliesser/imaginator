@@ -19,10 +19,10 @@ reports and feature requests.
     `extensions.typo3.org/extension/imaginator
     <https://extensions.typo3.org/extension/imaginator>`__
 
-When reporting a bug, please include your **PHP** and **TYPO3** versions, the
-configured :confval:`processor <conf-processor>`, and — where relevant — the
-rendered :html:`<picture>` / :html:`<img>` markup.
+When reporting a bug, please include your **Extension**, **TYPO3** and **PHP**
+versions, the configured :confval:`processor <conf-processor>`, and the rendered
+:html:`<picture>` / :html:`<img>` markup.
 
 ..  tip::
-    General TYPO3 questions are best asked in the
-    `TYPO3 Slack <https://typo3.org/community/meet/chat-slack>`__ community.
+    Reach out at
+    `TYPO3 Slack <https://typo3.org/community/meet/chat-slack>`__ to chat directly.

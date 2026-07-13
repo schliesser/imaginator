@@ -40,7 +40,7 @@ every standard TYPO3 install. No configuration is needed.
 
 ..  warning::
     Changing :php:`encryptionKey` invalidates previously generated image URLs.
-    Flush the frontend caches after changing it — already-cached HTML pointing
+    Flush the frontend caches after changing it. Already-cached HTML pointing
     at the old signatures returns :ref:`403 <image-endpoint>` until re-rendered.
 
 ..  _installation-versioning:
@@ -57,6 +57,3 @@ that
     tasks without breaking changes, and
 *   **major updates** (e.g. 1.0.0 => 2.0.0) contain breaking changes, which can
     be refactorings, features or bugfixes.
-
-..  note::
-    There is no change log yet.

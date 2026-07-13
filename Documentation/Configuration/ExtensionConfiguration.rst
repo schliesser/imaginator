@@ -18,14 +18,14 @@ Settings
     :type: string
     :default: ``local:async``
 
-    Image processor: ``local:async`` (signed endpoint + 302), ``local:sync``
-    (static ``srcset``, no middleware), ``imgproxy`` or ``imagor`` (offloaded).
-    See :ref:`configuration-processors`.
+    Image processor: ``local:async`` (signed endpoint middleware),
+    ``local:sync`` (static ``srcset``, no middleware), ``imgproxy`` or
+    ``imagor`` (offloaded). See :ref:`configuration-processors`.
 
 ..  confval:: maxDimension
     :name: conf-maxdimension
     :type: integer
-    :default: ``2000``
+    :default: ``3840``
 
     Largest image dimension in pixels. The width ladder is capped to this value.
 
@@ -41,11 +41,12 @@ Settings
 ..  confval:: ladder
     :name: conf-ladder
     :type: string
-    :default: ``320,420,560,740,980,1300,1720,2000``
+    :default: ``320,420,560,740,980,1300,1720,2000,2560,3200,3840``
 
     Width-ladder rungs (comma-separated px). An arbitrary requested width is
     quantized **up** to the nearest rung, which bounds the number of processed
-    files and the set of signable URLs.
+    files and the set of signable URLs. The default ladder covers everything
+    from small phones up to 4K (UHD) displays.
 
 ..  confval:: breakpoints
     :name: conf-breakpoints
@@ -60,7 +61,7 @@ Settings
     :type: string
     :default: ``avif``
 
-    The single output format — ``avif`` or ``webp`` — applied uniformly to the
+    The output format (``avif`` or ``webp``) applied uniformly to the
     :html:`<img>` and every :html:`<source>`.
 
 ..  confval:: quality.avif
@@ -136,5 +137,5 @@ Signing
 =======
 
 The signing secret is derived from the global :php:`encryptionKey`. When the
-encryption key changes, flush the frontend caches — re-rendered HTML then
+encryption key changes, flush the frontend caches. Re-rendered HTML then
 carries URLs signed with the new key.

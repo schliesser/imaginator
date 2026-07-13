@@ -27,11 +27,11 @@ The field stores a per-breakpoint ratio map as a JSON string, for example:
 
 Keys are :confval:`breakpoint aliases <conf-breakpoints>` (``md``, ``lg``, …) or
 literal min-widths in pixels (``768``; ``0`` is the base). A breakpoint that is
-absent — or set to ``auto`` — inherits the next-smaller ratio.
+absent or set to ``auto`` inherits the next-smaller ratio.
 
 A value may also be a fixed CSS height (``"600px"``) instead of a ``"W:H"``
-ratio: that tier pins the height while the width climbs the ladder — a
-full-bleed hero. See :ref:`usage-fixed-height`.
+ratio: that tier pins the height while the width climbs the ladder. Use for e.g.
+a full-width hero. See :ref:`usage-fixed-height`.
 
 Binding the field
 =================

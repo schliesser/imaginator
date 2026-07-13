@@ -8,9 +8,8 @@ Pictureino
 
 Imaginator is built on the **per-breakpoint aspect-ratio** idea pioneered by
 `EXT:pictureino <https://extensions.typo3.org/extension/pictureino>`__
-(``zeroseven/pictureino``) — that extension is where the concept comes from. The
-two **conflict** by design — they register the same backend field — so they
-cannot run side by side:
+(``zeroseven/pictureino``). The two extensions **conflict** by design as they
+register the same backend field. So they cannot run side by side:
 
 ..  code-block:: bash
     :caption: Swap the package
@@ -21,8 +20,8 @@ cannot run side by side:
 No database migration
 =====================
 
-The aspect-ratio field is the **unprefixed** ``aspect_ratio`` column — the same
-column pictureino used — so existing editor data is preserved as-is. There is no
+The aspect-ratio field is the **unprefixed** ``aspect_ratio`` column, the same
+column pictureino used, so existing editor data is preserved as-is. There is no
 schema change and no data migration to run.
 
 Template changes
@@ -38,10 +37,11 @@ The per-breakpoint ``{alias: ratio}`` map keys resolve to the configured
     <html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"
           data-namespace-typo3-fluid="true">
 
-        <i:image image="{ref}" aspectRatio="{ce.data.aspect_ratio}"
-                 alt="{ce.data.header}"/>
+        <i:image image="{data.image}"
+                 aspectRatio="{data.aspect_ratio}"
+                 alt="{data.header}"/>
     </html>
 
-After swapping templates, review the :ref:`configuration <configuration>` — the
+After swapping templates, review the :ref:`configuration <configuration>`. The
 :confval:`ladder <conf-ladder>`, :confval:`format <conf-format>` and
 :confval:`processor <conf-processor>` defaults differ from pictureino's.

@@ -16,32 +16,43 @@ from the largest ladder rung, so there is zero layout shift (CLS).
 How it works
 ============
 
-**One ratio, or one per breakpoint.** The :ref:`\<i:image\> ViewHelper
-<usage-viewhelper>` takes either a single aspect ratio or a **per-breakpoint
-ratio map** and turns it into the markup. A single ratio renders an
-:html:`<img>` with the full ladder; a map renders a :html:`<picture>` with one
-:html:`<source>` per breakpoint, each its own ladder — true **art direction**
-with no hand-written ``media`` queries. Editors set that map per content element
-in the :ref:`aspect-ratio field <editor>`, and the chosen :ref:`crop & focus
-area <image-endpoint-crop>` is honoured server-side, so the subject stays in
-frame at every size.
+**The width ladder.** Instead of generating a derivative for every width a
+layout could ever request, Imaginator works from a fixed, configurable list of
+rung widths. The default :confval:`ladder <conf-ladder>` (
+``320,420,560,740,980,1300,1720,2000,2560,3200,3840``) covers everything from
+small phones to 4K (UHD) displays out of the box. Every rung becomes one
+``srcset`` candidate; its height follows from the aspect ratio. Rungs larger
+than the source image (or :confval:`maxDimension <conf-maxdimension>`) are
+capped and deduplicated, so a small source never gets upscaled. Because any
+requested width is quantized **up** to the nearest rung, at most one ladder of
+derivatives ever exists per image and ratio, no matter how many different
+layout widths the site renders it at.
+
+The :ref:`\<i:image\> ViewHelper <usage-viewhelper>` optionally takes either a
+single aspect ratio or a **per-breakpoint ratio map** and turns it into the
+markup. A single ratio renders an :html:`<img>` with the full ladder; a map
+renders a :html:`<picture>` with one :html:`<source>` per breakpoint, each its
+own ladder — true **art direction** with no hand-written ``media`` queries.
+Editors set that map per content element in the :ref:`aspect-ratio field
+<editor>`, and the chosen :ref:`crop & focus area <image-endpoint-crop>` is
+honoured server-side, so the subject stays in frame at every size.
 
 **Pluggable processing.** The URLs in ``srcset`` come from a
 :ref:`processor <configuration-processors>`; the render layer is identical
 whoever produces the pixels. You choose where the work happens:
 
-*   **External** (e.g. imgproxy) — ``srcset`` points straight at the provider, so
-    the webserver never touches pixels. The lightest load on your TYPO3 server.
-*   **Async** (the default) — a cold derivative is processed on first request via
+*   **Async** (the default): a cold derivative is processed on first request via
     a signed endpoint, then served as a static file; the render itself stays
     cheap and processing is spread over real traffic.
-*   **Sync** — derivatives are materialized at render time and written straight
+*   **Sync**: derivatives are materialized at render time and written straight
     into ``srcset`` as static files (no PHP hop per image, higher cold-render
     cost).
+*   **External** (e.g. imgproxy): ``srcset`` points straight at the provider, so
+    the webserver never touches pixels. The lightest load on your TYPO3 server.
 
 **Bounded and safe.** Every requested width is quantized **up** to a fixed
-ladder rung. That bounds the set of processed files, and — on the signed async
-endpoint — means only rung sizes ever verify, so an attacker cannot request
+ladder rung. That bounds the set of processed files, and on the signed async
+endpoint means only rung sizes ever verify, so an attacker cannot request
 arbitrary dimensions.
 
 ..  _introduction-sizes-auto:
@@ -74,8 +85,8 @@ matching ``srcset`` candidate with no hand-written numbers at all:
 ..  code-block:: html
     :caption: The new way — the browser reads the real layout width
 
-    <img srcset="img-320.jpg 320w, … img-2000.jpg 2000w"
-         sizes="auto" loading="lazy" width="2000" height="1125" alt="…">
+    <img srcset="img-320.jpg 320w, … img-3840.jpg 3840w"
+         sizes="auto" loading="lazy" width="3840" height="2160" alt="…">
 
 This is why it pairs perfectly with the width ladder: Imaginator emits the
 candidates and lets the browser — which is the only party that actually knows

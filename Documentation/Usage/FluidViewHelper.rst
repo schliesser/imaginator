@@ -109,15 +109,15 @@ Fixed-height tiers
 A tier value of ``"600px"`` (or ``"600"``) pins the **height** instead of
 deriving it from a ratio. Width still climbs the ladder, so a full-bleed hero
 keeps a constant CSS height across viewports while the served crop only gets
-wider and flatter — never needlessly taller — from tablet to 4K.
+wider and flatter, but never needlessly taller, from tablet to 4K.
 
 The ``px`` value is a **CSS** height. To stay sharp on high-DPR screens the tier
 is emitted as several ``<source>``\ s gated by ``min-resolution``: 1× serves the
-given height, 2× serves twice it, 3× three times — up to
+given height, 2× serves twice it, 3× three times up to
 :confval:`fixedHeightDprCap <conf-fixed-height-dpr-cap>` (default 3). A low-DPR
 screen matches no ``min-resolution`` source and gets the cheap 1× height; a
 retina screen matches a gated source and stays crisp. Height is chosen by the
-device pixel ratio, width by the layout — so the served pixels match the need
+device pixel ratio, width by the layout. So the served pixels match the need
 with no waste. Heights are never scaled beyond the source image's own height.
 
 Pair a fixed-height image with CSS such as
@@ -142,5 +142,4 @@ This satisfies Lighthouse's *LCP request is discoverable*, *not lazily loaded*
 and *fetchpriority should be applied* audits.
 
 ..  important::
-    Use :html:`priority="1"` on **one** image per page — the single most
-    important above-the-fold image.
+    Use :html:`priority="1"` on the single most important above-the-fold image.

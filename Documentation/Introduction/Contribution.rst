@@ -30,7 +30,7 @@ Backend login on every instance: **admin** / **Password.1**.
 Tests & coding standards
 ========================
 
-Run everything through DDEV before opening a pull request:
+Run everything through DDEV before opening a pull request if possible:
 
 ..  code-block:: bash
     :caption: Test & lint
@@ -39,8 +39,7 @@ Run everything through DDEV before opening a pull request:
     ddev lint              # PHPStan (level 8) + php-cs-fixer (dry-run)
     ddev cgl-fix           # auto-fix coding-style violations
 
-Development follows **strict TDD**: write a failing test, verify it fails,
-add the minimal implementation, verify it passes, commit. Use
-`Conventional Commits <https://www.conventionalcommits.org/>`__ for messages
-(``feat:``, ``fix:``, ``docs:``, …), branch off ``main`` and open the pull
-request against ``main``.
+Development follows **Test Driven Development**: write a failing test, verify it
+fails, add the implementation and verify it passes. Use `Conventional Commits
+<https://www.conventionalcommits.org/>`__ for messages (``feat:``, ``fix:``,
+``docs:``, …), branch off ``main`` and open the pull request against ``main``.

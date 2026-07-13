@@ -23,7 +23,6 @@ Depending on the chosen :confval:`lqip <conf-lqip>` option:
 
 ``dominant-color``
     A plain background colour. Needs nothing beyond the nonced :html:`<style>`
-    — the leanest, strictest-CSP-friendly option.
 
 ``none``
     No placeholder, no extra directive.
@@ -31,16 +30,14 @@ Depending on the chosen :confval:`lqip <conf-lqip>` option:
 The ``sizes="auto"`` polyfill
 =============================
 
-Whenever a processed image renders, Imaginator queues the
-:ref:`sizes="auto" polyfill <introduction-sizes-auto>` — an external
-:html:`<script>` (``EXT:imaginator/Resources/Public/JavaScript/frontend/autosizes.js``)
-registered through the :php:`AssetCollector`. It is **not** inline JavaScript: it
-is a same-origin script file, nonce-tagged so a strict policy accepts it (TYPO3
-v14 via ``csp``, v13 via ``useNonce`` — the same split the LQIP :html:`<style>`
-uses).
+Whenever a processed image renders, Imaginator registers the
+:ref:`sizes="auto" polyfill <introduction-sizes-auto>` through the
+:php:`AssetCollector`. It is a same-origin script file, nonce-tagged so a strict
+policy accepts it (TYPO3 v14 via ``csp``, v13 via ``useNonce``).
 
-So a strict CSP needs to allow the nonced script under ``script-src`` — TYPO3's
+So a strict CSP needs to allow the nonced script under ``script-src``, TYPO3's
 default frontend CSP nonces scripts automatically, so nothing extra is required.
 If you maintain a custom policy, make sure ``script-src`` permits same-origin
-nonced scripts (e.g. ``script-src 'self' 'nonce-…'``). Pages without any
-:html:`<i:image>` queue no script at all.
+nonced scripts (e.g. ``script-src 'self' 'nonce-…'``).
+
+Pages without any :html:`<i:image>` register no script at all.

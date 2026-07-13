@@ -7,9 +7,9 @@ Custom Processor
 ================
 
 A processor turns an :php:`ImageVariant` into the URL that goes into ``srcset``
-(and, for local processors, materializes the binary). All built-ins —
-``local:async``, ``local:sync`` and ``imgproxy`` — implement the same interface;
-your own is added the same way.
+(and, for local processors, processes the file). All built-ins (``local:async``,
+``local:sync`` and ``imgproxy``) implement the same interface; your own is added
+the same way.
 
 The interface
 =============
@@ -31,8 +31,8 @@ The interface
 
 *   Return ``true`` from :php:`isOffloaded()` for an external service (CDN /
     provider). :php:`buildUrl()` then maps the variant onto the provider's URL
-    grammar and :php:`materialize()` is never called — the webserver never
-    touches pixels.
+    grammar and :php:`materialize()` is never called (the webserver never
+    touches pixels).
 *   Return ``false`` for a local processor; :php:`materialize()` produces the
     derivative through TYPO3's ``ImageService``.
 

@@ -14,16 +14,16 @@ GraphicsMagick/ImageMagick/GD calls.
 
 ``local:async`` (default)
     Processing is deferred to the first request per variant: a cold ``srcset``
-    candidate points at the signed ``/_imaginator/`` endpoint and a middleware
+    candidate points at the signed ``/_imaginator/`` endpoint and the middleware
     materializes the derivative, then 302-redirects to the processed file. Once a
     derivative exists, ``srcset`` points at the static ``_processed_/…`` file
     directly, so warm images skip the middleware entirely.
 
 ``local:sync``
-    Derivatives are materialized synchronously at render time and the static
-    ``_processed_/…`` file URL is written straight into ``srcset``, so the
-    middleware is never involved and requests are plain static-file serves.
-    Trade-off: higher cold-render cost, then no PHP hop per image.
+    Files are processed synchronously at first render time and the static
+    ``_processed_/…`` file URL is written straight into ``srcset``. Just like
+    the TYPO3 core processes files on first page load if ``<f:image>`` is used.
+    The middleware is never involved and requests are plain static-file serves.
 
 ``imgproxy``
     Offloaded; ``srcset`` points straight at the provider (see
@@ -75,7 +75,7 @@ Offloaded processing with imgproxy
 ==================================
 
 With :confval:`processor <conf-processor>` set to ``imgproxy``, ``srcset`` URLs
-point straight at an `imgproxy <https://imgproxy.net/>`__ service — the webserver
+point straight at an `imgproxy <https://imgproxy.net/>`__ service, the webserver
 never touches pixels, and the signed ``/_imaginator/`` endpoint is unused. Each
 candidate is built as::
 
@@ -84,11 +84,11 @@ candidate is built as::
 For a **reference with a stored crop or focus area** the editor's crop variant
 is replayed externally: the same ratio-fitted, focus-positioned rect local
 processing uses goes into imgproxy's crop op (``c:{cw}:{ch}:nowe:{x}:{y}``,
-replacing ``g:sm``), so external output matches local output. The reference
-resolves to its original file — imgproxy does the cropping. Plain files and
-references without editor crop use smart gravity. Offloading
-also sidesteps local encoder limits — e.g. AVIF at large dimensions that a thin
-GraphicsMagick / libheif build fails to encode.
+replacing ``g:sm``), so external output matches local output. Plain files and
+references without editor crop use smart gravity.
+
+Offloading also sidesteps local encoder limits: e.g. AVIF at large dimensions
+that a thin GraphicsMagick build fails to encode.
 
 ..  tip::
     For local development, the `ddev-imgproxy
@@ -121,13 +121,13 @@ The signature is a URL-safe base64 HMAC of the path, keyed with
 :confval:`processorSalt <conf-processorsalt>` is unused; imagor's scheme has no
 salt. An empty key emits ``unsafe`` URLs, which imagor only accepts with
 ``IMAGOR_UNSAFE=1`` (dev only). As with imgproxy, a reference's stored editor
-crop is replayed externally — the crop rect becomes imagor's manual crop segment
+crop is replayed externally, the crop rect becomes imagor's manual crop segment
 (``{x1}x{y1}:{x2}x{y2}``, replacing ``smart``); plain files and references
 without editor crop fall back to ``smart`` detection.
 
 Unlike the edge-cached SaaS providers, imagor caches derivatives **only when
 result storage is enabled** (``FILE_RESULT_STORAGE_BASE_DIR`` or the S3
-equivalent). Enable it — or front imagor with a CDN / reverse-proxy cache —
+equivalent). Enable it or front imagor with a CDN / reverse-proxy cache,
 otherwise every browser hit reprocesses the image.
 
 ..  tip::
