@@ -13,8 +13,8 @@ use Schliesser\Imaginator\Dto\Breakpoint;
  */
 final readonly class Settings
 {
-    public const DEFAULT_LADDER = [320, 420, 560, 740, 980, 1300, 1720, 2000];
-    public const DEFAULT_MAX_DIMENSION = 2000;
+    public const DEFAULT_LADDER = [320, 420, 560, 740, 980, 1300, 1720, 2000, 2560, 3200, 3840];
+    public const DEFAULT_MAX_DIMENSION = 3840;
     /** Highest device-pixel-ratio a fixed-height hero ships a `min-resolution` source for (1x..cap). */
     public const DEFAULT_FIXED_HEIGHT_DPR_CAP = 3;
     /** Single output format. AVIF is the universal default — broad modern-browser support, best ratio. */

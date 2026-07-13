@@ -172,7 +172,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
 
     public function testWithoutAspectRatioUsesTheOriginalImageRatio(): void
     {
-        // Fixture is 4000x3000 (4:3); largest rung = 2000 wide -> 1500 tall.
+        // Fixture is 4000x3000 (4:3); largest rung = 3840 wide -> 2880 tall.
         $fileUid = $this->importFixture();
 
         $output = $this->render(
@@ -180,7 +180,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
             . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '" alt="Native"/></html>'
         );
 
-        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1500"/', $output);
+        self::assertMatchesRegularExpression('/<img [^>]*width="3840" height="2880"/', $output);
     }
 
     public function testAspectRatioMapWithBreakpointAliasesEmitsMinWidthSources(): void
@@ -255,8 +255,8 @@ final class ImageViewHelperTest extends FunctionalTestCase
             . ' aspectRatio="{xxl: \'16:9\', md: \'auto\'}" alt="A hero"/></html>'
         );
 
-        // Fixture is 4000x3000 (4:3); native largest rung = 2000 wide -> 1500 tall.
-        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1500"/', $output);
+        // Fixture is 4000x3000 (4:3); native largest rung = 3840 wide -> 2880 tall.
+        self::assertMatchesRegularExpression('/<img [^>]*width="3840" height="2880"/', $output);
         self::assertStringNotContainsString('Oops', $output);
     }
 
@@ -273,7 +273,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
         );
 
         // 1x base <img> keeps the flat 600px height.
-        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="600"/', $output);
+        self::assertMatchesRegularExpression('/<img [^>]*width="3840" height="600"/', $output);
         // DPR-gated sources for 2x and 3x. Single format -> no <source type=…> stacking.
         self::assertStringContainsString('media="(min-resolution:1.5dppx)"', $output);
         self::assertStringContainsString('media="(min-resolution:2.5dppx)"', $output);
@@ -286,7 +286,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
 
     public function testMixedRatioAndFixedHeightMapCombinesMinWidthAndResolution(): void
     {
-        // {xs: "16:9", lg: "600px"}: base <img> keeps the 16:9 ladder (2000x1125); the lg tier pins a
+        // {xs: "16:9", lg: "600px"}: base <img> keeps the 16:9 ladder (3840x2160); the lg tier pins a
         // flat height per DPR, its media combining the breakpoint min-width with min-resolution.
         $fileUid = $this->importFixture();
 
@@ -298,7 +298,7 @@ final class ImageViewHelperTest extends FunctionalTestCase
 
         self::assertStringContainsString('<picture>', $output);
         self::assertStringContainsString('media="(min-width:992px) and (min-resolution:1.5dppx)"', $output);
-        self::assertMatchesRegularExpression('/<img [^>]*width="2000" height="1125"/', $output);
+        self::assertMatchesRegularExpression('/<img [^>]*width="3840" height="2160"/', $output);
         // lg 1x source keeps the flat 600px height.
         self::assertStringContainsString('x600.avif', $output);
     }

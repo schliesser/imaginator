@@ -37,7 +37,10 @@ final class SettingsTest extends TestCase
         $settings = Settings::fromArray([], 'key');
 
         self::assertSame(Settings::DEFAULT_LADDER, $settings->ladder);
+        // The default ladder covers up to 4K (UHD) out of the box.
+        self::assertSame([320, 420, 560, 740, 980, 1300, 1720, 2000, 2560, 3200, 3840], $settings->ladder);
         self::assertSame(Settings::DEFAULT_MAX_DIMENSION, $settings->maxDimension);
+        self::assertSame(3840, $settings->maxDimension);
         self::assertSame(Settings::DEFAULT_FIXED_HEIGHT_DPR_CAP, $settings->fixedHeightDprCap);
         self::assertSame(Settings::DEFAULT_FORMAT, $settings->format);
         self::assertSame('avif', $settings->format);

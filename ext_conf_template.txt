@@ -14,10 +14,10 @@ processorSalt =
 processorSourceBaseUrl =
 
 # cat=Processing; type=int+; label=Maximum image dimension (px): the width ladder is capped to this
-maxDimension = 2000
+maxDimension = 3840
 
 # cat=Processing; type=string; label=Width-ladder rungs (comma-separated)
-ladder = 320,420,560,740,980,1300,1720,2000
+ladder = 320,420,560,740,980,1300,1720,2000,2560,3200,3840
 
 # cat=Processing; type=string; label=Breakpoints for the aspect-ratio element (key:min-width px, comma-separated; xs:0 is the base ratio)
 breakpoints = xs:0,sm:576,md:768,lg:992,xl:1200

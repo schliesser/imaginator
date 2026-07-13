@@ -145,8 +145,8 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator'] = [
 | Setting | Default | Description |
 |---|---|---|
 | `processor` | `local:async` | Image processor: `local:async` (signed endpoint + 302), `local:sync` (static `srcset`, no middleware) or `imgproxy` (offloaded) |
-| `maxDimension` | `2000` | Largest image dimension in px; the ladder is capped to it |
-| `ladder` | `320,420,560,740,980,1300,1720,2000` | Width-ladder rungs (comma-separated) |
+| `maxDimension` | `3840` | Largest image dimension in px; the ladder is capped to it |
+| `ladder` | `320,420,560,740,980,1300,1720,2000,2560,3200,3840` | Width-ladder rungs (comma-separated), covering up to 4K (UHD) displays |
 | `format` | `avif` | Single uniform output format: `avif` or `webp` |
 | `quality.avif` | `50` | AVIF quality (AVIF's scale sits lower than JPEG/WebP for the same perceived quality) |
 | `quality.webp` | `72` | WebP quality |
