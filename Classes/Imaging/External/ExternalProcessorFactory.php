@@ -46,6 +46,7 @@ final readonly class ExternalProcessorFactory
                 $settings->processorBaseUrl,
                 $settings->processorSignKey,
                 $settings->processorSalt,
+                $settings->processorOptions,
             )),
             $this->resourceFactory,
             $this->cropResolver,

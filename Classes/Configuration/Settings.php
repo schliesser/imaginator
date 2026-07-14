@@ -34,6 +34,8 @@ final readonly class Settings
      * @param array<string, int>  $qualities
      * @param Breakpoint[]        $breakpoints ordered by minWidth ascending; the min-0 entry is the base
      * @param list<string>        $excludeExtensions lowercased file extensions served as-is (no processing)
+     * @param array<string, string> $processorOptions provider-specific extras passed through to the
+     *                              external processor's {@see \Schliesser\Imaginator\Dto\ExternalConfig}
      */
     public function __construct(
         public array $ladder,
@@ -50,6 +52,7 @@ final readonly class Settings
         public string $processorSignKey = '',
         public string $processorSalt = '',
         public string $processorSourceBaseUrl = '',
+        public array $processorOptions = [],
     ) {}
 
     /**
@@ -79,7 +82,29 @@ final readonly class Settings
             (string) ($raw['processorSignKey'] ?? ''),
             (string) ($raw['processorSalt'] ?? ''),
             (string) ($raw['processorSourceBaseUrl'] ?? ''),
+            self::optionMap($raw['processorOptions'] ?? null),
         );
+    }
+
+    /**
+     * Provider-specific pass-through options. ext_conf nesting is mixed, so scalar values are
+     * coerced to string and non-scalar entries dropped rather than passed through blind.
+     *
+     * @return array<string, string>
+     */
+    private static function optionMap(mixed $value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+        $map = [];
+        foreach ($value as $name => $option) {
+            if (is_scalar($option)) {
+                $map[(string) $name] = (string) $option;
+            }
+        }
+
+        return $map;
     }
 
     /**
