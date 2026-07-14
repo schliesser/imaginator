@@ -115,4 +115,30 @@ final class SettingsTest extends TestCase
 
         self::assertSame(['svg', 'eps', 'ai'], $settings->excludeExtensions);
     }
+
+    public function testProcessorOptionsDefaultToEmpty(): void
+    {
+        $settings = Settings::fromArray([], 'key');
+
+        self::assertSame([], $settings->processorOptions);
+    }
+
+    public function testProcessorOptionsCoerceScalarsAndDropNestedEntries(): void
+    {
+        // ext_conf nesting is mixed: scalars become strings, deeper arrays are dropped, not passed blind.
+        $settings = Settings::fromArray(['processorOptions' => [
+            'accountHash' => 'abc123',
+            'timeout' => 30,
+            'nested' => ['a' => 'b'],
+        ]], 'key');
+
+        self::assertSame(['accountHash' => 'abc123', 'timeout' => '30'], $settings->processorOptions);
+    }
+
+    public function testProcessorOptionsIgnoreNonArrayValue(): void
+    {
+        $settings = Settings::fromArray(['processorOptions' => 'not-a-map'], 'key');
+
+        self::assertSame([], $settings->processorOptions);
+    }
 }
