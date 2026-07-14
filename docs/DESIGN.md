@@ -25,8 +25,11 @@ enhancement only, never load-bearing for sharpness.
 3. **Pluggable processing** (`Imaging/ImageProcessorInterface`: `buildUrl`/`isOffloaded`/`materialize`).
    One shared interface; the render layer only ever sees it. Processors selected by the `processor`
    setting via `Imaging/ImageProcessorRegistry` (lazy DI locator over services tagged
-   `imaginator.image_processor` with a `key`). **Integrators add their own** by tagging a service with a
-   new `key` — no core change. Built-ins:
+   `imaginator.image_processor` with a `key`). **Integrators add their own** with
+   `#[AsImaginatorProcessor('key')]` — the implemented interface picks the shape
+   (`ImageProcessorInterface` = full processor, `UrlBuilderInterface` = pure URL grammar wrapped in
+   `ExternalImageProcessor` by `DependencyInjection/ProcessorRegistrationPass`); a manual yaml tag
+   stays a supported alternative. No core change. Built-ins:
    - **`local:async`** (`Imaging/Local/LocalImageProcessor`) — `buildUrl()` returns the signed
      `/_imaginator/…` URL **only while the derivative is cold**; once it exists, a read-only
      `sys_file_processedfile` probe (sharing `materialize()`'s exact instructions, so the checksum
@@ -39,8 +42,8 @@ enhancement only, never load-bearing for sharpness.
      middleware are never involved. Higher cold-render cost, plain static serves thereafter.
    - Both local modes drive **TYPO3's `ImageService` exclusively** — no direct GraphicsMagick/ImageMagick/GD.
      Signing is used on the `local:async` path only.
-   - **External — `imgproxy`, `imagor`** (`Imaging/External/ExternalImageProcessor` via
-     `ImgproxyProcessorFactory` / `ImagorProcessorFactory`, URL grammar in `UrlBuilder/ImgproxyUrlBuilder` /
+   - **External — `imgproxy`, `imagor`** (`Imaging/External/ExternalImageProcessor` built by the
+     generic `ExternalProcessorFactory`, URL grammar in `UrlBuilder/ImgproxyUrlBuilder` /
      `UrlBuilder/ImagorUrlBuilder`) — `isOffloaded() === true`; `buildUrl()` maps the variant onto the
      provider's URL grammar and points `srcset` at the provider. The webserver never touches pixels.
      Providers share the unified `processor*` settings (`processorSignKey` = imgproxy hex key / imagor
@@ -49,7 +52,9 @@ enhancement only, never load-bearing for sharpness.
      focus-positioned rect (the same rect local mode feeds to `ImageService`) goes into the provider's
      crop op, so external output matches local. Plain files and crop-less references fall back to the
      provider's smart gravity. More providers (Thumbor, imgix, Cloudflare Images, Cloudinary) plug in
-     as additional `UrlBuilderInterface` implementations.
+     as attribute-registered URL builders — one `UrlBuilderInterface` class taking `ExternalConfig` as
+     sole constructor argument, zero YAML; provider-specific extras travel in the `processorOptions`
+     map (`ExternalConfig::option()`/`requireOption()`).
 
      **Who owns the derivative cache depends on the processor's caching model.** External engines fall
      into three groups:

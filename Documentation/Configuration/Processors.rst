@@ -36,9 +36,10 @@ GraphicsMagick/ImageMagick/GD calls.
     fronting cache in front) so derivatives are rendered once, not per hit.
 
 ..  tip::
-    Integrators can register a **custom processor** by tagging a service with
-    ``imaginator.image_processor`` (attribute ``key``) and selecting it here. See
-    :ref:`extend-custom-processor`.
+    Integrators can register a **custom processor** by putting
+    :php:`#[AsImaginatorProcessor('my-key')]` on their class (a plain URL
+    builder is enough for a new CDN provider) and selecting it here — no YAML.
+    See :ref:`extend-custom-processor`.
 
 ..  _image-endpoint:
 

@@ -131,6 +131,18 @@ Settings
     ``IMGPROXY_BASE_URL``; imagor: ``HTTP_LOADER_BASE_URL`` /
     ``HTTP_LOADER_DEFAULT_SCHEME`` + allowed sources).
 
+..  confval:: processorOptions
+    :name: conf-processoroptions
+    :type: array of string
+    :default: (empty)
+
+    Provider-specific extras passed through to the URL builder (e.g. a
+    Cloudflare account hash). Not in the backend form — set it in
+    :file:`config/system/settings.php` under
+    :php:`$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processorOptions']`.
+    Builders consume what they need and ignore the rest; see
+    :ref:`extend-custom-processor`.
+
 ..  _configuration-signing:
 
 Signing
