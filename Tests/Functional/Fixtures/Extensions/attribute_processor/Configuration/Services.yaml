@@ -1,0 +1,10 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  # No imaginator.image_processor tags anywhere — registration happens purely via
+  # #[AsImaginatorProcessor] and the ProcessorRegistrationPass.
+  Schliesser\ImaginatorFixture\AttributeProcessor\:
+    resource: '../Classes/*'

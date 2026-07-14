@@ -42,7 +42,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Schliesser\\Imaginator\\Tests\\": "Tests/"
+            "Schliesser\\Imaginator\\Tests\\": "Tests/",
+            "Schliesser\\ImaginatorFixture\\AttributeProcessor\\": "Tests/Functional/Fixtures/Extensions/attribute_processor/Classes/"
         }
     },
     "config": {

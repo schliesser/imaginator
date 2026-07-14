@@ -1,0 +1,19 @@
+{
+    "name": "schliesser/imaginator-fixture-attribute-processor",
+    "type": "typo3-cms-extension",
+    "description": "Fixture extension: processors registered purely via #[AsImaginatorProcessor], no yaml tags.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "schliesser/imaginator": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Schliesser\\ImaginatorFixture\\AttributeProcessor\\": "Classes/"
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "attribute_processor"
+        }
+    }
+}
