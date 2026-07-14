@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\Imaging\Local;
 
+use Schliesser\Imaginator\Attribute\AsImaginatorProcessor;
 use Schliesser\Imaginator\Dto\AspectRatio;
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Dto\ProcessedImage;
@@ -32,6 +33,7 @@ use TYPO3\CMS\Extbase\Service\ImageService;
  * For reference variants the editor's crop variant (cropArea + focusArea) is resolved here and the
  * target ratio is fitted inside it ({@see CropCalculator}); plain file variants are centre-cropped.
  */
+#[AsImaginatorProcessor('local:async')]
 final readonly class LocalImageProcessor implements ImageProcessorInterface
 {
     public function __construct(

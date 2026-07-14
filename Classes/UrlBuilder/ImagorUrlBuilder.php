@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\UrlBuilder;
 
+use Schliesser\Imaginator\Attribute\AsImaginatorProcessor;
 use Schliesser\Imaginator\Dto\ExternalConfig;
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Dto\Rectangle;
@@ -23,6 +24,7 @@ use Schliesser\Imaginator\Dto\Rectangle;
  * The source is passed as given by {@see \Schliesser\Imaginator\Imaging\External\ExternalImageProcessor}
  * — a root-relative path when imagor has HTTP_LOADER_BASE_URL set, or an absolute URL otherwise.
  */
+#[AsImaginatorProcessor('imagor')]
 final readonly class ImagorUrlBuilder implements UrlBuilderInterface
 {
     public function __construct(private ExternalConfig $config) {}

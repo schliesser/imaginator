@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Schliesser\Imaginator\Imaging\Local;
 
+use Schliesser\Imaginator\Attribute\AsImaginatorProcessor;
 use Schliesser\Imaginator\Dto\ImageVariant;
 use Schliesser\Imaginator\Dto\ProcessedImage;
 use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
@@ -19,6 +20,7 @@ use Schliesser\Imaginator\Imaging\ImageProcessorInterface;
  * the derivatives exist, ImageService returns them without reprocessing and the webserver serves
  * the bytes directly.
  */
+#[AsImaginatorProcessor('local:sync')]
 final readonly class LocalSyncImageProcessor implements ImageProcessorInterface
 {
     public function __construct(private LocalImageProcessor $processor) {}
