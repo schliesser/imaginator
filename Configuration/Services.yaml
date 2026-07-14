@@ -21,35 +21,15 @@ services:
 
   # The active processor is chosen from the `processor` setting by the factory; the render layer +
   # middleware stay processor-agnostic behind the interface. Processors are collected by tag into a
-  # lazy locator (keyed by `key`), so an integrator plugs in their own by tagging a service.
+  # lazy locator (keyed by `key`). Built-ins and integrator processors alike register via
+  # #[AsImaginatorProcessor] (see ProcessorRegistrationPass, wired in Services.php); a manual
+  # `imaginator.image_processor` tag with a `key` remains a supported alternative.
   Schliesser\Imaginator\Imaging\ImageProcessorInterface:
     factory: ['@Schliesser\Imaginator\Imaging\ImageProcessorFactory', 'create']
 
   Schliesser\Imaginator\Imaging\ImageProcessorRegistry:
     arguments:
       $processors: !tagged_locator { tag: 'imaginator.image_processor', index_by: 'key' }
-
-  Schliesser\Imaginator\Imaging\Local\LocalImageProcessor:
-    tags:
-      - { name: 'imaginator.image_processor', key: 'local:async' }
-
-  Schliesser\Imaginator\Imaging\Local\LocalSyncImageProcessor:
-    tags:
-      - { name: 'imaginator.image_processor', key: 'local:sync' }
-
-  # imgproxy needs scalar provider settings; its dedicated factory builds it only when selected.
-  imaginator.processor.imgproxy:
-    class: Schliesser\Imaginator\Imaging\External\ExternalImageProcessor
-    factory: ['@Schliesser\Imaginator\Imaging\External\ImgproxyProcessorFactory', 'create']
-    tags:
-      - { name: 'imaginator.image_processor', key: 'imgproxy' }
-
-  # imagor: same offloaded processor class, imagor URL grammar. signKey = IMAGOR_SECRET, no salt.
-  imaginator.processor.imagor:
-    class: Schliesser\Imaginator\Imaging\External\ExternalImageProcessor
-    factory: ['@Schliesser\Imaginator\Imaging\External\ImagorProcessorFactory', 'create']
-    tags:
-      - { name: 'imaginator.image_processor', key: 'imagor' }
 
   Schliesser\Imaginator\Middleware\ProcessImageRequest:
     public: true
