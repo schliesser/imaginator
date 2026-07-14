@@ -11,8 +11,8 @@ use Schliesser\Imaginator\Configuration\SettingsFactory;
  * {@see ImageProcessorRegistry}, and is wired as the DI factory for that interface, so the render
  * path and middleware stay processor-agnostic. `local:async` runs ImageService behind the signed
  * endpoint (middleware + 302), `local:sync` writes processed-file URLs straight into srcset, and
- * `imgproxy` offloads pixels to an imgproxy service. Integrators add their own by tagging a service
- * (see {@see ImageProcessorRegistry}).
+ * `imgproxy`/`imagor` offload pixels to an external service. Integrators add their own with
+ * `#[AsImaginatorProcessor]` or a manual tag (see {@see ImageProcessorRegistry}).
  */
 final readonly class ImageProcessorFactory
 {

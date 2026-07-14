@@ -10,6 +10,14 @@ use Schliesser\Imaginator\Dto\Rectangle;
 /**
  * Maps an {@see ImageVariant} (+ the origin image's source string) onto a provider's URL grammar.
  * Implementations are pure (no I/O) so they are covered by exact-string golden-file tests.
+ *
+ * Registration convention: put `#[AsImaginatorProcessor('key')]` on the implementation and take
+ * {@see \Schliesser\Imaginator\Dto\ExternalConfig} as the sole constructor argument — the
+ * {@see \Schliesser\Imaginator\Imaging\External\ExternalProcessorFactory} constructs the builder
+ * from the unified provider settings and wraps it in an offloaded
+ * {@see \Schliesser\Imaginator\Imaging\External\ExternalImageProcessor}. Ignore the config fields
+ * your provider has no equivalent for (e.g. imagor ignores `salt`); provider-specific extras
+ * arrive in `ExternalConfig::$options` via the `processorOptions` setting.
  */
 interface UrlBuilderInterface
 {
