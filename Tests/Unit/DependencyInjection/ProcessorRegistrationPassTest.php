@@ -57,11 +57,31 @@ final class ProcessorRegistrationPassTest extends TestCase
         self::assertIsArray($factory);
         self::assertSame(ExternalProcessorFactory::class, (string) $factory[0]);
         self::assertSame('create', $factory[1]);
-        self::assertSame([FixtureUrlBuilder::class], $definition->getArguments());
+        self::assertSame([FixtureUrlBuilder::class, ''], $definition->getArguments());
         self::assertSame(
             [['key' => 'fixture-cdn']],
             $definition->getTag('imaginator.image_processor'),
         );
+    }
+
+    public function testUrlBuilderExtensionKeyIsPassedToTheFactory(): void
+    {
+        $container = $this->containerWith(FixtureNamespacedUrlBuilder::class);
+        $this->compile($container);
+
+        self::assertSame(
+            [FixtureNamespacedUrlBuilder::class, 'fixture_cdn'],
+            $container->getDefinition('imaginator.processor.fixture-namespaced')->getArguments(),
+        );
+    }
+
+    public function testExtensionKeyOnProcessorInterfaceClassThrows(): void
+    {
+        $container = $this->containerWith(FixtureProcessorWithExtensionKey::class);
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessageMatches('/extensionKey/');
+        $this->compile($container);
     }
 
     public function testUrlBuilderDefinitionItselfIsNotTagged(): void
@@ -173,6 +193,34 @@ final class FixtureUrlBuilder implements UrlBuilderInterface
     public function build(ImageVariant $variant, string $sourceUrl, ?Rectangle $crop = null): string
     {
         return 'https://cdn.example/' . $sourceUrl;
+    }
+}
+
+#[AsImaginatorProcessor('fixture-namespaced', extensionKey: 'fixture_cdn')]
+final class FixtureNamespacedUrlBuilder implements UrlBuilderInterface
+{
+    public function build(ImageVariant $variant, string $sourceUrl, ?Rectangle $crop = null): string
+    {
+        return '';
+    }
+}
+
+#[AsImaginatorProcessor('fixture-misplaced', extensionKey: 'fixture_cdn')]
+final class FixtureProcessorWithExtensionKey implements ImageProcessorInterface
+{
+    public function buildUrl(ImageVariant $variant): string
+    {
+        return '';
+    }
+
+    public function isOffloaded(): bool
+    {
+        return false;
+    }
+
+    public function materialize(ImageVariant $variant): ProcessedImage
+    {
+        throw new \LogicException('fixture only');
     }
 }
 

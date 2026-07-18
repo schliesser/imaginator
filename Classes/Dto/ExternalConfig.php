@@ -11,9 +11,12 @@ namespace Schliesser\Imaginator\Dto;
  * is empty the builder emits an unsigned/insecure URL (fine for local dev, e.g. the ddev-imgproxy
  * addon which runs keyless).
  *
- * `options` carries provider-specific extras (e.g. Cloudflare accountHash/variant) from the
- * `processorOptions` Extension Configuration subtree; builders consume what they need via
- * {@see option()}/{@see requireOption()} and ignore the rest.
+ * `options` carries provider-specific extras (e.g. Cloudflare accountHash/variant); builders consume
+ * what they need via {@see option()}/{@see requireOption()} and ignore the rest. They come from
+ * imaginator's `processorOptions` Extension Configuration subtree — or, for builders registered with
+ * `#[AsImaginatorProcessor(..., extensionKey: ...)]`, from that extension's own configuration, so a
+ * provider extension keeps its options in its own namespace. `optionsSource` is the display path of
+ * whichever namespace applied, used only in the {@see requireOption()} error message.
  */
 final readonly class ExternalConfig
 {
@@ -25,6 +28,7 @@ final readonly class ExternalConfig
         public string $signKey = '',
         public string $salt = '',
         public array $options = [],
+        public string $optionsSource = "['EXTENSIONS']['imaginator']['processorOptions']",
     ) {}
 
     public function option(string $name, string $default = ''): string
@@ -42,8 +46,9 @@ final readonly class ExternalConfig
             throw new \RuntimeException(
                 sprintf(
                     'imaginator: required processor option "%s" is not configured.'
-                    . " Set it in \$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processorOptions']['%s'].",
+                    . " Set it in \$GLOBALS['TYPO3_CONF_VARS']%s['%s'].",
                     $name,
+                    $this->optionsSource,
                     $name,
                 ),
                 1752400006,

@@ -17,7 +17,9 @@ use Schliesser\Imaginator\Dto\Rectangle;
  * from the unified provider settings and wraps it in an offloaded
  * {@see \Schliesser\Imaginator\Imaging\External\ExternalImageProcessor}. Ignore the config fields
  * your provider has no equivalent for (e.g. imagor ignores `salt`); provider-specific extras
- * arrive in `ExternalConfig::$options` via the `processorOptions` setting.
+ * arrive in `ExternalConfig::$options` — from imaginator's `processorOptions` setting, or from your
+ * own extension's configuration when the attribute declares `extensionKey` (keeps a provider
+ * extension's options in its own namespace, with its own `ext_conf_template.txt` backend UI).
  */
 interface UrlBuilderInterface
 {

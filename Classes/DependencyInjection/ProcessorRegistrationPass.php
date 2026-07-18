@@ -21,14 +21,14 @@ use Symfony\Component\DependencyInjection\Reference;
  * {@see UrlBuilderInterface} class gets a synthetic `imaginator.processor.{key}` definition — an
  * {@see ExternalImageProcessor} built by {@see ExternalProcessorFactory} around the builder. The
  * builder is passed as a class-name string (not a reference), so its own unreferenced definition is
- * dropped by the container and its scalar `ExternalConfig` constructor never has to autowire.
+ * dropped by the container and its scalar `ExternalConfig` constructor never has to autowire. The
+ * attribute's `extensionKey` travels to the factory as the second argument — it selects which
+ * extension's configuration supplies `ExternalConfig::$options`.
  *
  * Does its own reflection instead of `registerAttributeForAutoconfiguration` because the URL-builder
  * shape synthesizes a *new* definition (autoconfiguration can only modify the attributed service
  * itself) and duplicate-key validation needs a full-container view — the tagged locator's `index_by`
- * would otherwise silently last-win. Attributed classes register through their own extension's
- * standard `Services.yaml` discovery. Note TYPO3's container cache ignores Symfony resource
- * tracking: adding/removing the attribute needs a cache flush, same as editing a yaml tag.
+ * would otherwise silently last-win.
  */
 final class ProcessorRegistrationPass implements CompilerPassInterface
 {
@@ -61,9 +61,9 @@ final class ProcessorRegistrationPass implements CompilerPassInterface
                 continue;
             }
 
-            $key = $attributes[0]->newInstance()->key;
-            $this->register($container, $definition, $reflection, $serviceId, $key, $seenKeys);
-            $seenKeys[$key] = $serviceId;
+            $attribute = $attributes[0]->newInstance();
+            $this->register($container, $definition, $reflection, $serviceId, $attribute, $seenKeys);
+            $seenKeys[$attribute->key] = $serviceId;
         }
     }
 
@@ -76,9 +76,10 @@ final class ProcessorRegistrationPass implements CompilerPassInterface
         Definition $definition,
         \ReflectionClass $reflection,
         string $serviceId,
-        string $key,
+        AsImaginatorProcessor $attribute,
         array $seenKeys,
     ): void {
+        $key = $attribute->key;
         if ($key === '') {
             throw new \LogicException(
                 sprintf('imaginator: #[AsImaginatorProcessor] on "%s" has an empty key.', $reflection->getName()),
@@ -123,6 +124,18 @@ final class ProcessorRegistrationPass implements CompilerPassInterface
         }
 
         if ($isProcessor) {
+            if ($attribute->extensionKey !== '') {
+                throw new \LogicException(
+                    sprintf(
+                        'imaginator: #[AsImaginatorProcessor] on "%s" sets extensionKey, but the class'
+                        . ' implements ImageProcessorInterface — a full processor is a regular service'
+                        . ' and injects its own configuration. extensionKey only applies to the'
+                        . ' URL-builder shape; remove it.',
+                        $reflection->getName(),
+                    ),
+                    1752400007,
+                );
+            }
             $definition->addTag(self::TAG, ['key' => $key]);
 
             return;
@@ -130,7 +143,7 @@ final class ProcessorRegistrationPass implements CompilerPassInterface
 
         $external = new Definition(ExternalImageProcessor::class);
         $external->setFactory([new Reference(ExternalProcessorFactory::class), 'create']);
-        $external->setArguments([$reflection->getName()]);
+        $external->setArguments([$reflection->getName(), $attribute->extensionKey]);
         $external->addTag(self::TAG, ['key' => $key]);
         $container->setDefinition('imaginator.processor.' . $key, $external);
     }

@@ -6,11 +6,6 @@ namespace Schliesser\Imaginator\Configuration;
 
 use Schliesser\Imaginator\Dto\Breakpoint;
 
-/**
- * Parsed imaginator configuration. The pure {@see self::fromArray()} parser is unit-tested;
- * the DI side that sources the raw array (Site-Set settings + encryptionKey) lives in
- * {@see SettingsFactory}.
- */
 final readonly class Settings
 {
     public const DEFAULT_LADDER = [320, 420, 560, 740, 980, 1300, 1720, 2000, 2560, 3200, 3840];
@@ -35,7 +30,10 @@ final readonly class Settings
      * @param Breakpoint[]        $breakpoints ordered by minWidth ascending; the min-0 entry is the base
      * @param list<string>        $excludeExtensions lowercased file extensions served as-is (no processing)
      * @param array<string, string> $processorOptions provider-specific extras passed through to the
-     *                              external processor's {@see \Schliesser\Imaginator\Dto\ExternalConfig}
+     *                              external processor's {@see \Schliesser\Imaginator\Dto\ExternalConfig}.
+     *                              For imaginator-shipped builders only — a third-party builder declares
+     *                              `extensionKey` on its attribute and gets its options from its own
+     *                              Extension Configuration namespace instead
      */
     public function __construct(
         public array $ladder,
@@ -56,7 +54,7 @@ final readonly class Settings
     ) {}
 
     /**
-     * @param array<string, mixed> $raw site-set settings under the `imaginator.` namespace
+     * @param array<string, mixed> $raw Extension Configuration values (`EXTENSIONS['imaginator']`)
      */
     public static function fromArray(array $raw, string $encryptionKey): self
     {
@@ -88,11 +86,13 @@ final readonly class Settings
 
     /**
      * Provider-specific pass-through options. ext_conf nesting is mixed, so scalar values are
-     * coerced to string and non-scalar entries dropped rather than passed through blind.
+     * coerced to string and non-scalar entries dropped rather than passed through blind. Public:
+     * {@see \Schliesser\Imaginator\Imaging\External\ExternalProcessorFactory} applies the same
+     * coercion to a builder's own Extension Configuration (attribute `extensionKey`).
      *
      * @return array<string, string>
      */
-    private static function optionMap(mixed $value): array
+    public static function optionMap(mixed $value): array
     {
         if (!is_array($value)) {
             return [];
