@@ -60,9 +60,6 @@ final class AspectRatiosElement extends AbstractFormElement
             $enc($value),
         );
 
-        // FormEngine does not add a label for `type=user` nodes; the element renders its own. The
-        // component is multi-row (one per breakpoint) with no single labelable input, so use a
-        // fieldset/legend like core's non-input elements rather than a `<label for>`.
         $result['html'] = $this->wrapWithFieldsetAndLegend($component);
 
         $result['javaScriptModules'][] = JavaScriptModuleInstruction::create(self::MODULE);

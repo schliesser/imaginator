@@ -9,7 +9,7 @@ use TYPO3\CMS\Core\Resource\FileInterface;
 
 /**
  * Default placeholder: a ~25-byte ThumbHash decoded server-side to a small blurred preview and
- * inlined as a data-URI (no client JS). Rendered as a cover background behind the sharp image.
+ * inlined as a data-URI. Rendered as a cover background behind the sharp image.
  */
 final class ThumbHashGenerator implements LqipGeneratorInterface
 {
@@ -25,12 +25,11 @@ final class ThumbHashGenerator implements LqipGeneratorInterface
         if ($image === false) {
             return null;
         }
-        $image = $this->downscale($image);
         // A blurred preview behind a transparent image would shine through its transparent pixels.
         if (ImageTransparency::isPresent($image)) {
             return null;
         }
-
+        $image = $this->downscale($image);
         $width = imagesx($image);
         $height = imagesy($image);
         $rgba = [];

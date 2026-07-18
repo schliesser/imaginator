@@ -16,11 +16,7 @@ use Schliesser\Imaginator\Ladder\Rung;
  * Builds the responsive markup. Processor-agnostic: the same HTML is emitted regardless of who
  * produces the pixels — it only asks the processor for each candidate URL. A single breakpoint
  * yields an `<img>` with a width ladder + sizes="auto"; width/height come from the largest rung
- * so there is zero CLS. priority images drop lazy-loading for fetchpriority + an explicit sizes.
- *
- * A single output format is applied uniformly to the `<img>` and every `<source>` — there is no
- * format stacking. `<picture>` is emitted only for art-direction (per-breakpoint ratios / DPR-gated
- * heroes), never as a format-fallback shell.
+ * so there is zero CLS. Priority images drop lazy-loading for fetchpriority + an explicit sizes.
  */
 final readonly class PictureRenderer
 {
@@ -29,10 +25,6 @@ final readonly class PictureRenderer
     /**
      * `<link rel="preload">` tags for the `<head>` so a priority/LCP image is discoverable before
      * the body is parsed. Returns an empty list for non-priority images.
-     *
-     * Only the most-preferred format is preloaded (gated by `type`, so non-supporting browsers skip
-     * it rather than double-download); `imagesrcset`/`imagesizes` mirror the rendered tier exactly so
-     * the browser reuses the preload instead of re-fetching.
      *
      * @return string[]
      */
@@ -70,8 +62,7 @@ final readonly class PictureRenderer
 
     /**
      * Render an excluded file (vector/animated formats) as a plain `<img>` pointing straight at the
-     * original — no ladder, no srcset, no `<picture>`, no signed processing endpoint. Keeps the same
-     * priority semantics as the processed path (fetchpriority/high vs loading/lazy).
+     * original. Keeps the same priority semantics as the processed path (fetchpriority/high vs loading/lazy).
      */
     public function renderPassthrough(string $src, string $alt, ?string $class, bool $priority): string
     {
@@ -210,7 +201,7 @@ final readonly class PictureRenderer
         }
 
         // No base (media-null) tier. Normally the smallest media tier becomes the <img>; if the set
-        // is empty (a ratio map that resolved to nothing) synthesise the native source ratio so the
+        // is empty (a ratio map that resolved to nothing) synthesize the native source ratio so the
         // image still renders instead of indexing array_key_last([]).
         if ($request->breakpoints === []) {
             return new BreakpointRatio(new AspectRatio(max(1, $request->sourceWidth), max(1, $request->sourceHeight)));
@@ -220,7 +211,7 @@ final readonly class PictureRenderer
     }
 
     /**
-     * Merge the author class with the LQIP class. The LQIP *rule* (background colour or cover
+     * Merge the author class with the LQIP class. The LQIP *rule* (background color or cover
      * background-image) is registered as a nonce-able `<style>` by the caller, so the `<img>` only
      * ever carries a class — never a CSP-hostile inline `style=""` attribute.
      */

@@ -36,7 +36,7 @@ final readonly class CropResolver
         $fileHeight = (int) $original->getProperty('height');
         $collection = CropVariantCollection::create((string) $reference->getProperty('crop'));
 
-        // Empty crop area = whole file; empty focus area stays empty (crop centres on the crop area).
+        // Empty crop area = whole file; empty focus area stays empty (crop centers on the crop area).
         $cropAreaArea = $collection->getCropArea($cropVariant);
         $cropArea = $cropAreaArea->isEmpty()
             ? new Rectangle(0, 0, $fileWidth, $fileHeight)

@@ -32,7 +32,7 @@ final readonly class ExternalImageProcessor implements ImageProcessorInterface
         private ResourceFactory $resourceFactory,
         private CropResolver $cropResolver,
         private CropCalculator $cropCalculator,
-        /** Optional origin prefix when the provider has no own base URL; empty = pass the path as-is. */
+        // Optional origin prefix when the provider has no own base URL; empty = pass the path as-is.
         private string $sourceBaseUrl = '',
     ) {}
 
@@ -45,7 +45,7 @@ final readonly class ExternalImageProcessor implements ImageProcessorInterface
      * The editor's crop for a reference variant, ratio-fitted and focus-positioned — identical
      * geometry to LocalImageProcessor's processing plan. Null for plain files and for references
      * without a stored crop/focus area (smart fallback: provider detection beats a synthetic
-     * centre crop when the editor expressed no intent).
+     * center crop when the editor expressed no intent).
      */
     private function cropRect(ImageVariant $variant): ?Rectangle
     {

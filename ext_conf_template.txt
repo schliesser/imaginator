@@ -1,18 +1,6 @@
 # cat=Processing; type=options[Local async (middleware + 302)=local:async,Local sync (classic rendering on first page load)=local:sync,imgproxy (offloaded)=imgproxy,imagor (offloaded)=imagor]; label=Image processor
 processor = local:async
 
-# cat=External; type=string; label=Provider base URL of the external processor endpoint (e.g. https://imgproxy.example)
-processorBaseUrl =
-
-# cat=External; type=string; label=Provider HMAC key. imgproxy: hex-encoded key. imagor: the plain IMAGOR_SECRET string. Empty = unsigned URLs (dev only)
-processorSignKey =
-
-# cat=External; type=string; label=Provider HMAC salt (imgproxy only, hex; imagor has no salt). Empty = unsigned URLs (dev only)
-processorSalt =
-
-# cat=External; type=string; label=Origin prefix prepended to the source path (leave empty when the provider knows the origin itself: IMGPROXY_BASE_URL / HTTP_LOADER_BASE_URL)
-processorSourceBaseUrl =
-
 # cat=Processing; type=int+; label=Maximum image dimension (px): the width ladder is capped to this
 maxDimension = 3840
 
@@ -36,3 +24,15 @@ quality.webp = 72
 
 # cat=Placeholder; type=options[ThumbHash=thumbhash,Dominant color=dominant-color,None=none]; label=Low-quality placeholder
 lqip = thumbhash
+
+# cat=External; type=string; label=Provider base URL of the external processor endpoint (e.g. https://imgproxy.example)
+processorBaseUrl =
+
+# cat=External; type=string; label=Provider HMAC key. imgproxy: hex-encoded key. imagor: the plain IMAGOR_SECRET string. Empty = unsigned URLs (dev only)
+processorSignKey =
+
+# cat=External; type=string; label=Provider HMAC salt (imgproxy only, hex; imagor has no salt). Empty = unsigned URLs (dev only)
+processorSalt =
+
+# cat=External; type=string; label=Origin prefix prepended to the source path (leave empty when the provider knows the origin itself: IMGPROXY_BASE_URL / HTTP_LOADER_BASE_URL)
+processorSourceBaseUrl =

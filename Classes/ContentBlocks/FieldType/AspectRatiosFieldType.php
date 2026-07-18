@@ -10,18 +10,15 @@ use TYPO3\CMS\ContentBlocks\FieldType\FieldType;
 use TYPO3\CMS\ContentBlocks\FieldType\WithCommonProperties;
 
 /**
- * Exposes the per-breakpoint aspect-ratios field as a Content Blocks field type, so block authors can
- * write `type: AspectRatio` in their YAML instead of hand-rolling the `type: user` TCA. The emitted
- * TCA mirrors the standalone registration in `Configuration/TCA/Overrides/tt_content.php`: a custom
- * FormEngine node ({@see AspectRatiosElement}) editing a `{"<breakpoint>": "<ratio>"}` JSON map.
+ * Exposes the per-breakpoint aspect-ratios field as a Content Blocks field type.
  *
- * Content Blocks is an OPTIONAL integration: this class extends a `TYPO3\CMS\ContentBlocks\…` base, so
- * it must never be autoloaded when EXT:content_blocks is absent (it would fatal at class load).
- *
- * YAML usage:
+ * Example usage:
  *   - identifier: aspect_ratio
  *     type: AspectRatio
  *     allowedRatios: '16:9,21:9'   # optional; comma-separated, defaults to the full set
+ *
+ * Content Blocks is an OPTIONAL integration: this class extends a `TYPO3\CMS\ContentBlocks\…` base, so
+ * it must never be autoloaded when EXT:content_blocks is absent (it would fatal at class load).
  */
 #[FieldType(name: 'AspectRatio', tcaType: 'user')]
 final class AspectRatiosFieldType extends AbstractFieldType
@@ -52,8 +49,6 @@ final class AspectRatiosFieldType extends AbstractFieldType
     public function getTca(): array
     {
         $tca = $this->toTca();
-        // renderType is forced to the element's node name (single source of truth) so a stray
-        // `renderType:` in the block YAML cannot detach the field from its editor.
         $config = [
             'type' => $this->getTcaType(),
             'renderType' => AspectRatiosElement::NODE_NAME,

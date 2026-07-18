@@ -8,7 +8,7 @@ use TYPO3\CMS\Core\Resource\FileInterface;
 
 /**
  * Near-zero-byte placeholder: averages the image down to a single pixel and returns it as a
- * `#rrggbb` colour, rendered as a solid background behind the sharp image. No decode, no flash.
+ * `#rrggbb` color, rendered as a solid background behind the sharp image. No decode, no flash.
  */
 final class DominantColorGenerator implements LqipGeneratorInterface
 {
@@ -22,7 +22,7 @@ final class DominantColorGenerator implements LqipGeneratorInterface
         if ($image === false) {
             return null;
         }
-        // A solid colour behind a transparent image would shine through its transparent pixels.
+        // A solid color behind a transparent image would shine through its transparent pixels.
         if (ImageTransparency::isPresent($image)) {
             return null;
         }

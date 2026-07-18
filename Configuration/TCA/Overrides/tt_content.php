@@ -6,15 +6,9 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 defined('TYPO3') or die();
 
-// Content-element-level per-breakpoint aspect ratios: applies to every image rendered by
-// EXT:imaginator in this element. Stored as a `{"<breakpoint>": "<ratio>"}` JSON map; a breakpoint
-// absent (or `auto`) inherits the next-smaller ratio. Edited via the custom `imaginatorAspectRatios`
-// FormEngine web-component element. `allowedRatios` lists the offered ratios and can be narrowed per
-// CType via `types[...].columnsOverrides`.
-$ll = 'LLL:EXT:imaginator/Resources/Private/Language/locallang_db.xlf:tt_content.aspect_ratio';
 $GLOBALS['TCA']['tt_content']['columns']['aspect_ratio'] = [
-    'label' => $ll,
-    'description' => $ll . '.description',
+    'label' => 'LLL:EXT:imaginator/Resources/Private/Language/locallang_db.xlf:tt_content.aspect_ratio',
+    'description' => 'LLL:EXT:imaginator/Resources/Private/Language/locallang_db.xlf:tt_content.aspect_ratio.description',
     'config' => [
         'type' => 'user',
         'renderType' => 'imaginatorAspectRatios',
@@ -22,8 +16,6 @@ $GLOBALS['TCA']['tt_content']['columns']['aspect_ratio'] = [
     ],
 ];
 
-// Add to the media element's "mediaAdjustments" palette (next to imagewidth/height/border) so it
-// surfaces only on CEs that actually render images, rather than on every content type.
 ExtensionManagementUtility::addFieldsToPalette(
     'tt_content',
     'mediaAdjustments',

@@ -5,8 +5,8 @@ declare(strict_types=1);
 defined('TYPO3') or die();
 
 // Activate an editor-selectable focus area on the "default" crop variant of every file reference.
-// EXT:imaginator's processing already honours it (CropResolver reads getFocusArea; CropCalculator
-// centres the crop on it) — core just never offers a focus area to draw. Gated by the
+// EXT:imaginator's processing already honors it (CropResolver reads getFocusArea; CropCalculator
+// centers the crop on it) — core just never offers a focus area to draw. Gated by the
 // `imaginator.focusArea` feature toggle (default on; see ext_localconf.php).
 if (empty($GLOBALS['TYPO3_CONF_VARS']['SYS']['features']['imaginator.focusArea'])) {
     return;

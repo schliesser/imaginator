@@ -31,7 +31,7 @@ use TYPO3\CMS\Extbase\Service\ImageService;
  * lookup checksum matches byte-for-byte.
  *
  * For reference variants the editor's crop variant (cropArea + focusArea) is resolved here and the
- * target ratio is fitted inside it ({@see CropCalculator}); plain file variants are centre-cropped.
+ * target ratio is fitted inside it ({@see CropCalculator}); plain file variants are center-cropped.
  */
 #[AsImaginatorProcessor('local:async')]
 final readonly class LocalImageProcessor implements ImageProcessorInterface
