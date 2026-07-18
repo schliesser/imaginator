@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 permissions:
@@ -230,3 +231,38 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  ter-release:
+    name: publish to TER
+    # Stable tags only (v1.0.0). Pre-release tags like v1.0.0-rc.1 go to Packagist/GitHub
+    # only — TER rejects non-numeric x.y.z versions. Runs after the full test matrix.
+    if: github.ref_type == 'tag' && !contains(github.ref_name, '-')
+    needs: [lint, unit, functional, js, e2e-local, e2e-imgproxy]
+    runs-on: ubuntu-latest
+    env:
+      TYPO3_EXTENSION_KEY: imaginator
+      TYPO3_API_TOKEN: ${{ secrets.TYPO3_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+      - run: composer global require typo3/tailor
+      - name: Verify tag matches extension version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          grep -q "'version' => '${VERSION}'" ext_emconf.php || {
+            echo "Tag ${GITHUB_REF_NAME} does not match ext_emconf.php version"; exit 1; }
+          grep -q "\"version\": \"${VERSION}\"" composer.json || {
+            echo "Tag ${GITHUB_REF_NAME} does not match composer.json extra.typo3/cms.version"; exit 1; }
+          grep -q "release=\"${VERSION}\"" Documentation/guides.xml || {
+            echo "Tag ${GITHUB_REF_NAME} does not match Documentation/guides.xml release"; exit 1; }
+          grep -q "version=\"${VERSION%.*}\"" Documentation/guides.xml || {
+            echo "Tag ${GITHUB_REF_NAME} does not match Documentation/guides.xml version (major.minor)"; exit 1; }
+      - name: Publish to TER
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          php ~/.composer/vendor/bin/tailor ter:publish "$VERSION" \
+            --comment "See https://github.com/schliesser/imaginator/releases/tag/${GITHUB_REF_NAME}"
