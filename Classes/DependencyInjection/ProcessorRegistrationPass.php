@@ -23,12 +23,12 @@ use Symfony\Component\DependencyInjection\Reference;
  * builder is passed as a class-name string (not a reference), so its own unreferenced definition is
  * dropped by the container and its scalar `ExternalConfig` constructor never has to autowire.
  *
- * Does its own reflection instead of `registerAttributeForAutoconfiguration` because it must also
- * catch services without `autoconfigure: true` (other extensions), synthesize new definitions
- * (autoconfiguration cannot), and validate duplicate keys across the whole container — the tagged
- * locator's `index_by` would otherwise silently last-win. Note TYPO3's container cache ignores
- * Symfony resource tracking: adding/removing the attribute needs a cache flush, same as editing a
- * yaml tag.
+ * Does its own reflection instead of `registerAttributeForAutoconfiguration` because the URL-builder
+ * shape synthesizes a *new* definition (autoconfiguration can only modify the attributed service
+ * itself) and duplicate-key validation needs a full-container view — the tagged locator's `index_by`
+ * would otherwise silently last-win. Attributed classes register through their own extension's
+ * standard `Services.yaml` discovery. Note TYPO3's container cache ignores Symfony resource
+ * tracking: adding/removing the attribute needs a cache flush, same as editing a yaml tag.
  */
 final class ProcessorRegistrationPass implements CompilerPassInterface
 {

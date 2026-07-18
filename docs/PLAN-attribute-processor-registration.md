@@ -33,10 +33,10 @@ builder from the unified settings. The two per-provider factory classes become o
 *not* the problem — autoconfigured attribute tags materialize in `beforeOptimization` at priority 100
 (`AttributeAutoconfigurationPass` → `ResolveInstanceofConditionalsPass`, see Symfony `PassConfig`),
 well before the locator's `ServiceLocatorTagPass` (optimization), so they would be visible to
-`!tagged_locator`. Own reflection is needed because (a) autoconfiguration only applies to
-`autoconfigure: true` definitions — the pass must also catch other extensions' services without it,
-(b) the URL-builder shape synthesizes a *new* definition, which autoconfiguration cannot do, and
-(c) duplicate-key validation needs a full-container view anyway. The pass runs
+`!tagged_locator`. Own reflection is needed because (a) the URL-builder shape synthesizes a *new*
+definition, which autoconfiguration cannot do, and (b) duplicate-key validation needs a
+full-container view anyway. Attributed classes register through their own extension's standard
+`Services.yaml` discovery. The pass runs
 `TYPE_BEFORE_OPTIMIZATION` at default priority 0 — after yaml load, class resolution, and
 instanceof-tag materialization (all priority ≥ 100), before the locator resolves.
 
