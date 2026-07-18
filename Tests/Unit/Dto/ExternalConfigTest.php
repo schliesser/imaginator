@@ -35,6 +35,15 @@ final class ExternalConfigTest extends TestCase
         $config->requireOption('accountHash');
     }
 
+    public function testRequireOptionMessagePointsAtTheConfiguredOptionsSource(): void
+    {
+        $config = new ExternalConfig('https://cdn.example', optionsSource: "['EXTENSIONS']['my_cdn']");
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches("/\['EXTENSIONS'\]\['my_cdn'\]\['accountHash'\]/");
+        $config->requireOption('accountHash');
+    }
+
     public function testOptionsDefaultToEmpty(): void
     {
         $config = new ExternalConfig('https://cdn.example', 'key', 'salt');

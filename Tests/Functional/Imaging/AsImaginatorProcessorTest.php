@@ -68,6 +68,34 @@ final class AsImaginatorProcessorTest extends FunctionalTestCase
         self::assertSame('https://dummy-cdn.example/dummy/2000x1125/q72/fileadmin/source-4000.jpg', $url);
     }
 
+    public function testExtensionKeyBuilderReadsOptionsFromItsOwnExtensionConfiguration(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['attribute_processor'] = ['accountHash' => 'ns123'];
+        $processor = $this->createWith([
+            'processor' => 'namespaced-cdn',
+            'processorBaseUrl' => 'https://ns-cdn.example',
+        ]);
+        self::assertInstanceOf(ExternalImageProcessor::class, $processor);
+
+        $url = $processor->buildUrl(new ImageVariant(false, $this->fileUid(), 'default', 2000, 1125, 'webp', 72));
+
+        self::assertSame('https://ns-cdn.example/ns/ns123/2000x1125/fileadmin/source-4000.jpg', $url);
+    }
+
+    public function testExtensionKeyBuilderMissingOptionFailsNamingItsOwnNamespace(): void
+    {
+        unset($GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['attribute_processor']);
+        $processor = $this->createWith([
+            'processor' => 'namespaced-cdn',
+            'processorBaseUrl' => 'https://ns-cdn.example',
+        ]);
+        self::assertInstanceOf(ExternalImageProcessor::class, $processor);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches("/\['EXTENSIONS'\]\['attribute_processor'\]\['accountHash'\]/");
+        $processor->buildUrl(new ImageVariant(false, $this->fileUid(), 'default', 2000, 1125, 'webp', 72));
+    }
+
     private function fileUid(): int
     {
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
