@@ -29,7 +29,7 @@ interface UrlBuilderInterface
      *                             (e.g. imgproxy with IMGPROXY_BASE_URL takes a relative path).
      * @param Rectangle $crop      the editor's crop in absolute source pixels, already ratio-fitted and
      *                             focus-positioned ({@see \Schliesser\Imaginator\Imaging\CropCalculator}).
-     *                             Null = no editor crop; the provider falls back to its own smart/centre
+     *                             Null = no editor crop; the provider falls back to its own smart/center
      *                             gravity.
      */
     public function build(ImageVariant $variant, string $sourceUrl, ?Rectangle $crop = null): string;

@@ -17,12 +17,11 @@ use Schliesser\Imaginator\Dto\Rectangle;
  *   {base}/{signature}/{x1}x{y1}:{x2}x{y2}/{w}x{h}/filters:quality({q}):format({ext})/{source}
  * where signature = urlsafe-base64( HMAC_SHA256(secret, path) ), path being everything after the
  * signature segment (no leading slash). Matches IMAGOR_SIGNER_TYPE=sha256; the secret is imagor's
- * IMAGOR_SECRET — a plain string, unlike imgproxy's hex-encoded key/salt pair. `salt` from the
- * unified {@see ExternalConfig} has no equivalent in imagor's scheme and is ignored. Without a
- * secret the literal `unsafe` segment is used (dev mode, requires IMAGOR_UNSAFE=1 server-side).
+ * IMAGOR_SECRET (a plain string). Without a secret the literal `unsafe` segment is used (dev mode,
+ * requires IMAGOR_UNSAFE=1 server-side).
  *
  * The source is passed as given by {@see \Schliesser\Imaginator\Imaging\External\ExternalImageProcessor}
- * — a root-relative path when imagor has HTTP_LOADER_BASE_URL set, or an absolute URL otherwise.
+ * a root-relative path when imagor has HTTP_LOADER_BASE_URL set, or an absolute URL otherwise.
  */
 #[AsImaginatorProcessor('imagor')]
 final readonly class ImagorUrlBuilder implements UrlBuilderInterface

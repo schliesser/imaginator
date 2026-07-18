@@ -10,7 +10,7 @@ interface LqipGeneratorInterface
 {
     /**
      * Produce a low-quality placeholder for $file:
-     *  - a `#rrggbb` colour (rendered as a solid background), or
+     *  - a `#rrggbb` color (rendered as a solid background), or
      *  - a `data:image/...;base64,…` URI (rendered as a cover background-image), or
      *  - null when no placeholder should be emitted.
      */

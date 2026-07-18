@@ -118,8 +118,9 @@ Data flow and the seams that hold it together:
    each its own ladder. `width`/`height` from the largest rung guarantees zero CLS. `priority` images
    drop `loading=lazy`, get `fetchpriority="high"` + explicit `sizes`, and (later) a preload `<head>` link.
 
-5. **Configuration** (`Configuration/Settings` reading **Site-Set settings** under `imaginator.*`):
-   ladder rungs, `maxDimension`, the signing secret (derived from `encryptionKey`),
+5. **Configuration** (`Configuration/Settings` reading **instance-wide Extension Configuration** —
+   `ext_conf_template.txt` via `SettingsFactory`, no Site Set or TypoScript involved): ladder rungs,
+   `maxDimension`, the signing secret (derived from `encryptionKey`),
    formats, qualities, processor selection. Pure parsing parts stay unit-testable.
 
 ### Key invariants when changing things

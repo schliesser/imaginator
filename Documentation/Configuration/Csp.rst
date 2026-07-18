@@ -22,7 +22,7 @@ Depending on the chosen :confval:`lqip <conf-lqip>` option:
     ``img-src data:`` (TYPO3's default frontend CSP already does).
 
 ``dominant-color``
-    A plain background colour. Needs nothing beyond the nonced :html:`<style>`
+    A plain background color. Needs nothing beyond the nonced/hashed :html:`<style>`
 
 ``none``
     No placeholder, no extra directive.

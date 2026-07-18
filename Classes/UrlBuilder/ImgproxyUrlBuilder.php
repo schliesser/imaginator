@@ -20,7 +20,7 @@ use Schliesser\Imaginator\Dto\Rectangle;
  * segment is used (dev mode, e.g. the ddev-imgproxy addon).
  *
  * The source is passed as given by {@see \Schliesser\Imaginator\Imaging\External\ExternalImageProcessor}
- * — a root-relative path when imgproxy has IMGPROXY_BASE_URL set, or an absolute URL otherwise.
+ * a root-relative path when imgproxy has IMGPROXY_BASE_URL set, or an absolute URL otherwise.
  */
 #[AsImaginatorProcessor('imgproxy')]
 final readonly class ImgproxyUrlBuilder implements UrlBuilderInterface

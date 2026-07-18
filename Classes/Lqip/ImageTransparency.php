@@ -6,7 +6,7 @@ namespace Schliesser\Imaginator\Lqip;
 
 /**
  * Detects whether a decoded image actually uses transparency. A placeholder (blurred preview or
- * solid colour) is painted *behind* the sharp image, so for images with transparent pixels it would
+ * solid color) is painted *behind* the sharp image, so for images with transparent pixels it would
  * shine through permanently — those must get no placeholder at all.
  */
 final class ImageTransparency
@@ -19,7 +19,7 @@ final class ImageTransparency
 
     public static function isPresent(\GdImage $image): bool
     {
-        // Palette images carry alpha per index; promote to true colour so imagecolorat() exposes it.
+        // Palette images carry alpha per index; promote to true color so imagecolorat() exposes it.
         if (!imageistruecolor($image)) {
             imagepalettetotruecolor($image);
         }

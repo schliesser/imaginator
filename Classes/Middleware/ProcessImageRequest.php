@@ -21,7 +21,7 @@ use Schliesser\Imaginator\UrlBuilder\LocalAsyncUrlBuilder;
  * Serves the signed image endpoint. The candidate URL *is* the image: verify the HMAC
  * signature, re-check the width against the ladder (so a leaked secret still cannot trigger
  * arbitrary-size processing), materialize the derivative and 302-redirect to the processed
- * file with immutable cache headers. No JSON, ever. Forged/invalid signatures get a 403.
+ * file with immutable cache headers. Forged/invalid signatures get a 403.
  */
 final readonly class ProcessImageRequest implements MiddlewareInterface
 {

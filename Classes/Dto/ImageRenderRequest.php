@@ -12,9 +12,7 @@ final readonly class ImageRenderRequest
 {
     /**
      * @param BreakpointRatio[] $breakpoints ordered; entries with media => <source>, the one with null media => <img>
-     * @param string             $format      the single output format (avif|webp) applied uniformly to the
-     *                                         `<img>` and every `<source>`. No format stacking — `<picture>`
-     *                                         is used only for art-direction (per-breakpoint ratios).
+     * @param string $format the single output format (avif|webp)
      */
     public function __construct(
         public bool $isReference,

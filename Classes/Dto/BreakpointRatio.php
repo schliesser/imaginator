@@ -6,7 +6,7 @@ namespace Schliesser\Imaginator\Dto;
 
 /**
  * One per-breakpoint sizing spec: EITHER an aspect ratio (height derived from width) OR a fixed
- * height in CSS px (width climbs the ladder, height stays pinned — the full-bleed hero case).
+ * height in CSS px (width climbs the ladder, height stays pinned — e.g. a full-bleed hero image).
  * Exactly one of `ratio`/`fixedHeight` is set. A null media makes this the default `<img>`
  * (single-tier case or the `<picture>` fallback); a non-null media emits a `<source media>` tier.
  *

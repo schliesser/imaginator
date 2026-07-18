@@ -8,7 +8,7 @@ use Schliesser\Imaginator\Dto\BreakpointRatio;
 
 /**
  * Expands every fixed-height tier into per-DPR `<source>` variants gated by `min-resolution`, so a
- * full-bleed hero serves its pinned height at the device's real pixel ratio: 1x = H, 2x = 2H, … up
+ * full-bleed image serves its pinned height at the device's real pixel ratio: 1x = H, 2x = 2H, … up
  * to the configured cap. Width stays a `w`-descriptor ladder inside each variant, so a low-DPR
  * screen matches no `min-resolution` source and gets the cheap 1x height, while a high-DPR screen
  * matches a gated source and stays crisp.
@@ -20,7 +20,7 @@ final class DprTierExpander
 {
     /**
      * Smallest viewport width (CSS px) we assume for a priority hero. A priority image emits
-     * `sizes="100vw"` on every tier, so layout width == viewport; below this we don't optimise (no
+     * `sizes="100vw"` on every tier, so layout width == viewport; below this we don't optimize (no
      * real device renders a full-bleed hero narrower than this), which lets the gated tiers floor at
      * `assumedViewport * minDPR` even without an explicit min-width gate.
      */
@@ -28,8 +28,7 @@ final class DprTierExpander
 
     /**
      * @param BreakpointRatio[] $tiers
-     * @param bool              $priority when true the tier set renders `sizes="100vw"`, so an
-     *                                    assumed minimum viewport floors the gated ladders
+     * @param bool $priority when true the tier set renders `sizes="100vw"`, so an assumed minimum viewport floors the gated ladders
      * @return BreakpointRatio[]
      */
     public function expand(array $tiers, int $dprCap, bool $priority = false): array

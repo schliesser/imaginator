@@ -85,7 +85,7 @@ final class ExternalImageProcessorTest extends FunctionalTestCase
         $variant = new ImageVariant(true, $referenceUid, 'default', 1000, 563, 'webp', 72); // 16:9 within the crop
         $url = $this->processor()->buildUrl($variant);
 
-        // CropCalculator fit: 1000:563 inside 2000x1500 → 2000x1126, centred vertically at y=187.
+        // CropCalculator fit: 1000:563 inside 2000x1500 → 2000x1126, centered vertically at y=187.
         self::assertStringStartsWith(
             'https://imgproxy.example:8081/insecure/c:2000:1126:nowe:0:187/rs:fill:1000:563/q:72/plain/',
             $url,
@@ -96,7 +96,7 @@ final class ExternalImageProcessorTest extends FunctionalTestCase
     public function testCroplessReferenceFallsBackToSmartGravity(): void
     {
         // No editor crop (empty crop field) → nothing to replay; the provider's smart
-        // detection beats a synthetic centre crop.
+        // detection beats a synthetic center crop.
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_file_reference');
         $connection->insert('sys_file_reference', [
             'pid' => 0,

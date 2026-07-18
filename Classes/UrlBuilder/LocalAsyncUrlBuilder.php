@@ -8,7 +8,7 @@ use Schliesser\Imaginator\Dto\CanonicalParams;
 
 /**
  * Builds and verifies the HMAC-signed `/_imaginator/…` endpoint URL used by the `local:async`
- * processor (the only path that signs). The name mirrors that processor so the relation is obvious.
+ * processor.
  */
 final class LocalAsyncUrlBuilder
 {

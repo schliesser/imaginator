@@ -25,6 +25,34 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 /**
  * Thin Fluid entry point: resolve the FAL file, turn the aspectRatio argument into a per-breakpoint
  * ratio map and delegate to {@see PictureRenderer}. No measuring, no JS dependency for correctness.
+ *
+ * Examples
+ * ========
+ *
+ * Namespace (or add it to your global Fluid namespaces)::
+ *
+ *    <html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers" data-namespace-typo3-fluid="true">
+ *
+ * Single ratio — renders an ``<img>`` with the width-ladder ``srcset`` and ``sizes="auto"``::
+ *
+ *    <i:image src="fileadmin/demo/single.jpg" aspectRatio="16:9" alt="Single ratio" />
+ *
+ * FAL file reference from a content element (crop variant ratio applies when aspectRatio is omitted)::
+ *
+ *    <i:image image="{data.assets.0}" alt="{data.assets.0.alternative}" />
+ *
+ * Priority/LCP image — eager loading, ``fetchpriority="high"`` and a ``<head>`` preload link::
+ *
+ *    <i:image src="fileadmin/demo/hero.jpg" aspectRatio="16:9" alt="LCP hero" priority="1" />
+ *
+ * Fixed CSS height (full-bleed hero: width climbs the ladder, height stays pinned)::
+ *
+ *    <i:image src="fileadmin/demo/hero.jpg" aspectRatio="600px" alt="Fixed-height hero" />
+ *
+ * Per-breakpoint ratio map — renders a ``<picture>`` with one ``<source media>`` per breakpoint;
+ * keys are configured breakpoint aliases or literal min-widths in px::
+ *
+ *    <i:image src="fileadmin/demo/banner.jpg" aspectRatio="{xs: '16:9', lg: '600px'}" alt="Art-directed banner" />
  */
 final class ImageViewHelper extends AbstractViewHelper
 {
