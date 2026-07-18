@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" target-language="nl" datatype="plaintext" original="EXT:imaginator/Resources/Private/Language/locallang_db.xlf" date="2026-07-18T00:00:00Z" product-name="imaginator">
+    <header/>
+    <body>
+      <trans-unit id="tt_content.aspect_ratio" resname="tt_content.aspect_ratio" approved="yes">
+        <source>Aspect ratios</source>
+        <target>Beeldverhoudingen</target>
+      </trans-unit>
+      <trans-unit id="tt_content.aspect_ratio.description" resname="tt_content.aspect_ratio.description" approved="yes">
+        <source>Per-breakpoint aspect ratios applied to all images in this element. Empty = original / crop ratio.</source>
+        <target>Beeldverhoudingen per breakpoint, toegepast op alle afbeeldingen in dit element. Leeg = originele verhouding / uitsnedeverhouding.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
