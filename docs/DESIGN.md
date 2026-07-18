@@ -54,7 +54,9 @@ enhancement only, never load-bearing for sharpness.
      provider's smart gravity. More providers (Thumbor, imgix, Cloudflare Images, Cloudinary) plug in
      as attribute-registered URL builders — one `UrlBuilderInterface` class taking `ExternalConfig` as
      sole constructor argument, zero YAML; provider-specific extras travel in the `processorOptions`
-     map (`ExternalConfig::option()`/`requireOption()`).
+     map (`ExternalConfig::option()`/`requireOption()`). A provider shipped as its own extension
+     declares `extensionKey` on the attribute instead and keeps its options in its own Extension
+     Configuration namespace (own `ext_conf_template.txt`, own backend UI).
 
      **Who owns the derivative cache depends on the processor's caching model.** External engines fall
      into three groups:
@@ -98,7 +100,8 @@ enhancement only, never load-bearing for sharpness.
 5. **LQIP** (`Lqip/LqipGeneratorInterface`) — default **ThumbHash** (`ThumbHashGenerator`); alternatives
    `DominantColorGenerator` and `NullLqipGenerator`, selectable per site. Sits behind the `<img>`; the
    sharp image renders on top immediately, so the LQIP covers only the first few hundred ms of decode.
-6. **Configuration** (`Configuration/Settings` ← Site-Set settings under `imaginator.*`): ladder rungs,
+6. **Configuration** (`Configuration/Settings` ← instance-wide Extension Configuration,
+   `ext_conf_template.txt` via `SettingsFactory` — no Site Set or TypoScript): ladder rungs,
    `maxDimension`, the signing secret (derived from `encryptionKey`), formats,
    qualities, processor selection. Pure parsing stays unit-testable.
 
@@ -141,7 +144,7 @@ enhancement only, never load-bearing for sharpness.
 
 Implemented: signing + ladder core, local `async`/`sync` + imgproxy/imagor processors, registry/factory,
 `PictureRenderer` + `ImageViewHelper`, LQIP (ThumbHash/dominant/null), `ProcessImageRequest` middleware,
-aspect-ratio element + ContentBlocks field, Site-Set settings, backend TypeScript.
+aspect-ratio element + ContentBlocks field, Extension Configuration settings, backend TypeScript.
 
 Follow-on: remaining external providers (Thumbor, imgix, Cloudflare Images, Cloudinary),
 queue/warmup worker (v1 ships only the seams —

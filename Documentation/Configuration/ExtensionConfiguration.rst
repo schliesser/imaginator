@@ -143,6 +143,12 @@ Settings
     Builders consume what they need and ignore the rest; see
     :ref:`extend-custom-processor`.
 
+    This map only feeds builders registered **without** ``extensionKey``. A
+    provider shipped as its own extension declares
+    :php:`#[AsImaginatorProcessor('my-cdn', extensionKey: 'my_cdn')]` and keeps
+    its options in its **own** Extension Configuration namespace instead —
+    with its own :file:`ext_conf_template.txt` and backend form.
+
 ..  _configuration-signing:
 
 Signing

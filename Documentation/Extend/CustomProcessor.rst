@@ -55,20 +55,40 @@ unified :confval:`processorBaseUrl <conf-processorbaseurl>` /
 provider has no equivalent for (imagor ignores ``salt``). Keep the builder pure
 (no I/O), so it stays golden-file testable.
 
-Provider-specific extras (e.g. a Cloudflare account hash) travel in the
-``processorOptions`` map. It has no backend UI — set it in
-:file:`config/system/settings.php`:
+Provider-specific extras (e.g. a Cloudflare account hash) arrive in
+:php:`ExternalConfig::$options`; read them in the builder via
+:php:`$this->config->option('accountHash')` or
+:php:`$this->config->requireOption('accountHash')` — the latter throws a
+descriptive exception naming the exact configuration path, so a
+misconfiguration fails loudly instead of emitting broken URLs.
+
+Where the options live depends on who ships the builder. Extension
+Configuration is namespaced per extension, so a builder shipped in **your own
+extension** declares its extension key on the attribute and keeps the options
+in **its own** namespace — its own :file:`ext_conf_template.txt`, its own
+backend form:
+
+..  code-block:: php
+
+    #[AsImaginatorProcessor('my-cdn', extensionKey: 'my_cdn')]
+    final readonly class MyCdnUrlBuilder implements UrlBuilderInterface { /* … */ }
+
+..  code-block:: php
+    :caption: config/system/settings.php (or your ext_conf_template.txt backend form)
+
+    $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['my_cdn'] = [
+        'accountHash' => 'abc123',
+    ];
+
+Without ``extensionKey`` the options come from imaginator's own
+``processorOptions`` map (used by the built-in providers; it has no backend
+UI):
 
 ..  code-block:: php
 
     $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['imaginator']['processorOptions'] = [
         'accountHash' => 'abc123',
     ];
-
-and read it in the builder via :php:`$this->config->option('accountHash')` or
-:php:`$this->config->requireOption('accountHash')` — the latter throws a
-descriptive exception at processor-selection time, so a misconfiguration fails
-loudly instead of emitting broken URLs.
 
 The full interface
 ==================
@@ -128,7 +148,8 @@ locator indexed by that key:
         - { name: 'imaginator.image_processor', key: 'my-cdn' }
 
 Escalation ladder: attribute on a URL builder (zero configuration code) →
-builder + ``processorOptions`` → manual yaml named service with your own factory
+builder + options (``extensionKey`` for your own namespace, or imaginator's
+``processorOptions``) → manual yaml named service with your own factory
 → full :php:`ImageProcessorInterface` class (same attribute).
 
 Select it with the :confval:`processor <conf-processor>` setting:
