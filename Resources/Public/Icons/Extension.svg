@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- One picture, left half pixelated, right half sharp — the same mountain
+       silhouette continues across both halves. White matte frame around it. -->
+  <rect width="64" height="64" fill="#4c9ca4"/>
+
+  <!-- frame + picture as one white slab; content inset 3px = border -->
+  <rect x="5" y="9" width="54" height="46" rx="6" fill="#fff"/>
+
+  <defs>
+    <clipPath id="photo">
+      <rect x="8" y="12" width="48" height="40" rx="3"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#photo)">
+    <!-- right half: sharp photo (sun + mountain) -->
+    <circle cx="44" cy="21" r="4" fill="#4c9ca4"/>
+    <path d="M32 32 L36 38 L44 30 L56 46 L56 52 L32 52 Z" fill="#4c9ca4"/>
+
+    <!-- left half: 8px pixel blocks approximating the same scene -->
+    <g fill="#4c9ca4">
+      <!-- sky blocks (faint) -->
+      <rect x="8"  y="12" width="8" height="8" opacity="0.08"/>
+      <rect x="16" y="12" width="8" height="8" opacity="0.14"/>
+      <rect x="24" y="12" width="8" height="8" opacity="0.08"/>
+      <rect x="8"  y="20" width="8" height="8" opacity="0.14"/>
+      <rect x="16" y="20" width="8" height="8" opacity="0.08"/>
+      <rect x="24" y="20" width="8" height="8" opacity="0.35"/>
+      <rect x="8"  y="28" width="8" height="8" opacity="0.08"/>
+      <rect x="16" y="28" width="8" height="8" opacity="0.55"/>
+      <rect x="24" y="28" width="8" height="8" opacity="0.85"/>
+      <!-- mountain blocks (dense) -->
+      <rect x="8"  y="36" width="8" height="8" opacity="0.5"/>
+      <rect x="16" y="36" width="8" height="8" opacity="0.9"/>
+      <rect x="24" y="36" width="8" height="8" opacity="0.95"/>
+      <rect x="8"  y="44" width="8" height="8" opacity="0.9"/>
+      <rect x="16" y="44" width="8" height="8"/>
+      <rect x="24" y="44" width="8" height="8" opacity="0.95"/>
+    </g>
+  </g>
+</svg>
