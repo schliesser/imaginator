@@ -27,5 +27,6 @@ final readonly class ImageRenderRequest
         public ?string $class = null,
         public bool $priority = false,
         public ?string $lqipClass = null,
+        public ?string $title = null,
     ) {}
 }

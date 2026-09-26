@@ -197,6 +197,67 @@ final class PictureRendererTest extends TestCase
         self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
     }
 
+    public function testTitleIsRenderedEscapedOnImg(): void
+    {
+        $request = new ImageRenderRequest(
+            isReference: false,
+            uid: 9,
+            sourceWidth: 4000,
+            sourceHeight: 4000,
+            cropVariant: 'default',
+            breakpoints: [new BreakpointRatio(new AspectRatio(16, 9))],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+            class: 'lead',
+            title: 'Tom & "Jerry"',
+        );
+
+        $expected = '<img src="/img/9/640x360.webp"'
+            . ' srcset="/img/9/320x180.webp 320w, /img/9/640x360.webp 640w"'
+            . ' sizes="auto" width="640" height="360" alt="A hero" class="lead"'
+            . ' title="Tom &amp; &quot;Jerry&quot;" loading="lazy" decoding="async">';
+
+        self::assertSame($expected, $this->renderer()->render($request, $this->fakeProcessor()));
+    }
+
+    public function testEmptyTitleIsOmittedFromImg(): void
+    {
+        $request = new ImageRenderRequest(
+            isReference: false,
+            uid: 9,
+            sourceWidth: 4000,
+            sourceHeight: 4000,
+            cropVariant: 'default',
+            breakpoints: [new BreakpointRatio(new AspectRatio(16, 9))],
+            format: 'webp',
+            quality: 72,
+            alt: 'A hero',
+            title: '',
+        );
+
+        self::assertStringNotContainsString('title=', $this->renderer()->render($request, $this->fakeProcessor()));
+    }
+
+    public function testPassthroughRendersEscapedTitle(): void
+    {
+        $expected = '<img src="/fileadmin/logo.svg" alt="Vector" class="logo"'
+            . ' title="Tom &amp; &quot;Jerry&quot;" loading="lazy" decoding="async">';
+
+        self::assertSame(
+            $expected,
+            $this->renderer()->renderPassthrough('/fileadmin/logo.svg', 'Vector', 'logo', false, 'Tom & "Jerry"'),
+        );
+    }
+
+    public function testPassthroughOmitsTitleWhenNullOrEmpty(): void
+    {
+        $expected = '<img src="/fileadmin/logo.svg" alt="Vector" loading="lazy" decoding="async">';
+
+        self::assertSame($expected, $this->renderer()->renderPassthrough('/fileadmin/logo.svg', 'Vector', null, false));
+        self::assertSame($expected, $this->renderer()->renderPassthrough('/fileadmin/logo.svg', 'Vector', null, false, ''));
+    }
+
     public function testEmptyBreakpointsFallsBackToNativeSourceRatioWithoutWarning(): void
     {
         // Defensive: a caller must never hand the renderer an empty breakpoint set, but if it does
