@@ -133,6 +133,45 @@ final class ImageViewHelperTest extends FunctionalTestCase
         self::assertStringNotContainsString('/_imaginator/', $output);
     }
 
+    public function testTitleIsRenderedOnProcessedImg(): void
+    {
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="16:9" alt="A hero" title="Hero title"/></html>'
+        );
+
+        self::assertMatchesRegularExpression('/<img [^>]*title="Hero title"/', $output);
+    }
+
+    public function testTitleIsRenderedOnPassthroughImg(): void
+    {
+        $fileUid = $this->importSvgFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' alt="Vector" title="Logo title"/></html>'
+        );
+
+        self::assertMatchesRegularExpression('/<img [^>]*title="Logo title"/', $output);
+    }
+
+    public function testTitleIsOmittedWhenNotGiven(): void
+    {
+        $fileUid = $this->importFixture();
+
+        $output = $this->render(
+            '<html xmlns:i="http://typo3.org/ns/Schliesser/Imaginator/ViewHelpers"'
+            . ' data-namespace-typo3-fluid="true"><i:image src="' . $fileUid . '"'
+            . ' aspectRatio="16:9" alt="A hero"/></html>'
+        );
+
+        self::assertStringNotContainsString('title=', $output);
+    }
+
     public function testProcessedImageRegistersSizesAutoPolyfill(): void
     {
         // A processed image emits sizes="auto"; Safari has no native support, so the autosizes

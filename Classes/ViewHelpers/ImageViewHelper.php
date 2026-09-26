@@ -116,6 +116,7 @@ final class ImageViewHelper extends AbstractViewHelper
                 (string) $this->arguments['alt'],
                 $this->arguments['class'] !== null ? (string) $this->arguments['class'] : null,
                 (bool) $this->arguments['priority'],
+                $this->arguments['title'] !== null ? (string) $this->arguments['title'] : null,
             );
         }
 
@@ -146,6 +147,7 @@ final class ImageViewHelper extends AbstractViewHelper
             class: $this->arguments['class'] !== null ? (string) $this->arguments['class'] : null,
             priority: (bool) $this->arguments['priority'],
             lqipClass: $this->registerLqip($this->lqipFactory->get($settings->lqip)->generate($original)),
+            title: $this->arguments['title'] !== null ? (string) $this->arguments['title'] : null,
         );
 
         // Priority/LCP images get a <head> preload so the request is discoverable immediately.

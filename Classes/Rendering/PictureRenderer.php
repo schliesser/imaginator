@@ -64,7 +64,7 @@ final readonly class PictureRenderer
      * Render an excluded file (vector/animated formats) as a plain `<img>` pointing straight at the
      * original. Keeps the same priority semantics as the processed path (fetchpriority/high vs loading/lazy).
      */
-    public function renderPassthrough(string $src, string $alt, ?string $class, bool $priority): string
+    public function renderPassthrough(string $src, string $alt, ?string $class, bool $priority, ?string $title = null): string
     {
         $attrs = [
             'src' => htmlspecialchars($src, ENT_QUOTES),
@@ -72,6 +72,9 @@ final readonly class PictureRenderer
         ];
         if ($class !== null && $class !== '') {
             $attrs['class'] = htmlspecialchars($class, ENT_QUOTES);
+        }
+        if ($title !== null && $title !== '') {
+            $attrs['title'] = htmlspecialchars($title, ENT_QUOTES);
         }
         if ($priority) {
             $attrs['fetchpriority'] = 'high';
@@ -139,6 +142,9 @@ final readonly class PictureRenderer
         $class = $this->classAttribute($request);
         if ($class !== null) {
             $attrs['class'] = $class;
+        }
+        if ($request->title !== null && $request->title !== '') {
+            $attrs['title'] = htmlspecialchars($request->title, ENT_QUOTES);
         }
         if ($request->priority) {
             $attrs['fetchpriority'] = 'high';
